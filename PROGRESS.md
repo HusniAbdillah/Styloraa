@@ -4,6 +4,26 @@
 **Baseline:** merged `origin/main` at `34c3ca8`
 **Verification in this documentation task:** repository and source inspection only; no app checks or runtime flows were run.
 
+## Responsive design handoff, 31 October 2026
+
+The latest design revision is recorded in
+[`docs/design/v2-handoff.md`](docs/design/v2-handoff.md). It supersedes the
+earlier manual matching flow and repeated workspace/sample banners. This
+is a Figma prototype and documentation delivery, not implementation of the
+feature routes reported below.
+
+Prepared on the merged `origin/main` baseline `adf0029`. Local verification:
+`pnpm check` passed ESLint, TypeScript and eight tests across two test files;
+`pnpm build` passed; `git diff --check` passed. Figma inspection covered
+1440/1280px desktop and 390/360px mobile, with no horizontal text overflow
+or invalid prototype destinations recorded. Browser, screen-reader,
+real-device and provider flows were not verified. Database reset, type
+generation and database tests were not rerun for this documentation-only
+change; schema and server queries are unchanged.
+
+The implementation inventory below remains a historical source inspection
+at its stated baseline, rather than a current end-to-end completion claim.
+
 ## Delivery status
 
 The repository is an implementation scaffold. The full product scope in `PRD.md` remains required in the seven-hour hackathon; the checklist below reports what source inspection found at this baseline, not what the team has completed since.
