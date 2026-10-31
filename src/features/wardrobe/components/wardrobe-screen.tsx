@@ -15,7 +15,7 @@ export async function WardrobeScreen() {
           Your wardrobe, considered.
         </h1>
         <p className="text-secondary mt-4">
-          Koleksi demo bersama sebagai awal setiap kombinasi.
+          The shared demo collection behind every combination.
         </p>
       </div>
       <div className="grid items-start gap-6 lg:grid-cols-[1fr_340px]">
@@ -35,11 +35,11 @@ export async function WardrobeScreen() {
             ))
           ) : (
             <div className="border-border rounded-2xl border border-dashed p-8 sm:col-span-2">
-              <h2 className="font-serif text-2xl">Ruang untuk pilihan Anda.</h2>
+              <h2 className="font-serif text-2xl">Room for your picks.</h2>
               <p className="text-secondary mt-3 text-sm">
                 {configured
-                  ? "Belum ada item. Tambahkan item pertama untuk mulai menyusun look."
-                  : "Database belum terhubung. Ini empty state boilerplate, belum ada item tersimpan."}
+                  ? "No items yet. Add the first item to start composing looks."
+                  : "Database not connected. This is the boilerplate empty state; no items are stored yet."}
               </p>
             </div>
           )}

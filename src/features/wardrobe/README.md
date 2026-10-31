@@ -1,12 +1,13 @@
 # Wardrobe
 
-Owner: Developer 2. Contoh implementasi pertama untuk dipakai fitur lain.
+Owner: Developer 2. First reference implementation for other features.
 
-- `schema.ts`: validasi input yang boleh dikirim client.
-- `repository.ts`: server-only; workspace selalu berasal dari environment.
-- `actions.ts`: validasi, write gate, response aman, invalidasi route.
-- `components/`: screen server dan form client dengan pending/error state.
+- `schema.ts`: validation for client-submitted input.
+- `repository.ts`: server-only; workspace always comes from the environment.
+- `actions.ts`: validation, write gate, safe responses, route invalidation.
+- `components/`: server screen and client form with pending/error states.
 
-Saat ini baru tambah dan daftar metadata (maksimal 100 item terbaru). Update,
-delete, pagination dan upload belum diimplementasikan. Form tidak menerima
-workspace ID. Semua pengunjung berbagi data demo, tanpa identitas akun.
+Currently supports adding and listing metadata only (newest 100 items).
+Update, delete, pagination, and upload are not implemented. The form does
+not accept a workspace ID. All visitors share the demo data, with no
+account identity.

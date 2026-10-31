@@ -3,7 +3,7 @@ export default function Page() {
   return (
     <FeaturePlaceholder
       title="Workspace info"
-      description="Workspace demo bersama, tanpa akun atau profil pribadi."
+      description="Shared demo workspace, no accounts or personal profiles."
       owner="Developer 1"
     />
   );

@@ -16,11 +16,11 @@ export function FeaturePlaceholder({
       <p className="text-secondary max-w-xl leading-7">{description}</p>
       <div className="border-border bg-card rounded-2xl border p-6">
         <span className="bg-background rounded-full px-3 py-1 text-xs">
-          Belum diimplementasikan
+          Not implemented yet
         </span>
         <p className="text-secondary mt-4 text-sm">
-          Area ini siap dikembangkan oleh {owner}. Data dan hasil AI belum
-          tersedia.
+          This area is ready for {owner} to build. Data and AI results are
+          not available yet.
         </p>
       </div>
     </section>

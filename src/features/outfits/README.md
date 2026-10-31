@@ -1,7 +1,12 @@
 # outfits
 
-Owner: Developer 3. Modul belum diimplementasikan.
+Owner: Developer 3. Not implemented yet.
 
-Tambahkan schema.ts untuk kontrak Zod, repository.ts (server-only) untuk data, actions.ts bila perlu, dan components/ sesuai kebutuhan nyata. Route di app/ tetap tipis. Tidak perlu membuat folder kosong atau layer service yang hanya meneruskan argumen.
+Add `schema.ts` for the Zod contract, server-only `repository.ts` for data,
+`actions.ts` when needed, and `components/` for real needs. Keep routes in
+`app/` thin. Do not create empty folders or service layers that only forward
+arguments.
 
-Semua akses database memakai workspace ID dari server. Jangan menerima workspace ID dari browser. Jangan impor repository atau secret ke Client Component.
+All database access uses the server workspace ID. Never accept a workspace
+ID from the browser. Never import repositories or secrets into Client
+Components.

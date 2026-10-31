@@ -1,32 +1,45 @@
-# Skills dan kerja agent
+# Skills and agent work
 
-Skills membantu proses agent, bukan dependency runtime. Instalasi tiap developer bisa berbeda. Simpan instruksi proyek pada `AGENTS.md`; jangan salin cache skill global, credentials, atau konfigurasi akun pribadi ke repository.
+Skills support the agent process; they are not runtime dependencies. Each
+developer's install may differ. Keep project instructions in `AGENTS.md`; do
+not copy global skill caches, credentials, or personal account configs into
+the repository.
 
-| Pekerjaan                          | Skill relevan                                   | Kapan                                                                                  |
-| ---------------------------------- | ----------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Database, RLS, migrations, Storage | `supabase:supabase`                             | Sebelum implementasi dan verifikasi database                                           |
-| Query/index/constraint             | `supabase:supabase-postgres-best-practices`     | Saat review query/schema membutuhkan panduan                                           |
-| Linking/environment cloud          | `vercel:bootstrap`, `vercel:env-vars`           | Saat menyiapkan resource Vercel yang sebenarnya                                        |
-| Preview/CI/promotion               | `vercel:deployments-cicd`                       | Saat menyiapkan atau melakukan deployment                                              |
-| CLI Vercel                         | `vercel:vercel-cli`                             | Sebelum mengandalkan CLI platform                                                      |
-| Beberapa komponen TSX              | `vercel:react-best-practices`                   | Review hooks, aksesibilitas, client/server boundary                                    |
-| Alur yang gagal                    | `vercel:verification`                           | Telusuri browser → server → data → response                                            |
-| AI provider                        | Skill SDK/provider sesuai library yang dipilih  | Setelah provider disepakati, bukan karena SDK tersedia                                 |
-| Audit/desain                       | Product Design, Mobbin, atau Figma sesuai tugas | Bila tugas desain memerlukan; setup folder tidak otomatis memerlukan eksplorasi visual |
+| Work                                   | Relevant skill                              | When                                                              |
+| -------------------------------------- | ------------------------------------------- | ----------------------------------------------------------------- |
+| Database, RLS, migrations, Storage     | `supabase:supabase`                         | Before database implementation and verification                   |
+| Query/index/constraint                 | `supabase:supabase-postgres-best-practices` | When a query/schema review needs guidance                         |
+| Cloud linking/environment              | `vercel:bootstrap`, `vercel:env-vars`       | When provisioning real Vercel resources                           |
+| Preview/CI/promotion                   | `vercel:deployments-cicd`                   | When setting up or doing deployments                              |
+| Vercel CLI                             | `vercel:vercel-cli`                         | Before relying on the platform CLI                                |
+| Multiple TSX components                | `vercel:react-best-practices`               | Reviewing hooks, accessibility, client/server boundaries          |
+| Failing flows                          | `vercel:verification`                       | Tracing browser → server → data → response                        |
+| AI provider                            | SDK/provider skill matching the chosen library | After the provider is agreed, not because an SDK exists        |
+| Audit/design                           | Product Design, Mobbin, or Figma per task   | When a design task needs it; folder setup alone never requires visual exploration |
 
-Baca dokumentasi resmi terkini untuk API yang berubah dan cocokkan dengan versi lockfile. Skill auth tidak diperlukan pada scope tanpa login. Skill bukan alasan menambah auth, database lain, atau operasi cloud di luar scope pengguna.
+Read current official docs for fast-changing APIs and match them against
+the lockfile versions. No auth skill is needed for the login-free scope.
+Skills are not a reason to add auth, another database, or cloud operations
+outside the user's scope.
 
-Untuk Next.js pada Vercel, gunakan runtime Node.js bawaan terlebih dahulu. Skill atau contoh yang memakai runtime/queue/database lain tidak menjadi instruksi untuk mengganti arsitektur proyek. Ketika memasang skill tambahan, review scope dan sumbernya; jangan menyimpan token MCP atau konfigurasi akun pribadi pada repo bersama.
+For Next.js on Vercel, use the default Node.js runtime first. Skills or
+examples using another runtime/queue/database do not instruct replacing the
+project architecture. When adding skills, review their scope and source; do
+not store MCP tokens or personal account configs in the shared repo.
 
-## Format tugas agent
+## Agent task format
 
 ```text
-Tujuan: hasil konkret yang dapat direview.
-Area edit: file/folder milik task.
-Kontrak: schema/payload/env yang disepakati.
-Batas: file bersama dan operasi remote di luar task.
-Verifikasi: checks dan bukti runtime yang relevan.
-Handoff: perubahan, hasil checks, keterbatasan, langkah tersisa.
+Goal: concrete, reviewable outcome.
+Edit areas: files/folders owned by the task.
+Contract: agreed schema/payload/env.
+Limits: shared files and remote operations outside the task.
+Verification: relevant checks and runtime evidence.
+Handoff: changes, check results, limits, remaining steps.
 ```
 
-Contoh: agent wardrobe membuat form dan query pada modul wardrobe, memakai workspace server tetap, dan mengirim kebutuhan migration kepada pemilik database. Agent tidak membuat tabel alternatif atau menghapus scope query agar tests lolos. Jangan menambah agent melebihi area independen yang dapat direview.
+Example: the wardrobe agent builds forms and queries in the wardrobe
+module, uses the fixed server workspace, and sends migration needs to the
+database owner. The agent does not create alternate tables or drop query
+scope to make tests pass. Do not add more agents than the independently
+reviewable areas.

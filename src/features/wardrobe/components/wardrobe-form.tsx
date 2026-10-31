@@ -15,27 +15,27 @@ export function WardrobeForm({ enabled }: { enabled: boolean }) {
       action={action}
       className="border-border bg-card space-y-4 rounded-2xl border p-6"
     >
-      <h2 className="font-serif text-2xl">Tambah item</h2>
+      <h2 className="font-serif text-2xl">Add item</h2>
       <p className="text-secondary text-sm">
-        Semua pengunjung memakai wardrobe demo yang sama.
+        All visitors share the same demo wardrobe.
       </p>
       <fieldset
         disabled={!enabled || pending}
         className="space-y-4 disabled:opacity-60"
       >
         <label className="block text-sm">
-          Nama item
+          Item name
           <input
             name="name"
             required
             minLength={2}
             maxLength={100}
             className={inputClass}
-            placeholder="Kemeja linen"
+            placeholder="Linen shirt"
           />
         </label>
         <label className="block text-sm">
-          Kategori
+          Category
           <select name="category" className={inputClass}>
             {categories.map((category) => (
               <option key={category} value={category}>
@@ -45,7 +45,7 @@ export function WardrobeForm({ enabled }: { enabled: boolean }) {
           </select>
         </label>
         <label className="block text-sm">
-          Warna
+          Color
           <input
             name="color"
             required
@@ -55,13 +55,13 @@ export function WardrobeForm({ enabled }: { enabled: boolean }) {
           />
         </label>
         <Button type="submit" disabled={!enabled || pending}>
-          {pending ? "Menyimpan…" : "Tambah ke wardrobe"}
+          {pending ? "Saving…" : "Add to wardrobe"}
         </Button>
       </fieldset>
       <p role="status" aria-live="polite" className="text-secondary text-sm">
         {state.message ||
           (!enabled
-            ? "Hubungkan Supabase dan aktifkan penulisan demo untuk menyimpan."
+            ? "Connect Supabase and enable demo writes to save."
             : "")}
       </p>
     </form>

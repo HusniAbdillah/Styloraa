@@ -11,7 +11,7 @@ export default function WorkspaceLayout({
         href="#main"
         className="focus:bg-card sr-only focus:not-sr-only focus:absolute focus:z-10 focus:p-4"
       >
-        Lewati ke konten
+        Skip to content
       </a>
       <aside className="border-border border-b p-5 md:border-r md:border-b-0 md:p-7">
         <Link
@@ -32,7 +32,7 @@ export default function WorkspaceLayout({
             Your everyday style studio
           </span>
           <span className="border-border bg-card rounded-full border px-3 py-1 text-xs">
-            Shared demo · tanpa login
+            Shared demo · no login
           </span>
         </header>
         <main id="main" className="p-6 md:p-10 lg:p-14">

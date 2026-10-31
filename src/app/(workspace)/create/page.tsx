@@ -3,7 +3,7 @@ export default function CreatePage() {
   return (
     <FeaturePlaceholder
       title="Good style starts with you."
-      description="Mulai dari koleksi yang sudah ada, lalu susun kombinasi untuk hari Anda."
+      description="Start from what you already own, then compose combinations for your day."
       owner="Developer 3 (matching & outfits)"
     />
   );

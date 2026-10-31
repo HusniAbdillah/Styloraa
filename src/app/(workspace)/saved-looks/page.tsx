@@ -3,7 +3,7 @@ export default function Page() {
   return (
     <FeaturePlaceholder
       title="Saved looks"
-      description="Kombinasi pilihan yang ingin Anda kenakan kembali."
+      description="Favorite combinations you want to wear again."
       owner="Developer 3"
     />
   );

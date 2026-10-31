@@ -5,14 +5,14 @@ export const metadata: Metadata = {
     default: "Stylora — Personal style studio",
     template: "%s | Stylora",
   },
-  description: "Ruang eksplorasi wardrobe dan personal style.",
+  description: "A wardrobe and personal-style exploration space.",
   robots: { index: false, follow: false },
 };
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="id">
+    <html lang="en">
       <body>{children}</body>
     </html>
   );

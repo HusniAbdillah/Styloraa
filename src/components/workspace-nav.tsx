@@ -14,7 +14,7 @@ export function WorkspaceNav() {
   const path = usePathname();
   return (
     <nav
-      aria-label="Navigasi utama"
+      aria-label="Primary"
       className="flex gap-2 overflow-x-auto md:flex-col"
     >
       {links.map(([href, label]) => (

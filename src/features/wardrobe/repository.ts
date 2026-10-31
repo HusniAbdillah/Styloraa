@@ -10,7 +10,7 @@ export async function listWardrobeItems() {
     .eq("workspace_id", getServerEnv().STYLORA_WORKSPACE_ID)
     .order("created_at", { ascending: false })
     .limit(100);
-  if (error) throw new Error("Wardrobe belum dapat dimuat.");
+  if (error) throw new Error("Could not load the wardrobe.");
   return data;
 }
 export async function insertWardrobeItem(input: WardrobeItemInput) {
@@ -20,5 +20,5 @@ export async function insertWardrobeItem(input: WardrobeItemInput) {
       ...input,
       workspace_id: getServerEnv().STYLORA_WORKSPACE_ID,
     });
-  if (error) throw new Error("Item belum dapat disimpan.");
+  if (error) throw new Error("Could not save the item.");
 }

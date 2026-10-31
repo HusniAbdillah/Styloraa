@@ -23,6 +23,6 @@ export function getServerEnv() {
     DEMO_WRITES_ENABLED: process.env.DEMO_WRITES_ENABLED || undefined,
   });
   if (!result.success)
-    throw new Error("Konfigurasi server belum valid. Periksa .env.example.");
+    throw new Error("Invalid server configuration. See .env.example.");
   return result.data;
 }

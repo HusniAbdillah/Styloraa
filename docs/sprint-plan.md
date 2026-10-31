@@ -1,48 +1,68 @@
-# Sprint 7 jam, 4 developer
+# 7-hour sprint, 4 developers
 
-Target: satu alur wardrobe → create → save → reopen yang stabil. Total 28 jam orang nominal sudah termasuk integrasi, review, dan setup. Aplikasi tanpa login dan menggunakan satu dataset demo bersama.
+Goal: one stable wardrobe → create → save → reopen flow. 28 nominal
+person-hours total, including integration, review, and setup. The app has no
+login and uses one shared demo dataset.
 
-## Pemilik file
+## File owners
 
-| Developer               | Tanggung jawab                                 | Area milik                                               | Kontrak awal                       |
-| ----------------------- | ---------------------------------------------- | -------------------------------------------------------- | ---------------------------------- |
-| 1 — integrator          | Foundation, env, server client, shell, release | `lib/`, root layout/CSS, package/lockfile, CI            | Scope workspace, error, token UI   |
-| 2 — data/wardrobe       | Schema, RLS, storage, wardrobe                 | `supabase/`, generated types, wardrobe feature/route     | Nama field dan pola query scope    |
-| 3 — looks               | Pilihan item, save, detail, saved looks        | outfits/matching, create/look/saved routes               | Payload save dan relasi item       |
-| 4 — preferences/capsule | Form, empty/error state, QA                    | preferences/capsules dan modul pendukung yang disepakati | Validasi form dan kebutuhan schema |
+| Developer               | Responsibility                             | Owned areas                                          | Starting contract                |
+| ----------------------- | ------------------------------------------ | ---------------------------------------------------- | -------------------------------- |
+| 1 — integrator          | Foundation, env, server client, shell, release | `lib/`, root layout/CSS, package/lockfile, CI      | Workspace scope, errors, UI tokens |
+| 2 — data/wardrobe       | Schema, RLS, storage, wardrobe             | `supabase/`, generated types, wardrobe feature/route | Field names and scope query pattern |
+| 3 — looks               | Item picking, save, detail, saved looks    | outfits/matching, create/look/saved routes           | Save payload and item relations  |
+| 4 — preferences/capsule | Forms, empty/error states, QA              | preferences/capsules and agreed support modules      | Form validation and schema needs |
 
-Developer 2 satu-satunya pemilik migrations dan generated types. Developer 1 satu-satunya pemilik dependency/lockfile dan layout bersama. Developer 4 membantu QA P0 sebelum meneruskan capsule. Agent dapat membantu subtask dengan area edit eksplisit; developer tetap memeriksa hasil dan integrasi.
+Developer 2 is the only owner of migrations and generated types. Developer 1
+is the only owner of dependencies/lockfile and shared layout. Developer 4
+helps with P0 QA before moving on to capsules. Agents may help with
+subtasks that have explicit edit areas; developers still review results and
+integration.
 
-## Jadwal
+## Schedule
 
-| Waktu       | Target                                             | Integrasi                                             |
-| ----------- | -------------------------------------------------- | ----------------------------------------------------- |
-| 00:00–00:30 | Install, env demo, schema/payload disepakati       | Bekukan field P0 dan kontrak save                     |
-| 00:30–01:00 | Shell, server scope, migration, form awal          | Integrasikan foundation pertama                       |
-| 01:00–02:00 | Wardrobe CRUD, pilihan item, preferences sederhana | Satu item tersimpan setelah reload                    |
-| 02:00–03:00 | Save look, detail, saved looks, tes constraint     | Demo pertama alur P0 penuh                            |
-| 03:00–04:00 | Error/loading, responsif, perbaikan persistence    | Preview bersama dan scope test                        |
-| 04:00–05:00 | Tutup gap P0; capsule minimum bila stabil          | Pilih P1 yang masih realistis                         |
-| 05:00–06:00 | Integrasi akhir, focused tests, build, smoke       | Semua fitur masuk sebelum jam 6                       |
-| 06:00–07:00 | Feature freeze, blocker fixes, demo/handoff        | Tidak menambah dependency/schema baru kecuali blocker |
+| Time        | Goal                                                      | Integration                                  |
+| ----------- | --------------------------------------------------------- | -------------------------------------------- |
+| 00:00–00:30 | Install, demo env, agreed schema/payloads                 | Freeze P0 fields and save contract           |
+| 00:30–01:00 | Shell, server scope, migration, early forms               | Integrate the first foundation               |
+| 01:00–02:00 | Wardrobe CRUD, item picking, simple preferences           | One item persisted after reload              |
+| 02:00–03:00 | Save look, detail, saved looks, constraint tests          | First full P0 flow demo                      |
+| 03:00–04:00 | Error/loading states, responsive, persistence fixes       | Shared preview and scope tests               |
+| 04:00–05:00 | Close P0 gaps; minimum capsule if stable                  | Pick P1 items that are still realistic       |
+| 05:00–06:00 | Final integration, focused tests, build, smoke            | Everything merged before hour 6              |
+| 06:00–07:00 | Feature freeze, blocker fixes, demo/handoff               | No new dependencies/schemas except blockers  |
 
-Jika jam 3 belum bisa menyimpan dan membuka look, hentikan P1/P2. Jika jam 5 provider belum menghasilkan output tervalidasi, biarkan unavailable dan demo alur manual. Jam terakhir dipakai stabilisasi, bukan pemasangan queue atau penambahan auth.
+If saving and reopening a look is still impossible at hour 3, stop P1/P2. If
+the provider has no validated output at hour 5, leave it unavailable and
+demo the manual flow. The last hour is for stabilization, not for adding
+queues or auth.
 
-## Kolaborasi
+## Collaboration
 
-Integrasikan perubahan kecil secara rutin. Sebelum edit file milik orang lain, sampaikan kebutuhan kontraknya. Setiap PR menyebut perubahan perilaku, checks, dan batas yang tersisa. Jangan menunggu semua branch selesai untuk menguji integrasi.
+Integrate small changes regularly. Before editing someone else's files,
+share the contract need. Every PR states behavior changes, checks, and
+remaining limits. Do not wait for all branches to finish before testing
+integration.
 
-Tugas agent harus memuat tujuan konkret, area edit, kontrak input/output, batas operasi remote, checks, dan handoff. Agent yang menemui mismatch schema berkoordinasi dengan pemilik database, bukan membuat tabel kedua.
+Agent tasks must include a concrete goal, edit areas, input/output
+contracts, remote-operation limits, checks, and handoff. An agent that hits
+a schema mismatch coordinates with the database owner instead of creating a
+second table.
 
 ## Smoke flow
 
-1. Tambahkan item dengan payload valid, reload, pastikan tetap ada.
-2. Uji payload kosong/tidak valid; server menolak dengan error yang dapat dipahami.
-3. Pilih item, simpan look, buka detail dan saved looks setelah reload.
-4. Coba ID/workspace asing pada request; server tidak boleh membaca/menulis di luar workspace tetap.
-5. Uji relasi look/capsule dengan item workspace lain; constraint menolak.
-6. Direct Data API memakai anon/authenticated tidak dapat membaca/menulis tabel internal.
-7. Coba dua browser; keduanya melihat dataset bersama sesuai scope demo.
-8. Uji AI unavailable, job tidak ditemukan, error jaringan, serta tampilan mobile/keyboard.
+1. Add an item with a valid payload, reload, confirm it persists.
+2. Try empty/invalid payloads; the server rejects them with understandable
+   errors.
+3. Pick items, save a look, open detail and saved looks after reload.
+4. Try foreign IDs/workspaces in requests; the server must not read/write
+   outside the fixed workspace.
+5. Test look/capsule relations with other-workspace items; constraints reject.
+6. Direct Data API calls with anon/authenticated cannot read/write internal
+   tables.
+7. Try two browsers; both see the shared dataset per the demo scope.
+8. Test AI unavailable, job not found, network errors, and mobile/keyboard
+   views.
 
-Catat hasil aktual dengan environment dan commit. Daftar ini bukan klaim checks telah dijalankan.
+Record actual results with environment and commit. This list is not a claim
+that the checks were run.

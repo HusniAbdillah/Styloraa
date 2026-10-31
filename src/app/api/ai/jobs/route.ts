@@ -4,7 +4,7 @@ export async function POST() {
     {
       error: {
         code: "AI_NOT_CONFIGURED",
-        message: "Integrasi AI belum diaktifkan.",
+        message: "AI integration is not enabled.",
       },
     },
     { status: 503 },

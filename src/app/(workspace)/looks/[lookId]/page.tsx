@@ -3,7 +3,7 @@ export default function Page() {
   return (
     <FeaturePlaceholder
       title="Look details"
-      description="Detail kombinasi dan keputusan styling akan tersedia di sini."
+      description="Outfit combinations and styling decisions will live here."
       owner="Developer 3"
     />
   );

@@ -19,13 +19,13 @@ type/size validation and abuse limits before internet exposure.
 
 ## Commands
 
-Run through the project's pinned CLI (`npm run db:*` or `npx supabase`):
+Run through the project's pinned CLI (`pnpm db:*` or `pnpm exec supabase`):
 
 ```sh
-npx supabase start
-npx supabase db reset
-npx supabase test db
-npm run db:types
+pnpm exec supabase start
+pnpm db:reset
+pnpm db:test
+pnpm db:types
 ```
 
 `db reset` clears **local** database data. Use a disposable local stack. For a
@@ -40,7 +40,7 @@ captures output as UTF-8 rather than using shell redirection.
 
 ## Verification status
 
-The initial setup discovered CLI 2.122.0 via npm and generated `config.toml` and
+The initial setup discovered CLI 2.122.0 via the project's package manager and generated `config.toml` and
 the migration filename with the CLI. Docker initially answered `docker version`,
 but starting the local database stalled; subsequent `docker ps` also stalled.
 The start attempt was stopped. The migration and pgTAP tests therefore remain
