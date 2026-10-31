@@ -6,6 +6,19 @@
 
 ## Responsive design handoff, 31 October 2026
 
+**Implementation update:** Owner 4 now has the Capsule Studio and shared
+preview frontend described in [Owner 4 implementation](docs/owner4-implementation.md).
+Local verification passed `pnpm check` (37 tests), `pnpm build`, type
+generation, database reset and 82 database tests. The API smoke flow and
+eight-route browser walkthrough passed, including exact selection after
+reload, desktop navigation and 390/360px mobile layouts. These checks used
+an isolated worktree and disposable local Supabase, not hosted production
+data. Text AI and visual providers were not exercised live; missing
+configuration returns unavailable instead of mock output.
+
+Earlier design-only and baseline implementation observations below are
+historical. Current Owner 4 evidence is in `docs/owner4-verification.md`.
+
 The latest design revision is recorded in
 [`docs/design/v2-handoff.md`](docs/design/v2-handoff.md). It supersedes the
 earlier manual matching flow and repeated workspace/sample banners. This
