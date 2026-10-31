@@ -31,10 +31,13 @@ not go stale.
 
 ## Database boundaries
 
-Initial tables: wardrobe items, preferences, looks with their items,
-capsules with their items, and AI jobs. Every aggregate and relation row is
-workspace-scoped. Foreign keys/constraints prevent cross-workspace links; a
-predicate on the child row alone is not enough.
+The [database contract](database-contract.md) maps all current PRD features to
+workspace-scoped tables: inventory/assets, personalization, inspiration pieces,
+matches, three outfit options, shopping/value evidence, immutable saves,
+revocable shares, capsules/combinations and preview jobs. Foreign keys and
+constraints prevent cross-workspace and wrong-parent links; a predicate on the
+child row alone is not enough. These schema capabilities are not evidence that
+provider integrations or feature routes are complete.
 
 RLS is on and direct `anon`/`authenticated` access is denied. The server
 uses `SUPABASE_SECRET_KEY`, which bypasses RLS, so every query must include
@@ -69,9 +72,10 @@ API with polling where it fits. Add a queue/worker after duration and
 reliability are proven; do not run background promises after a Vercel
 response.
 
-Sharing waits until a public snapshot contract, random token, expiry,
-revoke, and safe fields are agreed. Do not grant anon select on internal
-data just for a shared page.
+Sharing uses an explicit safe snapshot, hash-only token storage, expiry and
+one-way revocation as defined in the database contract. The public server route
+must check token hash, expiry and revocation and return only allowlisted fields.
+Do not grant anon select on internal data just for a shared page.
 
 ## Sprint tradeoffs
 

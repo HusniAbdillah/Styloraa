@@ -8,6 +8,7 @@ export async function listWardrobeItems() {
     .from("wardrobe_items")
     .select("id,name,category,color,image_path,created_at")
     .eq("workspace_id", getServerEnv().STYLORA_WORKSPACE_ID)
+    .is("archived_at", null)
     .order("created_at", { ascending: false })
     .limit(100);
   if (error) throw new Error("Could not load the wardrobe.");
