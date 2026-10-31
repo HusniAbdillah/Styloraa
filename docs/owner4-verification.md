@@ -1,7 +1,7 @@
 # Owner 4 verification, 31 October 2026
 
-Baseline: merged main `3905a6e`, including Owner 3's selection contract,
-responsive product/saved-look flows and PWA shell.
+Baseline: merged main `3097c45`, including Owner 2 frontend PR #10,
+Owner 3 selected/product/saved-look flows and the PWA shell.
 Work was isolated from the shared checkout
 after the user confirmed another dependency installation was active there.
 
@@ -67,3 +67,14 @@ passed again. Desktop/mobile browser checks passed for Capsules, selected look,
 saved looks, drawer interaction and all linked brand/PWA assets, with no
 horizontal overflow or page errors. Database results above remain from the
 unchanged merged schema; database tests were not repeated for this UI merge.
+
+## Pre-merge refresh: Owner 2 frontend
+
+Fetched main 3097c45 (PR #10) and merged the complete Owner 2 landing,
+create, inspiration review, outfit selection and repository changes.
+Shell/navigation conflicts retain the existing collapsible brand shell,
+with the same destinations and active look state. The new Owner 2 pages,
+feature modules and CSS were retained. No main files were deleted.
+The real local Owner 4 API walkthrough passed after integration.
+Visual try-on is still unavailable until its separate provider/executor
+is integrated; this merge does not claim a completed live visual flow.
