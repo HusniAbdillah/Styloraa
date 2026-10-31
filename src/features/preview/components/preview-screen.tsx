@@ -23,16 +23,23 @@ export function PreviewScreen({
 }) {
   const ready = useClientReady();
   const [mode, setMode] = useState<"single" | "combo">(
-    data.items.length > 1 ? "combo" : "single",
+    data.latestJob?.input.mode === "single"
+      ? "single"
+      : data.latestJob?.input.mode === "combo"
+        ? "combo"
+        : data.items.length > 1
+          ? "combo"
+          : "single",
   );
   const [selectedIds, setSelectedIds] = useState(
-    data.items.map((item) => item.id),
+    (!data.latestJob?.stale ? data.latestJob?.input.item_ids : undefined) ??
+      data.items.map((item) => item.id),
   );
   const [consent, setConsent] = useState(false);
   const [limits, setLimits] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
-  const [job, setJob] = useState<PreviewJob | null>(null);
+  const [job, setJob] = useState<PreviewJob | null>(data.latestJob);
   const [pollError, setPollError] = useState("");
   const [retryPoll, setRetryPoll] = useState(0);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -133,6 +140,8 @@ export function PreviewScreen({
         method: "POST",
         signal: controller.signal,
         body: JSON.stringify({
+          request_id: crypto.randomUUID(),
+          option_id: data.subject.optionId,
           subject_type: data.subject.type,
           subject_id: data.subject.id,
           capsule_id: data.subject.capsuleId,
@@ -194,6 +203,7 @@ export function PreviewScreen({
             <SaveAsCapsule
               lookId={data.subject.id}
               selectedItemIds={selectedIds}
+              sourceOptionId={data.subject.optionId}
               disabled={unavailable}
             />
           ) : null}
@@ -346,6 +356,7 @@ export function PreviewScreen({
               onClick={generate}
               loading={pending}
               disabled={
+                !data.visualAi ||
                 !writes ||
                 !consent ||
                 !limits ||
@@ -357,6 +368,16 @@ export function PreviewScreen({
             >
               Request visual preview
             </Button>
+            {!data.visualAi ? (
+              <p className={styles.muted}>
+                Muse Image is currently unavailable. Your selection is kept.
+              </p>
+            ) : null}
+            <p className={styles.muted}>
+              Muse Image creates an approximate visualization on a
+              non-identifying mannequin using your garment photos and explicitly
+              selected style preferences. Up to six pieces, 12 MB total.
+            </p>
             {!writes ? (
               <p className={`${styles.muted} mt-4`}>
                 Preview requests are currently disabled.

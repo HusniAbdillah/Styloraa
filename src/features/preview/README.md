@@ -1,18 +1,17 @@
-# preview
+# Owned-piece previews
 
-Owner: Developer 4. One responsive template serves item, owned-look and capsule
-outfit preview routes. See `docs/owner4-implementation.md` for route coverage.
+Owner 4. One responsive template serves wardrobe, look and capsule contexts.
+Muse Image 1.0 receives owned garment references and explicitly selected style
+preferences. The model is a faceless mannequin; personal photo uploads are
+not part of this shared workspace.
 
-- `schema.ts`: job creation validation (consent + limitations acknowledgment
-  are mandatory literals).
-- `repository.ts`: server-only composition builders for item/look/outfit
-  previews, plus preview job create/read against `ai_jobs kind='preview'`.
-- Visual try-on generation is a separate provider and stays unavailable:
-  POST preview returns honest 503 and creates no job row. Status/result
-  reads work against rows once that provider is live. Polling starts only
-  after a real job is returned, has backoff/time bounds and stops at terminal
-  states. Results use scoped private assets, not arbitrary provider URLs.
+Generation is awaited within a bounded Node request, recorded as running,
+then succeeded/failed. It is not a durable queue. The server restores the
+latest job after reload and invalidates changed input or superseded selections.
+Results are workspace-scoped private Storage objects, exposed with short-lived
+signed URLs. Delete removes the image and detaches context relations while
+retaining the usage ledger.
 
-Preview pages never claim AI output. A replaced garment marks old results
-stale. Terminal-result deletion removes the scoped private image and job;
-active jobs cannot be silently canceled. No fixture preview image is displayed.
+Inputs: at most six PNG/JPEG/WebP references, 10 MB each and 12 MB combined.
+Output: inline image bytes only, at most 10 MB; provider URLs are never fetched.
+See docs/owner4-muse-integration.md and docs/api-capsule-preview.md.

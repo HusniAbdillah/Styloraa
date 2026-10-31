@@ -14,12 +14,14 @@ function signature(payload: string) {
 export function signCombination(
   capsuleId: string,
   combination: VerifiedCombination,
+  sourceRevision = 1,
 ) {
   const payload = Buffer.from(
     JSON.stringify({
       workspace: getServerEnv().STYLORA_WORKSPACE_ID,
       capsuleId,
       combination,
+      sourceRevision,
       expires: Date.now() + 15 * 60_000,
     }),
   ).toString("base64url");
@@ -30,6 +32,7 @@ export function requireVerifiedCombination(
   capsuleId: string,
   combination: VerifiedCombination,
   token?: string,
+  sourceRevision = 1,
 ) {
   if (!token || token.length > 24000)
     throw new InvalidInputError(
@@ -53,6 +56,7 @@ export function requireVerifiedCombination(
     capsuleId: string;
     combination: VerifiedCombination;
     expires: number;
+    sourceRevision: number;
   };
   try {
     parsed = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
@@ -62,6 +66,7 @@ export function requireVerifiedCombination(
   if (
     parsed.workspace !== getServerEnv().STYLORA_WORKSPACE_ID ||
     parsed.capsuleId !== capsuleId ||
+    parsed.sourceRevision !== sourceRevision ||
     parsed.expires < Date.now() ||
     JSON.stringify(parsed.combination) !== JSON.stringify(combination)
   ) {

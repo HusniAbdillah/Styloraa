@@ -1,5 +1,19 @@
 # Stylora progress
 
+## Owner 4 Muse integration — 31 October 2026
+
+Implemented on codex/owner4-muse-complete from merged main 33cae8d. Shared
+MODEL_API_KEY now drives Muse Spark 1.3 combinations and Muse Image 1.0
+reference-based previews. Actual provider calls verified all three contexts,
+owned replacement, selected-option context, private results and idempotent
+replay. Missing additions remain separate from owned capsule membership.
+
+Local reset and generated types passed; 114 SQL assertions and 80 unit tests
+passed. Browser checks verified real images after reload, selected/saved
+look navigation, exact Save as Capsule selection and mobile geometry.
+See docs/owner4-muse-integration.md for evidence, limits and rollout status.
+The prior unconfigured-provider status below is historical.
+
 ## Owner 2–3 backend integration, 31 October 2026
 
 Implemented on `feat/owner3-backend` after pulling `origin/main` at `cee20b5`.

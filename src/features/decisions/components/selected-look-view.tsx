@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getLook } from "@/features/inspiration/repository";
 import { getSelectedLook } from "@/features/decisions/repository";
+import { SaveAsCapsule } from "@/features/capsules/components/save-as-capsule";
 import { SaveLookButton } from "./save-look-button";
 
 type Selection = Awaited<ReturnType<typeof getSelectedLook>>;
@@ -238,6 +239,27 @@ export async function SelectedLookView({
             )}
           </div>
           <div className="mt-6 flex flex-col gap-3">
+            {!selected.stale &&
+            selected.items.length > 0 &&
+            missing.length === 0 &&
+            owned.every((item) => item.available) &&
+            selected.selected_option?.source_type !== "sample" ? (
+              <>
+                <Link
+                  href={`/looks/${lookId}/preview${selected.selected_option ? `?option_id=${selected.selected_option.id}` : ""}`}
+                  className="border-primary text-primary rounded-full border px-5 py-3 text-center text-sm font-semibold"
+                >
+                  Preview owned look
+                </Link>
+                <SaveAsCapsule
+                  lookId={lookId}
+                  sourceOptionId={selected.selected_option?.id}
+                  selectedItemIds={owned.flatMap((item) =>
+                    item.wardrobe_item_id ? [item.wardrobe_item_id] : [],
+                  )}
+                />
+              </>
+            ) : null}
             {comparisonUrl && missing.length > 0 && (
               <Link
                 href={comparisonUrl}

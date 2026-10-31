@@ -37,6 +37,7 @@ export function CapsuleOutfits({
   const router = useRouter();
   const [constraints, setConstraints] = useState<Record<string, string>>({});
   const [count, setCount] = useState(3);
+  const [additions, setAdditions] = useState(capsule.missing_additions);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -56,10 +57,12 @@ export function CapsuleOutfits({
       const data = await studioRequest<{
         combinations: Suggestion[];
         source: string;
+        missing_additions: import("../types").MissingAddition[];
         dropped?: number;
       }>(`/api/capsules/${capsule.id}/combinations`, {
         method: "POST",
         body: JSON.stringify({
+          request_id: crypto.randomUUID(),
           source: "ai",
           count,
           required_item_ids: Object.keys(constraints).filter(
@@ -73,6 +76,7 @@ export function CapsuleOutfits({
       if (data.source !== "ai")
         throw new Error("Unexpected suggestion source.");
       setSuggestions(data.combinations);
+      setAdditions(data.missing_additions);
       if (data.dropped)
         setNotice(
           "Some suggestions could not be verified and were left out. Only verified combinations are shown.",
@@ -120,6 +124,37 @@ export function CapsuleOutfits({
         <p role="status" className={styles.notice}>
           {notice}
         </p>
+      ) : null}
+      {additions.length ? (
+        <section
+          className={styles.panel}
+          aria-labelledby="missing-additions-heading"
+        >
+          <h2 id="missing-additions-heading">Considered additions</h2>
+          <p className={styles.muted}>
+            Optional, unowned suggestions from the last generation. They are
+            never included in your owned combinations. Regenerate after changing
+            your preferences.
+          </p>
+          <ul className={styles.stack}>
+            {additions.map((item, index) => (
+              <li key={index}>
+                <h3>{item.name}</h3>
+                <p>{item.rationale}</p>
+                <p className={styles.muted}>
+                  Works with:{" "}
+                  {item.related_item_ids
+                    .map((id) => capsule.items.find((x) => x.id === id)?.name)
+                    .filter(Boolean)
+                    .join(", ")}
+                </p>
+                {item.uncertainty ? (
+                  <p className={styles.muted}>{item.uncertainty}</p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </section>
       ) : null}
       <div className={styles.split}>
         <section className={styles.stack}>

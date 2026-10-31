@@ -1,8 +1,9 @@
 import "server-only";
+import { clearOutfitPreviews } from "@/features/preview/cleanup";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { getServerEnv } from "@/lib/env";
 import { ConflictError, InvalidInputError, NotFoundError } from "@/lib/errors";
-import { getCapsuleInventory } from "../capsules/repository";
+import { getCapsule, getCapsuleInventory } from "../capsules/repository";
 import type { CreateOutfitInput } from "./schema";
 import { requireVerifiedCombination } from "./combination-token";
 
@@ -96,6 +97,7 @@ export async function createCapsuleOutfit(
   capsuleId: string,
   input: CreateOutfitInput,
 ) {
+  let sourceRevision: number | undefined;
   if (input.source_type === "sample")
     throw new InvalidInputError(
       "Sample combinations cannot be saved in this studio.",
@@ -104,7 +106,9 @@ export async function createCapsuleOutfit(
     throw new InvalidInputError(
       "A verified AI suggestion cannot be replaced with another look.",
     );
-  if (input.source_type === "live")
+  if (input.source_type === "live") {
+    const capsule = await getCapsule(capsuleId);
+    sourceRevision = capsule.revision;
     requireVerifiedCombination(
       capsuleId,
       {
@@ -114,7 +118,9 @@ export async function createCapsuleOutfit(
         uncertainty: input.uncertainty,
       },
       input.draft_token,
+      capsule.revision,
     );
+  }
   let itemIds = input.item_ids;
   if (input.from_saved_look_id && !itemIds.length) {
     itemIds = await ownedLookItemIds(input.from_saved_look_id);
@@ -128,10 +134,17 @@ export async function createCapsuleOutfit(
       p_rationale: input.rationale,
       p_item_ids: itemIds,
       p_source_type: input.source_type,
-      p_inputs_used: { uncertainty: input.uncertainty },
+      p_inputs_used: {
+        uncertainty: input.uncertainty,
+        capsule_revision: sourceRevision,
+      },
     },
   );
   if (error) {
+    if (error.code === "PT409")
+      throw new ConflictError(
+        "The capsule changed. Generate a new AI suggestion before saving.",
+      );
     if (error.code === "22023") {
       const message = error.message ?? "";
       if (message.includes("Capsule is unavailable")) {
@@ -201,6 +214,8 @@ export async function getGeneratorInventory(capsuleId: string) {
 }
 
 export async function deleteCapsuleOutfit(capsuleId: string, outfitId: string) {
+  await getCapsuleOutfit(capsuleId, outfitId);
+  await clearOutfitPreviews([outfitId]);
   const { data, error } = await createServerSupabase()
     .from("capsule_outfits")
     .delete()

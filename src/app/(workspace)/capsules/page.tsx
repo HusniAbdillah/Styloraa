@@ -10,12 +10,16 @@ export const dynamic = "force-dynamic";
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ fromLook?: string; pieces?: string }>;
+  searchParams: Promise<{
+    fromLook?: string;
+    pieces?: string;
+    fromOption?: string;
+  }>;
 }) {
   const [data, params] = await Promise.all([loadCapsuleIndex(), searchParams]);
   const look =
     params.fromLook && !data.error
-      ? await selectedLookItems(params.fromLook)
+      ? await selectedLookItems(params.fromLook, params.fromOption)
       : null;
   let ids = look?.items.map((item) => item.id);
   if (look && params.pieces) {

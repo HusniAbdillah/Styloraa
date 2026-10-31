@@ -1,9 +1,10 @@
 import { combinationRequestSchema } from "@/features/capsules/schema";
 import { getCapsule } from "@/features/capsules/repository";
 import { signCombination } from "@/features/outfits/combination-token";
-import { generateAiCombinations } from "@/features/outfits/generator";
+import { generateCapsuleSuggestions } from "@/features/capsules/generation";
 import {
   checkDatabase,
+  checkWrites,
   invalidId,
   isUuid,
   jsonError,
@@ -21,7 +22,7 @@ type Params = { params: Promise<{ capsuleId: string }> };
  * is rejected instead of persisted. Nothing is saved by this endpoint.
  */
 export async function POST(request: Request, { params }: Params) {
-  const blocked = checkDatabase();
+  const blocked = checkDatabase() ?? checkWrites();
   if (blocked) return blocked;
   const { capsuleId } = await params;
   if (!isUuid(capsuleId)) return invalidId();
@@ -72,32 +73,20 @@ export async function POST(request: Request, { params }: Params) {
         "No requested items belong to this capsule.",
       );
     }
-    const brief =
-      typeof capsule.brief === "object" && capsule.brief !== null
-        ? (capsule.brief as { purpose?: string; notes?: string })
-        : {};
-    const { combinations, dropped } = await generateAiCombinations({
-      brief: {
-        purpose: brief.purpose || capsule.title,
-        notes: JSON.stringify({
-          ...brief,
-          timeframe: capsule.timeframe,
-          season: capsule.season,
-          occasion: capsule.occasion,
-        }),
-      },
-      inventory: scope,
-      requiredIds: parsed.data.required_item_ids,
-      excludedIds: parsed.data.excluded_item_ids,
-      count: parsed.data.count,
-    });
+    const { combinations, missing_additions, dropped } =
+      await generateCapsuleSuggestions(capsule, scope, parsed.data);
     return Response.json({
       data: {
         combinations: combinations.map((combination) => ({
           ...combination,
-          draft_token: signCombination(capsuleId, combination),
+          draft_token: signCombination(
+            capsuleId,
+            combination,
+            capsule.revision,
+          ),
         })),
         source: "ai",
+        missing_additions,
         dropped,
       },
     });
@@ -105,3 +94,5 @@ export async function POST(request: Request, { params }: Params) {
     return mapRouteError(error);
   }
 }
+
+export const maxDuration = 60;

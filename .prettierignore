@@ -6,3 +6,4 @@ supabase/.temp
 
 node_modules.bak
 .build-tmp
+next-env.d.ts

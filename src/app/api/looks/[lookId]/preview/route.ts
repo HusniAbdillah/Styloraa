@@ -17,13 +17,16 @@ export async function POST(request: Request, { params }: Params) {
 }
 
 /** Read-only look composition for preview. No AI claims attached. */
-export async function GET(_request: Request, { params }: Params) {
+export async function GET(request: Request, { params }: Params) {
   const blocked = checkDatabase();
   if (blocked) return blocked;
   const { lookId } = await params;
   if (!isUuid(lookId)) return invalidId();
   try {
-    const data = await buildLookPreview(lookId);
+    const data = await buildLookPreview(
+      lookId,
+      new URL(request.url).searchParams.get("option_id") ?? undefined,
+    );
     return Response.json(
       { data },
       { headers: { "Cache-Control": "no-store" } },
@@ -32,3 +35,5 @@ export async function GET(_request: Request, { params }: Params) {
     return mapRouteError(error);
   }
 }
+
+export const maxDuration = 240;

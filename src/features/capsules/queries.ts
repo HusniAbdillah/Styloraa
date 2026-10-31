@@ -1,4 +1,5 @@
 import "server-only";
+import { wardrobeImagePath } from "@/features/decisions/repository";
 import { notFound } from "next/navigation";
 import { isDatabaseConfigured, getServerEnv } from "@/lib/env";
 import { createServerSupabase } from "@/lib/supabase/server";
@@ -11,7 +12,11 @@ import {
   getCapsuleOutfit,
   listCapsuleOutfits,
 } from "@/features/outfits/repository";
-import { capsuleBriefSchema, uuidSchema } from "./schema";
+import {
+  capsuleBriefSchema,
+  missingAdditionSchema,
+  uuidSchema,
+} from "./schema";
 import type { CapsuleDetail, StudioItem, StudioCapabilities } from "./types";
 
 export function studioCapabilities(): StudioCapabilities {
@@ -30,18 +35,32 @@ export async function withItemImages<T extends StudioItem>(
   const workspace = getServerEnv().STYLORA_WORKSPACE_ID;
   const { data, error } = await db
     .from("wardrobe_items")
-    .select("id,image_path")
+    .select("id,image_path,asset_id")
     .eq("workspace_id", workspace)
     .in(
       "id",
       items.map((item) => item.id),
     );
   if (error) return items;
-  const paths = (data ?? []).filter(
-    (row) =>
-      row.image_path?.startsWith(`${workspace}/`) &&
-      !row.image_path.includes(".."),
+  const assetIds = (data ?? []).flatMap((row) =>
+    row.asset_id ? [row.asset_id] : [],
   );
+  const assets = assetIds.length
+    ? await db
+        .from("assets")
+        .select("id,workspace_id,bucket,storage_path,deleted_at")
+        .eq("workspace_id", workspace)
+        .in("id", assetIds)
+    : { data: [], error: null };
+  if (assets.error) return items;
+  const paths = (data ?? []).flatMap((row) => {
+    const path = wardrobeImagePath(
+      row,
+      assets.data?.find((asset) => asset.id === row.asset_id),
+      workspace,
+    );
+    return path ? [{ id: row.id, image_path: path }] : [];
+  });
   if (!paths.length) return items;
   const { data: signed } = await db.storage.from("wardrobe").createSignedUrls(
     paths.map((row) => row.image_path!),
@@ -91,6 +110,9 @@ export async function loadCapsule(capsuleId: string): Promise<CapsuleDetail> {
     const brief = capsuleBriefSchema.safeParse(capsule.brief);
     return {
       ...capsule,
+      missing_additions: missingAdditionSchema
+        .array()
+        .parse(capsule.missing_additions),
       brief: brief.success ? brief.data : { purpose: capsule.title, notes: "" },
       items: await withItemImages(capsule.items),
     };
@@ -119,10 +141,10 @@ export async function loadOutfit(capsuleId: string, outfitId: string) {
   }
 }
 
-export async function selectedLookItems(lookId: string) {
+export async function selectedLookItems(lookId: string, optionId?: string) {
   if (!uuidSchema.safeParse(lookId).success) notFound();
   try {
-    const look = await buildLookPreview(lookId);
+    const look = await buildLookPreview(lookId, optionId);
     if (!look.items.length || look.items.some((item) => !item.available))
       throw new NotFoundError("Look items are unavailable.");
     return look;

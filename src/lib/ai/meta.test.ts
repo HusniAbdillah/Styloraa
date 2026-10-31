@@ -6,8 +6,7 @@ const BASE_ENV = {
 } as const;
 
 function setEnv(overrides: Record<string, string | undefined>) {
-  for (const key of ["META_API_KEY", "META_TEXT_MODEL"])
-    delete process.env[key];
+  for (const key of ["MODEL_API_KEY"]) delete process.env[key];
   for (const [key, value] of Object.entries({ ...BASE_ENV, ...overrides })) {
     if (value === undefined) delete process.env[key];
     else vi.stubEnv(key, value);
@@ -19,8 +18,8 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("meta text provider", () => {
-  it("reports unconfigured without key and model", async () => {
+describe("Muse text provider", () => {
+  it("reports unconfigured without the shared Muse key", async () => {
     setEnv({});
     const { isMetaTextConfigured, metaChatCompletion } = await import("./meta");
     expect(isMetaTextConfigured()).toBe(false);
@@ -32,13 +31,21 @@ describe("meta text provider", () => {
     });
   });
   it("returns completion content on success", async () => {
-    setEnv({ META_API_KEY: "key", META_TEXT_MODEL: "model" });
+    setEnv({ MODEL_API_KEY: "key" });
     vi.stubGlobal(
       "fetch",
       vi.fn(
         async () =>
           new Response(
-            JSON.stringify({ choices: [{ message: { content: "hello" } }] }),
+            JSON.stringify({
+              status: "completed",
+              output: [
+                {
+                  type: "message",
+                  content: [{ type: "output_text", text: "hello" }],
+                },
+              ],
+            }),
             {
               status: 200,
             },
@@ -51,7 +58,7 @@ describe("meta text provider", () => {
     ).resolves.toBe("hello");
   });
   it("maps provider errors without leaking details", async () => {
-    setEnv({ META_API_KEY: "key", META_TEXT_MODEL: "model" });
+    setEnv({ MODEL_API_KEY: "key" });
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => new Response("secret-failure", { status: 500 })),

@@ -1212,6 +1212,18 @@ export type Database = {
         };
         Returns: Json;
       };
+      reserve_owner4_generation: {
+        Args: {
+          p_capsule_outfit_id?: string;
+          p_input: Json;
+          p_kind: string;
+          p_look_id?: string;
+          p_preview_mode?: string;
+          p_wardrobe_item_id?: string;
+          p_workspace_id: string;
+        };
+        Returns: string;
+      };
       save_capsule_studio: {
         Args: {
           p_brief: Json;

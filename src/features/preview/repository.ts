@@ -1,13 +1,13 @@
 import "server-only";
-import { MetaAiError } from "@/lib/ai/meta";
-import { requireOwnedPreviewItems, selectedOwnedPieces } from "./ownership";
+
+import { selectedOwnedPieces } from "./ownership";
 import { getSelectedLook } from "@/features/decisions/repository";
 import { BackendError } from "@/features/decisions/backend";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { getServerEnv } from "@/lib/env";
 import { ConflictError, InvalidInputError, NotFoundError } from "@/lib/errors";
 import { getCapsuleOutfit } from "../outfits/repository";
-import type { CreatePreviewJobInput } from "./schema";
+import { createPreviewJobSchema } from "./schema";
 import { z } from "zod";
 
 function workspaceId() {
@@ -40,7 +40,7 @@ async function requireWardrobeItem(itemId: string) {
   };
 }
 
-async function requireLook(lookId: string) {
+async function requireLook(lookId: string, optionId?: string) {
   const db = createServerSupabase();
   const { data: snapshot, error: snapshotError } = await db
     .from("saved_look_snapshots")
@@ -50,6 +50,10 @@ async function requireLook(lookId: string) {
     .maybeSingle();
   if (snapshotError) throw new Error("Could not load the saved look.");
   if (snapshot) {
+    if (optionId)
+      throw new InvalidInputError(
+        "A saved snapshot cannot use a different option.",
+      );
     const parsed = z
       .array(z.object({ kind: z.literal("owned"), wardrobe_item_id: z.uuid() }))
       .min(1)
@@ -79,6 +83,7 @@ async function requireLook(lookId: string) {
       };
     });
     return {
+      snapshot_id: snapshot.id,
       look: {
         id: snapshot.id,
         title: snapshot.title,
@@ -99,7 +104,7 @@ async function requireLook(lookId: string) {
   if (source.source_type === "sample")
     throw new InvalidInputError("Sample looks cannot be previewed.");
   try {
-    const selection = await getSelectedLook(lookId);
+    const selection = await getSelectedLook(lookId, optionId);
     if (selection.selected_option?.source_type === "sample")
       throw new InvalidInputError("Sample looks cannot be previewed.");
     return {
@@ -130,12 +135,16 @@ export async function buildItemPreview(itemId: string) {
   };
 }
 
-export async function buildLookPreview(lookId: string) {
-  const { look, items } = await requireLook(lookId);
+export async function buildLookPreview(lookId: string, optionId?: string) {
+  if (optionId && !z.uuid().safeParse(optionId).success)
+    throw new InvalidInputError("Choose a valid outfit option.");
+  const composition = await requireLook(lookId, optionId);
+  const { look, items } = composition;
   return {
     subject: { type: "look" as const, id: look.id },
     title: look.title,
     notes: look.notes,
+    is_snapshot: "snapshot_id" in composition,
     is_saved: look.is_saved,
     items,
     provenance: "manual" as const,
@@ -158,25 +167,6 @@ export async function buildOutfitPreview(capsuleId: string, outfitId: string) {
   };
 }
 
-export async function createPreviewJob(input: CreatePreviewJobInput) {
-  const composition =
-    input.subject_type === "wardrobe_item"
-      ? await buildItemPreview(input.subject_id)
-      : input.subject_type === "look"
-        ? await buildLookPreview(input.subject_id)
-        : input.capsule_id
-          ? await buildOutfitPreview(input.capsule_id, input.subject_id)
-          : null;
-  if (!composition)
-    throw new InvalidInputError("Outfit previews require a capsule.");
-  requireOwnedPreviewItems(composition.items);
-  throw new MetaAiError(
-    "VISUAL_PROVIDER_NOT_CONFIGURED",
-    503,
-    "Visual previews are currently unavailable.",
-  );
-}
-
 export async function getPreviewJob(jobId: string) {
   const { data, error } = await createServerSupabase()
     .from("ai_jobs")
@@ -189,12 +179,83 @@ export async function getPreviewJob(jobId: string) {
     .maybeSingle();
   if (error) throw new Error("Could not load the preview job.");
   if (!data) throw new NotFoundError("Preview job not found.");
+  if (
+    (data.status === "running" || data.status === "queued") &&
+    Date.now() - new Date(data.created_at).getTime() > 240000
+  ) {
+    const expired = await createServerSupabase()
+      .from("ai_jobs")
+      .update({
+        status: "failed",
+        error_code: "AI_TIMEOUT",
+        completed_at: new Date().toISOString(),
+      })
+      .eq("workspace_id", workspaceId())
+      .eq("id", data.id)
+      .in("status", ["running", "queued"]);
+    if (expired.error) throw new Error("Could not update the expired preview.");
+    data.status = "failed";
+    data.error_code = "AI_TIMEOUT";
+  }
   let imageUrl: string | null = null;
   const input =
     data.input && typeof data.input === "object" && !Array.isArray(data.input)
       ? data.input
       : {};
   let stale = data.source_type !== "live" || !Array.isArray(input.item_ids);
+  if (!stale) {
+    const parsed = createPreviewJobSchema.safeParse({
+      ...input,
+      capsule_id: input.capsule_id ?? undefined,
+      option_id: input.option_id ?? undefined,
+      model_source: "mannequin",
+      consent_acknowledged: true,
+      limitations_acknowledged: true,
+    });
+    if (!parsed.success || typeof input.fingerprint !== "string") stale = true;
+    else {
+      try {
+        const { previewFingerprint } = await import("./generation");
+        stale = (await previewFingerprint(parsed.data)) !== input.fingerprint;
+      } catch {
+        stale = true;
+      }
+    }
+  }
+  if (
+    !stale &&
+    typeof input.subject_type === "string" &&
+    typeof input.subject_id === "string"
+  ) {
+    let latest = createServerSupabase()
+      .from("ai_jobs")
+      .select("id,input")
+      .eq("workspace_id", workspaceId())
+      .eq("kind", "preview")
+      .eq("input->>subject_type", input.subject_type)
+      .eq("input->>subject_id", input.subject_id);
+    latest =
+      typeof input.option_id === "string"
+        ? latest.eq("input->>option_id", input.option_id)
+        : latest.is("input->>option_id", null);
+    if (typeof input.capsule_id === "string")
+      latest = latest.eq("input->>capsule_id", input.capsule_id);
+    const result = await latest
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (result.error)
+      throw new Error("Could not check the current preview selection.");
+    const recent = result.data?.input;
+    if (
+      result.data?.id !== data.id &&
+      recent &&
+      typeof recent === "object" &&
+      !Array.isArray(recent) &&
+      recent.fingerprint !== input.fingerprint
+    )
+      stale = true;
+  }
   if (data.status === "succeeded" && data.output_asset_id && !stale) {
     const db = createServerSupabase();
     const { data: asset } = await db
@@ -218,15 +279,27 @@ export async function getPreviewJob(jobId: string) {
     if (!imageUrl) stale = true;
   }
   const safeInput = {
-    subject_type: input.subject_type,
-    subject_id: input.subject_id,
-    capsule_id: input.capsule_id,
-    item_ids: input.item_ids,
+    subject_type:
+      typeof input.subject_type === "string" ? input.subject_type : undefined,
+    subject_id:
+      typeof input.subject_id === "string" ? input.subject_id : undefined,
+    capsule_id:
+      typeof input.capsule_id === "string" ? input.capsule_id : undefined,
+    option_id:
+      typeof input.option_id === "string" ? input.option_id : undefined,
+    item_ids:
+      Array.isArray(input.item_ids) &&
+      input.item_ids.every((x) => typeof x === "string")
+        ? (input.item_ids as string[])
+        : undefined,
+    mode: typeof input.mode === "string" ? input.mode : undefined,
   };
   return {
     id: data.id,
     kind: data.kind,
-    status: data.status,
+    status: z
+      .enum(["queued", "running", "succeeded", "failed"])
+      .parse(data.status),
     error_code: data.error_code,
     preview_mode: data.preview_mode,
     model_source: data.model_source,
@@ -286,9 +359,45 @@ export async function deletePreviewResult(jobId: string) {
   }
   const { error: deleteError } = await db
     .from("ai_jobs")
-    .delete()
+    .update({
+      status: "failed",
+      error_code: "RESULT_DELETED",
+      output_asset_id: null,
+      wardrobe_item_id: null,
+      look_id: null,
+      option_id: null,
+      capsule_outfit_id: null,
+      input_asset_id: null,
+      completed_at: new Date().toISOString(),
+    })
     .eq("workspace_id", workspaceId())
     .eq("id", job.id)
     .eq("kind", "preview");
   if (deleteError) throw new Error("Could not delete the preview.");
+}
+
+export async function latestPreview(
+  type: string,
+  id: string,
+  capsuleId?: string,
+  optionId?: string,
+) {
+  const db = createServerSupabase();
+  let q = db
+    .from("ai_jobs")
+    .select("id")
+    .eq("workspace_id", workspaceId())
+    .eq("kind", "preview")
+    .eq("input->>subject_type", type)
+    .eq("input->>subject_id", id);
+  if (capsuleId) q = q.eq("input->>capsule_id", capsuleId);
+  if (optionId) q = q.eq("input->>option_id", optionId);
+  else q = q.is("input->>option_id", null);
+  const result = await q
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (result.error) throw new Error("Could not restore the preview status.");
+  const job = result.data ? await getPreviewJob(result.data.id) : null;
+  return job?.error_code === "RESULT_DELETED" ? null : job;
 }

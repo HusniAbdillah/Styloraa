@@ -1,106 +1,90 @@
-# Capsule + preview API contract
+# Capsule and preview API
 
-Backend reference for the frontend agent building Capsule Studio pages and
-the single preview template. All routes are same-origin Next.js Route
-Handlers; responses are `{ data }` or `{ error: { code, message?, details? } }`.
-Reads send `Cache-Control: no-store`. IDs are UUIDs; anything else is 400
-`INVALID_ID`. Unknown or out-of-workspace records are 404 `NOT_FOUND`
-(existence is never leaked). Mutations require `DEMO_WRITES_ENABLED=true`
-or they return 403 `WRITE_DISABLED`.
+All endpoints use server-only Supabase access and the environment workspace.
+Mutations and paid generation require DEMO_WRITES_ENABLED=true. No auth or
+per-user privacy is implied. JSON input is validated with Zod.
 
 ## Capsules
 
-`GET /api/capsules` → `{ data: [{ id, title, description, occasion, season,
-timeframe, revision, created_at, updated_at, item_count, outfit_count }] }`
+GET/POST /api/capsules lists or creates persisted capsules.
+GET/PATCH/DELETE /api/capsules/:id reads, updates or removes one capsule.
+The full brief, timeframe, season, occasion and exact owned inventory persist
+atomically. PATCH requires the current revision for the interactive editor.
+Referenced saved pieces cannot be silently removed.
 
-`POST /api/capsules` → 201 `{ data: { id } }`
-Body: `{ title, description?, brief: { purpose, notes?, style_preferences?,
-fit_preferences?, color_preferences?, avoid? }, timeframe?,
-season?, occasion?, item_ids: [uuid] (1-100, unique),
-from_saved_look_id?: uuid }`. Provide owned `item_ids` or
-`from_saved_look_id` (owned looks only; archived items rejected).
+POST can use from_saved_look_id for an entirely owned snapshot. The frontend
+Save as Capsule flow also passes the actual current selected IDs and optional
+source option, rather than copying a fixed default composition.
 
-`GET /api/capsules/:id` → capsule + `items: [{ id, name, category, color,
-available }]`. Unavailable members stay visible with `available: false`.
+GET/POST /api/capsules/:id/outfits lists or saves combinations.
+GET/DELETE /api/capsules/:id/outfits/:outfitId reads or deletes one.
+AI saves require a server-issued draft_token bound to the current capsule
+revision. source_type=sample is rejected. All member IDs must be owned and
+available in that capsule.
 
-`PATCH /api/capsules/:id` → updated capsule. Body fields all optional
-(`title?, description?, brief?, timeframe?, season?, occasion?, item_ids?, expected_revision?`);
-member replacement returns 409 `CONFLICT` when removed items are used by
-saved outfits.
+## Muse Spark combinations
 
-Brief, metadata and members are saved atomically by `save_capsule_studio`.
-An expected revision mismatch also returns 409. Reload before retrying a stale edit.
+POST /api/capsules/:id/combinations
 
-`DELETE /api/capsules/:id` → `{ data: { id } }` (outfits cascade).
+Body: request_id (UUID), count (1–6), optional item_ids, required_item_ids and
+excluded_item_ids, source=ai. A generated UUID is accepted for older clients;
+new clients should retain their request ID when replaying a network request.
 
-## Outfits (capsule scope)
+Uses Muse Spark 1.3, shared MODEL_API_KEY, https://api.meta.ai/v1/responses.
+Returns combinations with signed draft tokens, missing_additions, source=ai
+and dropped count. Invalid IDs, violated constraints or duplicate combinations
+are filtered or rejected. Missing additions have name, category, rationale,
+related_item_ids and uncertainty; they never become owned capsule members.
+They persist on the capsule and clear when its brief, metadata or revision changes.
 
-`GET /api/capsules/:id/outfits` → outfit summaries (newest first).
+The brief and selected profile inputs are sent as data. Generation reserves a
+workspace-scoped job atomically. Failed attempts remain in the usage ledger.
+Limits: one active text generation, 10 requests/hour and 30/day per workspace.
+Identical request IDs with unchanged fingerprints reuse the existing result.
+A changed fingerprint with the same request ID returns 409.
 
-`POST /api/capsules/:id/outfits` → 201 full outfit with items.
-Body: `{ title, rationale, item_ids?: [uuid], from_saved_look_id?: uuid,
-source_type?: manual|live, uncertainty?, draft_token? }`. Item IDs must already be
-capsule members; anything else is 400 with a plain message.
-Live AI output requires the unmodified server-issued `draft_token`; sample
-output is rejected. User-arranged combinations use `manual`.
+## Muse Image previews
 
-`GET /api/capsules/:id/outfits/:outfitId` → `{ id, title, rationale,
-uncertainty, source_type, source_revision, inputs_used, created_at,
-items: [{ id, name, category, color, available, position }] }`.
+GET/POST /api/wardrobe/:itemId/preview
+GET/POST /api/looks/:lookId/preview
+GET/POST /api/capsules/:capsuleId/outfits/:outfitId/preview
 
-## Combinations (generate, nothing persisted)
+GET returns owned composition. Look GET accepts option_id to preserve the
+actual selected option; saved snapshot IDs also work. Mixed, stale, sample,
+foreign or unavailable compositions are rejected.
 
-`POST /api/capsules/:id/combinations`
-Body: `{ item_ids?: [uuid] (defaults to available members),
-required_item_ids?: [uuid], excluded_item_ids?: [uuid], count?: 1-6
-(default 3), source?: ai (default ai) }`.
-Response: `{ data: { combinations: [{ title, rationale, item_ids,
-uncertainty, draft_token }], source, dropped? } }`. `dropped` counts AI suggestions
-rejected by ownership verification. Without `META_API_KEY +
-META_TEXT_MODEL`, generation returns 503 `AI_NOT_CONFIGURED`. There is no
-synthetic AI fallback. Malformed provider output returns 502. Users can
-arrange their own pieces and save them as manual outfits. Save a generated
-combination through `POST .../outfits` with unchanged contents and its token.
+POST body: request_id, subject_type, subject_id, optional capsule_id/option_id,
+mode (single/combo), item_ids, model_source=mannequin, and both
+consent_acknowledged=true and limitations_acknowledged=true. Route identity
+must match the body. Single mode selects one item; combo selects 2–6.
+Replacements must be available owned pieces in the current capsule/workspace
+pool. Every selected item needs a valid private garment photo.
 
-## Preview composition (read-only, never AI-labeled)
+Muse Image 1.0 receives inline PNG/JPEG/WebP references, at most 10 MB each
+and 12 MB combined. External provider search/shell tools are disabled. Output
+is accepted only as bounded inline image bytes, never an arbitrary URL.
+Results are stored in private previews Storage with random workspace paths.
 
-- `GET /api/wardrobe/:itemId/preview` → `{ subject, title, items: [1],
-  provenance: manual }`
-- `GET /api/looks/:lookId/preview` → `{ subject, title, notes, is_saved,
-  items, provenance: manual }`
-- `GET /api/capsules/:id/outfits/:outfitId/preview` → `{ subject, title,
-  rationale, source_type, items, provenance }`
+POST awaits generation and returns 201 with the persisted job; a replay can
+return its existing running or completed job. Provider deadline is 150s and
+the Node route maxDuration is 240s. No un-awaited background job is started.
+One active image request is allowed, with 6/hour and 12/day per workspace.
+A job left running beyond four minutes becomes failed when checked. This is
+failure recovery for an interrupted request, not a durable executor.
 
-## Preview generation (visual provider: separate, not configured)
+GET /api/preview/jobs/:jobId returns status, sanitized input, stale flag and a
+short-lived signed image_url for a valid successful result. The page restores
+the latest matching context after reload. Server fingerprints and newer
+selection checks prevent relabelling an old image as the new composition.
 
-`POST /api/capsules/:id/outfits/:outfitId/preview`
-Body: `{ subject_type: capsule_outfit, subject_id (= outfitId), capsule_id
-(= id), mode: single|combo, model_source?: mannequin|provider_model,
-item_ids?: [uuid], consent_acknowledged: true, limitations_acknowledged: true }`.
-Subject must match the route. Today this returns 503
-`VISUAL_PROVIDER_NOT_CONFIGURED` and creates no job row. Render the
-unavailable state; do not poll.
+DELETE /api/preview/jobs/:jobId removes the terminal image, marks its asset
+deleted, detaches parent references and retains the failed/RESULT_DELETED
+ledger row. Active work cannot be deleted. Capsule/outfit deletion also cleans
+its terminal preview images. A new request ID is required for a new generation.
 
-`POST /api/looks/:lookId/preview` and
-`POST /api/wardrobe/:itemId/preview` follow the same contract with their
-matching subject types/IDs and no capsule ID. Single mode requires one
-owned piece; combo mode requires at least two. Replacements must be available
-owned pieces in the current capsule/workspace context. Archived, suggested,
-foreign and duplicate pieces are rejected before provider configuration is checked.
+## Failure states
 
-`GET /api/preview/jobs/:jobId` → `{ id, kind, status, error_code,
-preview_mode, model_source, input, image_url, stale, created_at, updated_at,
-completed_at }`. Statuses: `queued|running|succeeded|failed`. Poll with
-backoff only after a provider exists; stop on terminal states.
-
-`DELETE /api/preview/jobs/:jobId` deletes a terminal preview and its scoped
-private result asset. Active jobs return 409; no cancellation is implied.
-
-## Frontend rules from the design spec
-
-- Label provenance everywhere (`manual` vs `live` vs `sample`); never
-  present manual/sample output as provider results.
-- Replaced garments invalidate previews (mark stale, never relabel).
-- No invented percentages, ETAs, prices, or ratings.
-- Pending/error/empty states per `docs/design/desktop-ux-spec.md` §12, §15.
-- No browser Supabase client; never accept a workspace ID from the user.
+Missing MODEL_API_KEY returns 503 AI_NOT_CONFIGURED. Invalid composition or
+consent returns 400; changed context returns 409; shared rate/concurrency limits
+return 429; provider timeout returns 504. Provider details, keys and signed URLs
+are not logged. Display uncertainty and the approximate-fit limitation.

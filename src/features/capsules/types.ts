@@ -1,3 +1,10 @@
+export type MissingAddition = {
+  name: string;
+  category: string;
+  rationale: string;
+  related_item_ids: string[];
+  uncertainty: string;
+};
 export type StudioItem = {
   id: string;
   name: string;
@@ -17,6 +24,7 @@ export type CapsuleBrief = {
 };
 
 export type CapsuleDetail = {
+  missing_additions: MissingAddition[];
   id: string;
   title: string;
   description: string;

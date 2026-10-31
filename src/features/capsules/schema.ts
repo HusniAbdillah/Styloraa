@@ -61,6 +61,7 @@ export type CreateCapsuleInput = z.infer<typeof createCapsuleSchema>;
 export type UpdateCapsuleInput = z.infer<typeof updateCapsuleSchema>;
 
 export const combinationRequestSchema = z.object({
+  request_id: z.uuid().default(() => crypto.randomUUID()),
   item_ids: z.array(uuidSchema).min(1).max(100).optional(),
   required_item_ids: z.array(uuidSchema).max(20).default([]),
   excluded_item_ids: z.array(uuidSchema).max(100).default([]),
@@ -71,7 +72,15 @@ export const combinationRequestSchema = z.object({
 export type CombinationRequestInput = z.infer<typeof combinationRequestSchema>;
 
 /** Raw AI combination payload before ownership verification. */
+export const missingAdditionSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  category: z.string().trim().min(1).max(80),
+  rationale: z.string().trim().min(1).max(1000),
+  related_item_ids: z.array(uuidSchema).min(1).max(20),
+  uncertainty: z.string().trim().max(1000),
+});
 export const aiCombinationSchema = z.object({
+  missing_additions: z.array(missingAdditionSchema).max(3).default([]),
   combinations: z
     .array(
       z.object({

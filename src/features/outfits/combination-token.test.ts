@@ -18,6 +18,12 @@ const combination = {
 };
 afterEach(() => vi.useRealTimers());
 describe("AI provenance", () => {
+  it("rejects an AI draft after the capsule revision changes", () => {
+    const token = signCombination("capsule-a", combination, 2);
+    expect(() =>
+      requireVerifiedCombination("capsule-a", combination, token, 3),
+    ).toThrow(/changed or expired/);
+  });
   it("accepts only the unchanged server-issued suggestion for its capsule", () => {
     const token = signCombination("capsule-a", combination);
     expect(() =>

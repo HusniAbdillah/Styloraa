@@ -1,4 +1,5 @@
 import "server-only";
+import { isMuseConfigured } from "@/lib/ai/muse";
 import { notFound } from "next/navigation";
 import { NotFoundError } from "@/lib/errors";
 import { uuidSchema } from "@/features/capsules/schema";
@@ -8,6 +9,7 @@ import {
 } from "@/features/capsules/queries";
 import { getCapsuleInventory } from "@/features/capsules/repository";
 import {
+  latestPreview,
   buildItemPreview,
   buildLookPreview,
   buildOutfitPreview,
@@ -18,6 +20,7 @@ export async function loadPreview(
   type: "wardrobe_item" | "look" | "capsule_outfit",
   id: string,
   capsuleId?: string,
+  optionId?: string,
 ): Promise<PreviewScreenData> {
   if (
     !uuidSchema.safeParse(id).success ||
@@ -29,7 +32,7 @@ export async function loadPreview(
       type === "wardrobe_item"
         ? await buildItemPreview(id)
         : type === "look"
-          ? await buildLookPreview(id)
+          ? await buildLookPreview(id, optionId)
           : await buildOutfitPreview(capsuleId!, id);
     const items = await withItemImages(composition.items);
     const pool =
@@ -39,7 +42,9 @@ export async function loadPreview(
           ? await loadStudioInventory()
           : items;
     return {
-      subject: { type, id, ...(capsuleId ? { capsuleId } : {}) },
+      visualAi: isMuseConfigured(),
+      latestJob: await latestPreview(type, id, capsuleId, optionId),
+      subject: { type, id, optionId, ...(capsuleId ? { capsuleId } : {}) },
       title: composition.title,
       items,
       pool,
@@ -53,7 +58,13 @@ export async function loadPreview(
         type === "wardrobe_item"
           ? { href: "/wardrobe", label: "Back to wardrobe" }
           : type === "look"
-            ? { href: `/looks/${id}`, label: "Back to look" }
+            ? {
+                href:
+                  "is_snapshot" in composition && composition.is_snapshot
+                    ? `/saved-looks/${id}`
+                    : `/looks/${id}${optionId ? `?option_id=${optionId}` : ""}`,
+                label: "Back to look",
+              }
             : {
                 href: `/capsules/${capsuleId}/outfits/${id}`,
                 label: "Back to combination",

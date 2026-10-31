@@ -1,4 +1,5 @@
 import "server-only";
+import { clearOutfitPreviews } from "@/features/preview/cleanup";
 import { z } from "zod";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { getServerEnv } from "@/lib/env";
@@ -177,6 +178,15 @@ export async function updateCapsule(
 }
 
 export async function deleteCapsule(capsuleId: string) {
+  await getCapsule(capsuleId);
+  const outfits = await createServerSupabase()
+    .from("capsule_outfits")
+    .select("id")
+    .eq("workspace_id", workspaceId())
+    .eq("capsule_id", capsuleId);
+  if (outfits.error)
+    throw new Error("Could not check the capsule combinations.");
+  await clearOutfitPreviews(outfits.data.map((x) => x.id));
   const { data, error } = await createServerSupabase()
     .from("capsules")
     .delete()

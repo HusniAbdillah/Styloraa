@@ -13,15 +13,17 @@ export async function PreviewPage({
   type,
   id,
   capsuleId,
+  optionId,
 }: {
   type: "wardrobe_item" | "look" | "capsule_outfit";
   id: string;
   capsuleId?: string;
+  optionId?: string;
 }) {
   let data: PreviewScreenData | undefined;
   let message: string | undefined;
   try {
-    data = await loadPreview(type, id, capsuleId);
+    data = await loadPreview(type, id, capsuleId, optionId);
   } catch (error) {
     if (
       !(error instanceof InvalidInputError) &&
