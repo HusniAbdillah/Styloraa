@@ -1,6 +1,6 @@
-# Preferences and Style DNA
+# preferences
 
-Owner: Owner 1. Not implemented yet; includes optional skin depth/tone, undertone, body shape, style, and fit preferences.
+Owner: Developer 4. Not implemented yet.
 
 Add `schema.ts` for the Zod contract, server-only `repository.ts` for data,
 `actions.ts` when needed, and `components/` for real needs. Keep routes in

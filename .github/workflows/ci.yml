@@ -11,25 +11,27 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
-      - run: npm run check
-      - run: npm run build
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm build
   database:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
-      - run: npm run db:start
-      - run: npm run db:reset
-      - run: npm run db:test
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:start
+      - run: pnpm db:reset
+      - run: pnpm db:test
       - if: always()
-        run: npm run db:stop
+        run: pnpm db:stop

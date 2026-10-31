@@ -24,12 +24,12 @@ export async function WardrobeScreen() {
             items.map((item) => (
               <article
                 key={item.id}
-                className="border-border bg-card rounded-2xl border p-6"
+                className="border-border bg-card rounded-2xl border p-6 transition-[border-color,box-shadow] duration-200 ease-out hover:border-primary/40 hover:shadow-xs"
               >
-                <p className="text-secondary text-xs uppercase">
+                <p className="text-secondary text-xs uppercase tracking-wider">
                   {item.category}
                 </p>
-                <h2 className="mt-4 font-serif text-2xl">{item.name}</h2>
+                <h2 className="mt-4 font-serif text-2xl tracking-tight">{item.name}</h2>
                 <p className="text-secondary mt-2 text-sm">{item.color}</p>
               </article>
             ))

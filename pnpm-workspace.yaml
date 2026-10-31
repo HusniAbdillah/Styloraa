@@ -1,0 +1,6 @@
+# One application; no additional workspace packages.
+savePrefix: ""
+onlyBuiltDependencies:
+  - unrs-resolver
+ignoredBuiltDependencies:
+  - fsevents

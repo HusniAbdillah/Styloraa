@@ -16,6 +16,8 @@ the repository.
 | Failing flows                          | `vercel:verification`                       | Tracing browser → server → data → response                        |
 | AI provider                            | SDK/provider skill matching the chosen library | After the provider is agreed, not because an SDK exists        |
 | Audit/design                           | Product Design, Mobbin, or Figma per task   | When a design task needs it; folder setup alone never requires visual exploration |
+| UI Craft & Anti-Slop                   | `.agents/skills/antislop`                   | Saat membuat atau mereview UI, copywriting, dan palet warna        |
+| Design Engineering & Motion            | `.agents/skills/design-engineering`         | Saat mendesain interaksi, animasi snappy, dan pemilihan UI library |
 
 Read current official docs for fast-changing APIs and match them against
 the lockfile versions. No auth skill is needed for the login-free scope.

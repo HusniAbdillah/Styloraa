@@ -1,48 +1,58 @@
 # Stylora
 
-Stylora turns a saved outfit image into a wardrobe-aware look: identify its pieces, match them to items already owned, compare three explained outfit combinations, and find considered options for anything missing.
+Next.js App Router + TypeScript starter for a 7-hour styling demo by
+4 developers. UI uses React and Tailwind CSS; Zod validation; React Hook
+Form is available for long forms. Data uses Supabase PostgreSQL, hosted on
+Vercel.
 
-This is a responsive web app for desktop and mobile, built with Next.js App Router, TypeScript, Supabase, Muse image analysis, Gemini generation, and a SERP shopping provider. The full product scope is planned for a seven-hour hackathon with four owners; see [PRD.md](PRD.md) and [TASK.md](TASK.md).
+In the current scope, the app has **no login** and uses one shared demo
+workspace. All visitors can change the same data. Use synthetic data only;
+no photos or personal information. This is not a private per-user wardrobe.
 
-## Product flow
+## Run it
 
-1. Upload or choose a labeled demo inspiration.
-2. Review and correct AI-detected clothing pieces.
-3. Match each piece to an owned item, wardrobe alternative, or missing item.
-4. Compare three outfit combinations with a “Why this?” explanation for each.
-5. Compare shopping results for missing items, then save, share, preview, or add the look to a capsule.
-
-Style DNA and fit/body preferences are optional, editable inputs. Recommendations explain which preferences were used. Capsule Studio favors useful combinations from the existing wardrobe. Social Fit shares only a reviewed outfit snapshot. Try-on supports single pieces and combinations.
-
-## Current implementation status
-
-The repository is a partial scaffold, not a completed product. The landing route currently redirects to `/create`; the wardrobe supports adding and listing metadata only; the AI jobs endpoint returns `AI_NOT_CONFIGURED`; other product routes are placeholders. See [PROGRESS.md](PROGRESS.md) for inspected implementation status and actual verification notes.
-
-The shared demo has no authentication. All visitors can modify the same synthetic workspace, and preferences/profile data are shared. Do not use real personal wardrobe data or personal photos in this demo. Outfit inspiration and try-on must use non-sensitive images and a non-identifying model/illustration path.
-
-## Requirements and team docs
-
-- [Product requirements](PRD.md)
-- [Agent guide](AGENT.md) and [repository instructions](AGENTS.md)
-- [Engineering and product rules](RULES.md)
-- [Four-owner task assignments and 7-hour plan](TASK.md)
-- [Progress and verification log](PROGRESS.md)
-- [Architecture](docs/architecture.md)
-- [Deployment runbook](docs/deployment.md)
-- [Skills guidance](docs/skills.md)
-
-## Run locally
-
-Prerequisites: Node.js 22 and pnpm 9 or newer. Enable Corepack if needed.
+Prerequisites: Node.js 22 LTS and pnpm 10.26.2, pinned in `packageManager`
+(via `corepack enable`, or install that pnpm version separately). Both plain `pnpm` commands and `make` shortcuts
+work; every `make` target is a thin wrapper over the matching pnpm script.
 
 ```powershell
 pnpm install --frozen-lockfile
 Copy-Item .env.example .env.local
 ```
 
-Fill environment values only when using the corresponding service. Secrets stay server-side. `DEMO_WRITES_ENABLED=false` prevents shared demo mutations until the database and seed are ready. The app is designed to build without credentials and must show unavailable/empty states instead of pretending to return live provider results.
+or:
 
-With Docker running, use local Supabase:
+```powershell
+make install
+make env
+```
+
+Fill in the environment per `.env.example`. `SUPABASE_SECRET_KEY` is
+server-only; `STYLORA_WORKSPACE_ID` pins the fixed server workspace. Never
+prefix secrets with `NEXT_PUBLIC_`. No cloud project is selected or
+deployed by this setup.
+
+`DEMO_WRITES_ENABLED=false` is the default: demo forms and mutations accept
+no writes. Flip it to `true` only after the database is migrated, the
+workspace seed exists, and the team is ready to share one dataset. This
+setting is not authentication; when on, every visitor can perform the
+available mutations.
+
+A clean checkout is designed to build with no database connection or
+credentials. Wardrobe renders an empty state explaining the database is not
+connected; no fake data is shown as stored data.
+
+## Implementation status
+
+This is a **partial scaffold, not a complete MVP**. Shell, UI tokens, route
+boundaries, server env validation, the wardrobe repository/action pattern,
+the metadata add form, and the AI-unavailable endpoint are the foundation.
+A Supabase connection is required to try wardrobe persistence. Wardrobe
+edit/delete, look composing and saving, preferences, capsules, sharing,
+uploads, and a real AI provider still need implementation or integration.
+The sprint plan below describes next targets, not finished features.
+
+With local Supabase, start Docker first:
 
 ```powershell
 make db-start
@@ -51,7 +61,24 @@ make db-types
 make db-test
 ```
 
-Start the app with `make dev` and open `http://localhost:3000`.
+or with pnpm directly:
+
+```powershell
+pnpm db:start
+pnpm db:reset
+pnpm db:types
+pnpm db:test
+```
+
+Reset is for disposable local databases only. Follow the
+[deployment runbook](docs/deployment.md) for cloud linking and environment
+before running the app against cloud resources.
+
+```powershell
+make dev
+```
+
+Open `http://localhost:3000`.
 
 ## Checks
 
@@ -60,18 +87,67 @@ make check
 make build
 ```
 
-`make check` runs lint, type generation/typecheck, and unit tests. Database tests and builds do not establish that external AI, marketplace, upload, sharing, or try-on flows work end to end. Record only checks that actually ran in `PROGRESS.md`.
+Individual scripts: `lint`, `typecheck`, `test`, plus `db:test` for
+database policy. A passing build does not prove cloud connections, uploads,
+or product flows passed end-to-end. Actual check results go in the handoff.
 
-## Repository layout
+## Makefile targets
+
+| Target       | Runs         | Purpose                               |
+| ------------ | ------------ | ------------------------------------- |
+| `make env`   | —            | Create `.env.local` from the example  |
+| `make dev`   | `pnpm dev`   | Dev server                            |
+| `make build` | `pnpm build` | Production build                      |
+| `make start` | `pnpm start` | Serve the production build            |
+| `make check` | `pnpm check` | Lint + typecheck + tests              |
+| `make test`  | `pnpm test`  | Unit tests                            |
+| `make db-*`  | `pnpm db:*`  | Local Supabase lifecycle and DB tests |
+| `make clean` | —            | Remove build output and cache         |
+
+Run `make help` for the full list with descriptions.
+
+## Structure
 
 ```text
-src/app/             routes, layouts, and HTTP handlers
-src/features/        feature schemas, server data access, actions, and UI
-src/components/ui/   shared interface primitives
-src/lib/              environment and server-only Supabase helpers
-src/types/            generated database contracts
-supabase/             migrations, seed data, and policy tests
-docs/                 architecture, sprint, deployment, and skills guidance
+src/app/             thin routes/layouts and HTTP handlers
+src/features/        schema, UI, queries, and actions per feature
+src/components/ui/   shared primitives
+src/lib/supabase/    server-only Supabase access
+src/lib/env.ts       environment validation
+src/types/           database contracts
+supabase/            config, migrations, seed, policy tests
+docs/                architecture, sprint, deployment, skills
+Makefile             pnpm workflow shortcuts
 ```
 
-Use the project palette and accessible focus, validation, loading, empty, and error states. Keep route modules thin and business logic inside the owning feature.
+Routes exist as foundation: `/create`, `/looks/[lookId]`, `/wardrobe`,
+`/capsules`, `/saved-looks`, `/preferences`, `/profile`,
+`/shared/[shareToken]`. Routes are not proof of complete features. Profile
+implies no account identity; sharing and real AI are later work.
+
+## Team docs
+
+- [Product requirements and scope](PRD.md)
+- [Arsitektur](docs/architecture.md)
+- [Pembagian 4 developer dan jadwal 7 jam](docs/sprint-plan.md)
+- [PRD and scope](PRD.md)
+- [Architecture](docs/architecture.md)
+- [4-developer split and 7-hour schedule](docs/sprint-plan.md)
+- [Deployment](docs/deployment.md)
+- [Agent instructions](AGENTS.md) and [skills](docs/skills.md)
+
+## Visual tokens
+
+| Token          | Hex       | Role                         |
+| -------------- | --------- | ---------------------------- |
+| Porcelain      | `#F5F2EC` | Main background              |
+| Paper          | `#FFFEFC` | Cards and panels             |
+| Near-black     | `#211F20` | Text and navigation          |
+| Oxblood        | `#642E3B` | CTA and selected state       |
+| Deep wine      | `#48212B` | CTA hover/active             |
+| Muted mauve    | `#A18483` | Small accents, not body text |
+| Stone          | `#DCD6CE` | Borders/dividers             |
+| Secondary text | `#706A66` | Supporting text              |
+
+Use the CSS tokens; check contrast when adding combinations/opacity.
+Selected and error states need a cue besides color.

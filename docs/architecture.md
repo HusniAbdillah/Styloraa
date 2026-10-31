@@ -8,9 +8,8 @@ Route Handlers. Supabase provides PostgreSQL and private Storage. No extra
 ORM is needed: supabase-js plus generated types cover the early queries.
 
 The app has no auth and uses one shared demo workspace. All visitors have
-the same app capabilities and share wardrobe/profile/preferences data. Never
-treat the workspace ID as an identity or a secret. Use synthetic data; this
-setup gives no per-user privacy.
+the same app capabilities. Never treat the workspace ID as an identity or a
+secret. This speeds up the demo but gives no per-user privacy.
 
 ## Structure and data flow
 
@@ -53,20 +52,16 @@ must be reported, not papered over with claims that types were generated.
 
 ## Files and AI
 
-Buckets stay private. Non-sensitive inspiration images and non-identifying
-try-on illustration inputs may be accepted through server-mediated upload
-paths with size/MIME limits, random paths inside the fixed workspace, and
-cleanup. Personal/sensitive photos are out of scope for the shared demo.
-The database stores the storage path; signed URLs are minted on demand and
-never stored permanently. Do not build arbitrary-URL fetch endpoints; they
-open SSRF.
+Buckets stay private. Sensitive uploads are out of scope. Demo uploads go
+through the server later, with size/MIME limits, random paths inside the
+fixed workspace, and orphan cleanup. The database stores the storage path;
+signed URLs are minted on demand and never stored permanently. Do not build
+arbitrary-URL fetch endpoints; they open SSRF.
 
-AI runs server-side only, with secret environment config. Muse analyzes
-inspiration images; Gemini generates structured outfit/capsule rationale
-and optional try-on imagery. Output validation, cost/rate limits, timeouts,
-and clear errors are required before a provider goes live on a login-free
-public demo. The current AI endpoint is disabled and returns unavailable
-until a real bounded adapter is implemented. Sample data must be labeled.
+AI runs server-side only, with secret environment config. Output validation,
+cost/rate limits, timeouts, and clear errors are required before a provider
+goes live on a login-free public demo. No provider is installed yet:
+unavailable is the correct behavior.
 
 Long jobs need a real executor. A PostgreSQL record stores status; that
 record is not a queue that processes itself. Prefer the provider's async
@@ -74,11 +69,9 @@ API with polling where it fits. Add a queue/worker after duration and
 reliability are proven; do not run background promises after a Vercel
 response.
 
-Social Fit shares a reviewed outfit snapshot, not internal look/wardrobe
-rows. Use a random unguessable token, revocation, expiry where practical,
-and a strict allowlist of public fields. Do not grant anon select on
-internal tables just for a shared page. Keep the snapshot query server-side
-and bounded to the requested token.
+Sharing waits until a public snapshot contract, random token, expiry,
+revoke, and safe fields are agreed. Do not grant anon select on internal
+data just for a shared page.
 
 ## Sprint tradeoffs
 
@@ -90,10 +83,8 @@ and bounded to the requested token.
   must not create alternate tables to dodge coordination.
 - Server-first reduces state syncing; client components still cover
   interactions that need them.
-- The complete PRD feature set is the seven-hour target. Provider-unavailable
-  states preserve the user path but must not be presented as live AI/search.
 - Tests focus on validation, workspace scope, constraints, and key failures;
-  placeholder pages are not feature evidence.
+  snapshotting every placeholder does not serve the sprint goal.
 
 Official references: [Next.js App Router](https://nextjs.org/docs/app),
 [Supabase RLS](https://supabase.com/docs/guides/database/postgres/row-level-security),

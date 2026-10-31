@@ -1,6 +1,6 @@
-# Capsules / Capsule Studio
+# capsules
 
-Owner: Owner 4. Not implemented yet; this is part of the complete 7-hour scope.
+Owner: Developer 4. Not implemented yet.
 
 Add `schema.ts` for the Zod contract, server-only `repository.ts` for data,
 `actions.ts` when needed, and `components/` for real needs. Keep routes in

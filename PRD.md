@@ -272,18 +272,18 @@ Do not optimize purchases as the only success outcome; wardrobe reuse and recomm
 
 ## 14. Seven-hour execution plan
 
-All feature areas are in scope for the same seven-hour delivery. Follow the four-owner assignments in [`TASK.md`](TASK.md) and integrate continuously. Each owner ships their feature surface plus its connected data contract. Owner 1 coordinates migrations/generated types; all owners coordinate shared navigation, environment, and end-to-end wiring.
+All feature areas are in scope for the same seven-hour delivery. Follow the repository's four-person ownership plan and integrate continuously. Each stream ships its feature surface plus connected data contract; the integrator coordinates shared schema, environment, navigation, and end-to-end wiring.
 
 | Time | Parallel work and integration outcome |
 | --- | --- |
 | 0:00–0:30 | Agree shared schemas, route contracts, synthetic demo data, provider keys/status, file owners, workspace scope, and integration checkpoints. |
-| 0:30–2:00 | Owner 1: wardrobe/profile persistence. Owner 2: responsive landing and inspiration analysis/review. Owner 3: selected look, compare/shop/share surfaces. Owner 4: Capsule Studio and single/combo preview surfaces. |
+| 0:30–2:00 | Integrator: responsive shell, landing, env/provider adapters. Wardrobe owner: CRUD and profile data. Looks owner: inspiration intake, detection/review, matching, outfit generation. Capsule/social owner: capsule, sharing snapshot, and try-on flow contracts. |
 | 2:00–3:30 | Wire persisted looks and preferences; complete all three outfit cards with “Why this?” details; connect wardrobe matches and profile personalization. |
 | 3:30–5:00 | Complete capsule combinations, SERP shopping results and Value Score, Social Fit snapshot/link, and single/combo try-on through configured provider or clearly labeled demo/unavailable state. |
 | 5:00–6:00 | Connect navigation and state across the full journey; fix integration gaps, persistence, share safety, upload validation, and provider error paths. |
 | 6:00–7:00 | Feature freeze; run agreed smoke checks; verify responsive/keyboard states; prepare demo data reset and a complete walkthrough of every feature. |
 
-**Execution rule:** do not remove a feature area from the deliverable to create a smaller release. Parallelize and use truthful provider-unavailable states or clearly labeled sample results when a third-party integration cannot be exercised. Follow `TASK.md` for the named owners, shared contracts, and single migration owner.
+**Execution rule:** do not remove a feature area from the deliverable to create a smaller release. Parallelize and use truthful provider-unavailable states or clearly labeled sample results when a third-party integration cannot be exercised. The sprint plan's named file ownership and single migration owner remain in effect; update its task assignments with the team if needed to cover every scope item concurrently.
 
 ## 15. Acceptance criteria
 

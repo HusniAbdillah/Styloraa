@@ -1,6 +1,6 @@
-# Previews and try-on
+# preview
 
-Owner: Owner 4. Not implemented yet; includes single-item and full-combination previews.
+Owner: unassigned; P2 scope, decide after P0 is stable. Not implemented yet.
 
 Add `schema.ts` for the Zod contract, server-only `repository.ts` for data,
 `actions.ts` when needed, and `components/` for real needs. Keep routes in

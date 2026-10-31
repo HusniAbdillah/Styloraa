@@ -1,5 +1,5 @@
 .next
 node_modules
-package-lock.json
+pnpm-lock.yaml
 src/types/database.ts
 supabase/.temp

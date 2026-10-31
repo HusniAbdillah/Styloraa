@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { addWardrobeItem } from "../actions";
 import { categories } from "../schema";
 const inputClass =
-  "mt-2 block min-h-11 w-full rounded-xl border border-border bg-card px-3 py-2";
+  "mt-2 block min-h-11 w-full rounded-xl border border-border bg-card px-3 py-2 transition-colors duration-150 ease-out focus:border-primary focus:outline-none";
 export function WardrobeForm({ enabled }: { enabled: boolean }) {
   const [state, action, pending] = useActionState(addWardrobeItem, {
     ok: false,

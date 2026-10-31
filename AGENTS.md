@@ -8,12 +8,11 @@ non-English text when you touch a file instead of leaving mixed languages.
 
 ## Scope
 
-Read `PRD.md`, `RULES.md`, `TASK.md`, `PROGRESS.md`, `docs/architecture.md`,
-and `docs/sprint-plan.md`. The complete feature set is in scope for one
-7-hour hackathon with four owners. The app has no auth: one shared demo
-workspace is used by everyone, and all visitors can change its synthetic
-data. Do not add login, user ownership, or private-data promises without an
-explicit scope change. `AGENT.md` provides the agent handoff format.
+Read `PRD.md`, `docs/architecture.md`, and `docs/sprint-plan.md`. The target
+is a 7-hour demo with 4 developers. The app has no auth: one shared demo
+workspace is used by everyone, and all visitors can change the data. Do not
+add login, user ownership, or private-data promises without an explicit
+scope change.
 
 ## Implementation
 
@@ -33,11 +32,10 @@ explicit scope change. `AGENT.md` provides the agent handoff format.
   that use the secret key; audit the workspace predicate separately.
 - Validate input on the server with Zod. Never assume data from a Server
   Action or Route Handler is safe.
-- Do not accept personal or sensitive photos into the identity-less demo.
-  Non-sensitive outfit inspiration images and non-identifying try-on
-  illustrations must use the approved server-mediated path, with MIME/size
-  limits, random names, workspace scope, and deletion/cleanup. Buckets stay
-  private. Do not store signed URLs as permanent file identities.
+- Do not add sensitive uploads to the identity-less demo. Buckets stay
+  private; uploads/downloads go through the server later with workspace
+  scope, MIME/size limits, and random names. Do not store signed URLs as
+  permanent file identities.
 - Do not log secrets, personal payloads, or signed URLs. Do not fetch
   arbitrary URLs from clients/providers without source restrictions.
 - Database migrations are the source of truth. Create migrations via the
@@ -58,20 +56,19 @@ explicit scope change. `AGENT.md` provides the agent handoff format.
 
 ## Parallel work and verification
 
-Follow the feature owners and shared-file boundaries in `TASK.md` (also
-summarized in `docs/sprint-plan.md`). Owner 1 coordinates migrations and
-generated types. Share the contract before editing another owner's files.
-Agents only work on the assigned scope; do not expand the task or add
-agents without need and authorization.
+Follow the file owners in `docs/sprint-plan.md`. One owner for the
+lockfile/root CSS/layout/env, one for migrations/generated types. Share the
+contract before editing another team's files. Agents only work on the
+assigned scope; do not expand the task or add agents without need and
+authorization.
 
-Run `pnpm check` (`make check`) and `pnpm build` (`make build`) when
-implementation work requires verification. For the database, run a local
-reset, `pnpm db:types`, and `pnpm db:test`. Verify
+Run `pnpm check` (`make check`) and `pnpm build` (`make build`). For the
+database, run a local reset, `pnpm db:types`, and `pnpm db:test`. Verify
 that other workspace scopes are rejected by the server layer and that
 direct anon/authenticated access is rejected by the database. Record actual
 results and checks that did not run. Do not present placeholder routes,
 builds, or unit tests as end-to-end feature proof.
 
-Do not commit/push/deploy or change the remote database unless the user
-explicitly requests that operation. Do not modify memory or copy personal
-skills/caches into the repo. See `docs/skills.md` for agent guide selection.
+Do not commit/push/deploy or change the remote database just because local
+verification passed. Do not modify memory or copy personal skills/caches
+into the repo. See `docs/skills.md` for agent guide selection.

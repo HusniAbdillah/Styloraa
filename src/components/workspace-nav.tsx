@@ -23,7 +23,7 @@ export function WorkspaceNav() {
           href={href}
           aria-current={path === href ? "page" : undefined}
           className={cn(
-            "text-secondary hover:bg-card hover:text-foreground shrink-0 rounded-xl px-4 py-3 text-sm",
+            "text-secondary hover:bg-card hover:text-foreground shrink-0 rounded-xl px-4 py-3 text-sm font-medium transition-[transform,colors] duration-150 ease-out active:scale-[0.98]",
             path === href &&
               "bg-primary text-primary-foreground hover:bg-primary-hover hover:text-primary-foreground",
           )}
