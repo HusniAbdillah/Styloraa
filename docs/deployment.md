@@ -1,7 +1,9 @@
 # Vercel and Supabase runbook
 
-No cloud project has been selected, linked, or deployed by this setup. This
-runbook is for the next steps. The login-free app gives every visitor change
+The hosted Styloraaaa project is selected and its 13 repository migrations
+were applied through 31 October 2026. See
+[the hosted release record](hosted-release-2026-10-31.md) for actual checks.
+This runbook describes the repeatable deployment process. The login-free app gives every visitor change
 access to the shared demo dataset; use synthetic data and do not open
 sensitive uploads.
 
