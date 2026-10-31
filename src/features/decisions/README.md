@@ -1,6 +1,6 @@
-# decisions
+# Decisions / Value Score
 
-Owner: unassigned; P2 scope, decide after P0 is stable. Not implemented yet.
+Owner: Owner 3. Not implemented yet; compare shopping results using visible Value Score factors.
 
 Add `schema.ts` for the Zod contract, server-only `repository.ts` for data,
 `actions.ts` when needed, and `components/` for real needs. Keep routes in

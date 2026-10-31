@@ -1,6 +1,6 @@
 # matching
 
-Owner: Developer 3. Not implemented yet.
+Owner: Owner 2. Not implemented yet; match detected pieces to owned items, alternatives, or missing items.
 
 Add `schema.ts` for the Zod contract, server-only `repository.ts` for data,
 `actions.ts` when needed, and `components/` for real needs. Keep routes in
