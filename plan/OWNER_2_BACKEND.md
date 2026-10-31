@@ -129,7 +129,7 @@ Persist exactly `closest`, `from_wardrobe`, and `fresh_alternative` with title, 
 - Commit and push the feature branch after checks and documentation are complete.
 
 **Gate:** all intended API stages persist and reload; temp data cleaned; all repository checks reported with actual results.
-**Status:** E2E PASS after fixing a hosted RPC ambiguity; hosted cleanup verified. `corepack pnpm@10.26.2 check` and `corepack pnpm@10.26.2 build` both passed. Branch pushed to `origin/feat/owner-2-backend-flow` at commit `ed0e2ba`.
+**Status:** E2E PASS after fixing a hosted RPC ambiguity; hosted cleanup verified. `corepack pnpm@10.26.2 check` and `corepack pnpm@10.26.2 build` both passed. Implementation commit `ed0e2ba` and handoff update `c05992f` are pushed to `origin/feat/owner-2-backend-flow`.
 
 ## 6. Verification record
 
@@ -159,7 +159,7 @@ Persist exactly `closest`, `from_wardrobe`, and `fresh_alternative` with title, 
 | Cleanup | PASS | Temporary look, asset row, and Storage object removed; hosted inventory unchanged |
 | Hosted negative HTTP cases | PARTIAL PASS | Unsupported upload type, missing asset, stale review revision, and stale match revision rejected; oversize, missing object, foreign wardrobe ID, and provider failure injection are not covered by this runner |
 | `corepack pnpm@10.26.2 build` | PASS | Final run after repository isolation fix; optimized Next.js build and route compilation completed |
-| Push to origin | PASS | `ed0e2ba` pushed to `origin/feat/owner-2-backend-flow` |
+| Push to origin | PASS | Branch tip `c05992f` on `origin/feat/owner-2-backend-flow`; implementation commit `ed0e2ba` |
 
 ## 7. Operational and privacy constraints
 
