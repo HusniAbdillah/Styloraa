@@ -179,6 +179,7 @@ button { color: inherit; }
 .skip-link { position: fixed; top: 8px; left: 8px; z-index: 100; transform: translateY(-150%); padding: 11px 15px; background: var(--paper); color: var(--wine); border: 1px solid var(--wine); border-radius: 6px; }
 .skip-link:focus { transform: translateY(0); }
 .workspace-sidebar { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; padding: 27px 18px 25px; border-right: 1px solid var(--line-soft); background: #f8f5f0; }
+.workspace-mobile-brand { display: none; }
 .workspace-brand { margin: 1px 6px 37px; font-size: 29px; }
 .brand-period { color: var(--wine); }
 .workspace-links { display: flex; flex-direction: column; gap: 7px; }
@@ -392,11 +393,13 @@ button { color: inherit; }
   .process-section { grid-template-columns: 1fr; gap: 38px; padding: 75px 3%; }
   .landing-cta > div { align-items: start; flex-direction: column; }.landing-cta h2 { font-size: 39px; }.landing-cta .button { margin-top: 2px; }
   .workspace-shell { display: block; }
-  .workspace-sidebar { position: static; z-index: 10; width: 100%; height: auto; min-height: 65px; flex-direction: row; align-items: center; justify-content: space-between; padding: 10px 18px; border-right: 0; border-bottom: 1px solid var(--line-soft); }
-  .workspace-brand { margin: 0; font-size: 25px; }.workspace-brand .brand-symbol { font-size: 25px; }
-  .workspace-sidebar > .workspace-links { display: none; }.sidebar-mantra { display: none; }
-  .mobile-menu-trigger { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 13px; border: 1px solid var(--line-soft); border-radius: 999px; background: var(--paper); color: var(--wine); font-size: 11px; }
-  .workspace-topbar { height: 56px; padding-inline: 20px; }.workspace-main { padding: 24px 20px 55px; }
+  .workspace-sidebar { display: none; }
+  .workspace-mobile-brand { grid-column: 1 / -1; display: flex; align-items: center; gap: 13px; }
+  .workspace-mobile-brand .brand-lockup { font-size: 25px; }.workspace-mobile-brand .brand-symbol { font-size: 25px; }
+  .workspace-topbar { height: auto; min-height: 99px; display: grid; grid-template-columns: minmax(0,1fr) auto; grid-template-rows: 43px 28px; align-content: center; gap: 7px 12px; padding: 10px 20px; }
+  .workspace-breadcrumb { grid-column: 1; grid-row: 2; }
+  .profile-shortcut { grid-column: 2; grid-row: 2; }
+  .workspace-main { padding: 24px 20px 55px; }
   .mobile-nav-dialog[open] { position: fixed; inset: 0 0 0 auto; width: min(360px,88vw); max-width: none; height: 100dvh; max-height: none; display: flex; flex-direction: column; margin: 0; padding: 23px 20px; border: 0; background: var(--porcelain); box-shadow: -12px 0 35px rgba(33,31,32,.16); }
   .mobile-nav-dialog::backdrop { background: rgba(33,31,32,.37); }.mobile-nav-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 29px; }.mobile-nav-head .brand-lockup { font-size: 26px; }.mobile-nav-dialog .workspace-links { display: flex; }.mobile-nav-dialog .workspace-link { min-height: 50px; }.mobile-nav-note { margin-top: auto; padding-top: 17px; border-top: 1px solid var(--line-soft); color: var(--secondary-text); font-family: Georgia,serif; font-size: 15px; }
   .create-heading-row { min-height: 0; }.upload-editorial { width: 165px; height: 135px; }.cloth-one { left: 23px; }.cloth-two { right: 18px; }
@@ -412,7 +415,7 @@ button { color: inherit; }
   .value-strip { grid-template-columns: 1fr 1fr; }.value-strip > div { gap: 8px; padding-inline: 7px; font-size: 9px; }.value-strip svg { width: 17px; }
   .process-section { padding: 60px 1% 65px; }.process-intro h2 { font-size: 40px; }.process-row { min-height: 84px; grid-template-columns: 31px minmax(0,1fr) 18px; gap: 10px; }.process-row h3 { font-size: 18px; }.process-row p { font-size: 10px; line-height: 1.45; }
   .landing-cta { min-height: 280px; padding: 32px 23px; }.landing-cta h2 { font-size: 34px; }.cta-seal { right: 18px; top: 24px; width: 36px; height: 36px; }.landing-footer { min-height: 75px; gap: 8px; }.landing-footer > span { display: none; }.landing-footer > a:last-child { font-size: 9px; }
-  .workspace-sidebar { min-height: 59px; padding-inline: 14px; }.workspace-topbar { height: 49px; padding-inline: 15px; }.workspace-breadcrumb { gap: 7px; font-size: 9px; }.profile-shortcut { min-height: 36px; min-width: 36px; padding: 0 8px; }.profile-shortcut-label { display: none; }.workspace-main { padding: 20px 14px 44px; }
+  .workspace-topbar { min-height: 91px; grid-template-rows: 39px 25px; gap: 5px 8px; padding: 8px 15px; }.workspace-mobile-brand .brand-lockup { font-size: 23px; }.workspace-mobile-brand .brand-symbol { font-size: 23px; }.workspace-breadcrumb { gap: 7px; font-size: 9px; }.profile-shortcut { min-height: 34px; min-width: 34px; padding: 0 8px; }.profile-shortcut-label { display: none; }.workspace-main { padding: 20px 14px 44px; }
   .studio-breadcrumb { margin-bottom: 25px; font-size: 10px; }.create-heading-row { margin-bottom: 19px; }.create-heading-row h1, .look-heading h1 { font-size: clamp(42px,11vw,56px); }.create-heading-row .eyebrow, .look-heading .eyebrow { margin-bottom: 11px; font-size: 9px; }.create-heading-row .studio-lede, .look-heading .studio-lede { margin-top: 12px; font-size: 12px; }.upload-editorial { width: 84px; height: 76px; }.upload-editorial > svg { top: 18px; right: 17px; width: 14px; }.cloth-one { width: 45px; height: 75px; left: 9px; }.cloth-two { width: 40px; height: 64px; right: 8px; }.editorial-sun { width: 50px; height: 50px; left: 13px; }.editorial-thread { width: 79px; height: 52px; top: 21px; left: 8px; }
   .upload-panel { padding: 18px 15px; }.panel-kicker { font-size: 9px; }.upload-panel h2 { font-size: 25px; }.drop-zone { min-height: 190px; }.drop-empty svg { width: 34px; }.drop-empty strong { font-size: 12px; }.context-panel { padding: 20px 16px; }.context-panel-title h2 { font-size: 20px; }.context-panel-title { margin-bottom: 17px; }.context-note p, .privacy-note p { font-size: 10px; }
   .create-bottom-row { align-items: stretch; flex-direction: column; }.journey-progress { justify-content: space-between; gap: 4px; }.journey-step { gap: 5px; font-size: 8px; }.journey-step i { width: 19px; height: 19px; font-size: 7px; }.journey-line { width: 14px; }.button-continue { width: 100%; }.upload-reassurance { justify-content: flex-start; font-size: 9px; line-height: 1.4; }
