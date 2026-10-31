@@ -1,5 +1,19 @@
 # Stylora progress
 
+## Owner 4 Muse integration — 31 October 2026
+
+Implemented on codex/owner4-muse-complete from merged main 33cae8d. Shared
+MODEL_API_KEY now drives Muse Spark 1.3 combinations and Muse Image 1.0
+reference-based previews. Actual provider calls verified all three contexts,
+owned replacement, selected-option context, private results and idempotent
+replay. Missing additions remain separate from owned capsule membership.
+
+Local reset and generated types passed; 114 SQL assertions and 80 unit tests
+passed. Browser checks verified real images after reload, selected/saved
+look navigation, exact Save as Capsule selection and mobile geometry.
+See docs/owner4-muse-integration.md for evidence, limits and rollout status.
+The prior unconfigured-provider status below is historical.
+
 ## Owner 2–3 backend integration, 31 October 2026
 
 Implemented on `feat/owner3-backend` after pulling `origin/main` at `cee20b5`.
@@ -35,6 +49,19 @@ separate.
 **Verification in this documentation task:** repository and source inspection only; no app checks or runtime flows were run.
 
 ## Responsive design handoff, 31 October 2026
+
+**Implementation update:** Owner 4 now has the Capsule Studio and shared
+preview frontend described in [Owner 4 implementation](docs/owner4-implementation.md).
+Local verification passed `pnpm check` (37 tests), `pnpm build`, type
+generation, database reset and 82 database tests. The API smoke flow and
+eight-route browser walkthrough passed, including exact selection after
+reload, desktop navigation and 390/360px mobile layouts. These checks used
+an isolated worktree and disposable local Supabase, not hosted production
+data. Text AI and visual providers were not exercised live; missing
+configuration returns unavailable instead of mock output.
+
+Earlier design-only and baseline implementation observations below are
+historical. Current Owner 4 evidence is in `docs/owner4-verification.md`.
 
 The latest design revision is recorded in
 [`docs/design/v2-handoff.md`](docs/design/v2-handoff.md). It supersedes the

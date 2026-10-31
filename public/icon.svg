@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><title>Stylora</title><rect width="512" height="512" rx="112" fill="#642E3B"/><g transform="translate(112 112) scale(4.5)"><g xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#FFFEFC" stroke-width="4.5">
+    <defs>
+      <mask id="first-loop"><rect width="64" height="64" fill="white" stroke="none" /><circle cx="25" cy="39" r="4.5" fill="black" stroke="none" /></mask>
+      <mask id="second-loop"><rect width="64" height="64" fill="white" stroke="none" /><circle cx="38" cy="26" r="4.5" fill="black" stroke="none" /></mask>
+    </defs>
+    <g mask="url(#first-loop)"><ellipse cx="25" cy="25" rx="11" ry="22" transform="rotate(42 25 25)" /></g>
+    <g mask="url(#second-loop)"><ellipse cx="39" cy="39" rx="11" ry="22" transform="rotate(42 39 39)" /></g>
+  </g></g></svg>

@@ -242,6 +242,16 @@ export async function SavedLookDetail({
           >
             Share this look
           </Link>
+          {look.source_type !== "sample" &&
+          look.items.length > 0 &&
+          look.items.every((item) => item.kind === "owned") ? (
+            <Link
+              className={`${button} w-full`}
+              href={`/looks/${look.id}/preview`}
+            >
+              Preview owned look
+            </Link>
+          ) : null}
           {look.look_id && (
             <Link
               className={`${button} w-full`}

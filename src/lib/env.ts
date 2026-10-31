@@ -18,7 +18,6 @@ export function isDatabaseConfigured() {
 export function isMuseConfigured() {
   return Boolean(process.env.MODEL_API_KEY);
 }
-
 export function getMuseApiKey() {
   return process.env.MODEL_API_KEY;
 }

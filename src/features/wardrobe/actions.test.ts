@@ -11,7 +11,10 @@ vi.mock("@/lib/env", () => ({
   isDatabaseConfigured: () => mocks.configured,
   getServerEnv: () => ({ DEMO_WRITES_ENABLED: mocks.writes }),
 }));
-vi.mock("./repository", () => ({ insertWardrobeItem: mocks.insert }));
+vi.mock("./repository", () => ({
+  insertWardrobeItem: mocks.insert,
+  WardrobeItemNotFoundError: class WardrobeItemNotFoundError extends Error {},
+}));
 import { addWardrobeItem } from "./actions";
 
 function form(overrides: Record<string, string> = {}) {

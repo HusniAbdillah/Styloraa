@@ -60,9 +60,7 @@ export function WardrobeForm({ enabled }: { enabled: boolean }) {
       </fieldset>
       <p role="status" aria-live="polite" className="text-secondary text-sm">
         {state.message ||
-          (!enabled
-            ? "Connect Supabase and enable demo writes to save."
-            : "")}
+          (!enabled ? "Connect Supabase and enable demo writes to save." : "")}
       </p>
     </form>
   );

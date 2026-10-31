@@ -1,12 +1,12 @@
-# capsules
+# Capsule Studio
 
-Owner: Developer 4. Not implemented yet.
+Owner 4. The builder persists the full brief and exact owned selection.
+Generation uses the shared MODEL_API_KEY with Muse Spark 1.3.
 
-Add `schema.ts` for the Zod contract, server-only `repository.ts` for data,
-`actions.ts` when needed, and `components/` for real needs. Keep routes in
-`app/` thin. Do not create empty folders or service layers that only forward
-arguments.
+- generation.ts reserves bounded, idempotent requests and persists missing additions.
+- Owned combinations contain only selected inventory IDs; additions remain separate and unowned.
+- Queries sign only workspace-scoped private wardrobe assets.
+- Revision checks protect editing and saving generated drafts.
+- Removing a capsule cleans terminal outfit previews; active generation blocks deletion.
 
-All database access uses the server workspace ID. Never accept a workspace
-ID from the browser. Never import repositories or secrets into Client
-Components.
+See docs/owner4-muse-integration.md for provider evidence and rollout.

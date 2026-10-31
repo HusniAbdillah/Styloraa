@@ -1,12 +1,14 @@
-# outfits
+# Capsule outfits
 
-Owner: Developer 3. Not implemented yet.
+Owner 4 owns capsule combinations; Owner 3 owns the general selected-look flow.
+Muse Spark 1.3 produces explained combinations through the shared Meta Responses
+endpoint. Every returned ID is checked against the available selected inventory,
+required IDs and exclusions; repeated combinations are removed.
 
-Add `schema.ts` for the Zod contract, server-only `repository.ts` for data,
-`actions.ts` when needed, and `components/` for real needs. Keep routes in
-`app/` thin. Do not create empty folders or service layers that only forward
-arguments.
+A short-lived signature binds each draft to its workspace, capsule, exact output
+and capsule revision. Server validation and a database trigger reject stale AI
+drafts; the database records the current source revision. Manual arrangements
+remain explicitly manual. All queries and child relations use server workspace
+scope. Deletion cleans terminal previews while retaining the generation ledger.
 
-All database access uses the server workspace ID. Never accept a workspace
-ID from the browser. Never import repositories or secrets into Client
-Components.
+See docs/owner4-muse-integration.md.

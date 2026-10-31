@@ -1,7 +1,19 @@
 import type { Metadata } from "next";
+import { Inter, Instrument_Serif } from "next/font/google";
 import "@/components/arc/foundation.css";
 import "./globals.css";
 import { PwaRegistration } from "@/components/pwa-registration";
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-stylora-inter",
+  display: "swap",
+});
+const instrument = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-stylora-serif",
+  display: "swap",
+});
 export const metadata: Metadata = {
   title: {
     default: "Stylora — Personal style studio",
@@ -10,12 +22,14 @@ export const metadata: Metadata = {
   description: "A wardrobe and personal-style exploration space.",
   robots: { index: false, follow: false },
   applicationName: "Stylora",
+  appleWebApp: { title: "Stylora" },
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: [{ url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
-    apple: [
-      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+    icon: [
+      { url: "/favicon.ico", sizes: "16x16 32x32", type: "image/x-icon" },
+      { url: "/icon.svg", type: "image/svg+xml" },
     ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
 };
 export default function RootLayout({
@@ -23,7 +37,10 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning>
+      <body
+        className={`${inter.variable} ${instrument.variable}`}
+        suppressHydrationWarning
+      >
         {children}
         <PwaRegistration />
       </body>
