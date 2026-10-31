@@ -1,6 +1,6 @@
 # outfits
 
-Owner: Developer 3. Not implemented yet.
+Owner: Owner 2 owns generated outfit recommendations; Owner 3 owns selection and save/reopen. Not implemented yet.
 
 Add `schema.ts` for the Zod contract, server-only `repository.ts` for data,
 `actions.ts` when needed, and `components/` for real needs. Keep routes in

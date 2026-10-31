@@ -1,6 +1,6 @@
-# sharing
+# Sharing / Social Fit
 
-Owner: unassigned; P2 scope, decide after P0 is stable. Not implemented yet.
+Owner: Owner 3. Not implemented yet; share an allowlisted snapshot with an unguessable, revocable token.
 
 Add `schema.ts` for the Zod contract, server-only `repository.ts` for data,
 `actions.ts` when needed, and `components/` for real needs. Keep routes in

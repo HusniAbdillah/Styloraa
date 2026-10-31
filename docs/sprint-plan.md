@@ -1,68 +1,44 @@
-# 7-hour sprint, 4 developers
+# Seven-hour sprint plan
 
-Goal: one stable wardrobe → create → save → reopen flow. 28 nominal
-person-hours total, including integration, review, and setup. The app has no
-login and uses one shared demo dataset.
+The complete product in `../PRD.md` is in scope. The named owners, shared contracts, and detailed schedule live in [`../TASK.md`](../TASK.md). This document records the integration rhythm and demo verification checklist; it does not reduce the feature scope.
 
-## File owners
+## Team and ownership
 
-| Developer               | Responsibility                             | Owned areas                                          | Starting contract                |
-| ----------------------- | ------------------------------------------ | ---------------------------------------------------- | -------------------------------- |
-| 1 — integrator          | Foundation, env, server client, shell, release | `lib/`, root layout/CSS, package/lockfile, CI      | Workspace scope, errors, UI tokens |
-| 2 — data/wardrobe       | Schema, RLS, storage, wardrobe             | `supabase/`, generated types, wardrobe feature/route | Field names and scope query pattern |
-| 3 — looks               | Item picking, save, detail, saved looks    | outfits/matching, create/look/saved routes           | Save payload and item relations  |
-| 4 — preferences/capsule | Forms, empty/error states, QA              | preferences/capsules and agreed support modules      | Form validation and schema needs |
+| Owner | Workstream | Coordination responsibility |
+| --- | --- | --- |
+| Owner 1 | Wardrobe CRUD, Style DNA/preferences, profile | Sole owner for database migrations and generated database types; publish profile and wardrobe contracts by 00:30. |
+| Owner 2 | Landing, inspiration upload/analysis, garment breakdown, matching, three explained outfit options | Publish detected-piece and outfit option contracts by 00:30; coordinate use of Owner 1 profile/wardrobe types. |
+| Owner 3 | Product comparison, SERP marketplace search, Value Score, selected/saved look, Social Fit | Publish selected-look, product, and public snapshot contracts by 00:30; coordinate with preview consumer. |
+| Owner 4 | Capsule Studio and all previews (single item and combination try-on) | Publish capsule and preview input/status contracts by 00:30; consume shared wardrobe/profile/look contracts. |
 
-Developer 2 is the only owner of migrations and generated types. Developer 1
-is the only owner of dependencies/lockfile and shared layout. Developer 4
-helps with P0 QA before moving on to capsules. Agents may help with
-subtasks that have explicit edit areas; developers still review results and
-integration.
+Do not assign database ownership to multiple people. Other owners send schema proposals to Owner 1; Owner 1 reviews and applies migrations/regenerates types. Shared layouts, environment, dependency files, and contracts are agreed before parallel edits.
 
-## Schedule
+## Schedule and integration gates
 
-| Time        | Goal                                                      | Integration                                  |
-| ----------- | --------------------------------------------------------- | -------------------------------------------- |
-| 00:00–00:30 | Install, demo env, agreed schema/payloads                 | Freeze P0 fields and save contract           |
-| 00:30–01:00 | Shell, server scope, migration, early forms               | Integrate the first foundation               |
-| 01:00–02:00 | Wardrobe CRUD, item picking, simple preferences           | One item persisted after reload              |
-| 02:00–03:00 | Save look, detail, saved looks, constraint tests          | First full P0 flow demo                      |
-| 03:00–04:00 | Error/loading states, responsive, persistence fixes       | Shared preview and scope tests               |
-| 04:00–05:00 | Close P0 gaps; minimum capsule if stable                  | Pick P1 items that are still realistic       |
-| 05:00–06:00 | Final integration, focused tests, build, smoke            | Everything merged before hour 6              |
-| 06:00–07:00 | Feature freeze, blocker fixes, demo/handoff               | No new dependencies/schemas except blockers  |
+| Time | Work and integration gate |
+| --- | --- |
+| 00:00–00:30 | Confirm provider/environment availability, demo data, server workspace boundaries, schemas, action/API contracts, and feature owner file boundaries. Publish the contracts listed above. |
+| 00:30–02:00 | Build each workstream's vertical foundation in parallel: CRUD/profile persistence; landing/upload/analyze; compare/save/share; capsule/preview. Integrate route/navigation and display states early. |
+| 02:00–04:00 | Connect inspiration analysis → wardrobe matching → three recommendations; connect selected look → shopping/save/share/preview; connect profile/preferences → all relevant recommendations; persist capsule and saved look. |
+| 04:00–05:30 | Exercise configured Muse/Gemini/SERP/image providers. Finish correction/edit flows, value controls, public snapshot/revocation, capsule rationale, item replacement, and provider error/unavailable flows. |
+| 05:30–06:00 | Integration lock. Resolve cross-feature, workspace-scope, and persistence failures. Any new shared schema/dependency requires team agreement and Owner 1 review. |
+| 06:00–07:00 | Feature freeze. Run agreed checks and full smoke walk-through; verify desktop/mobile/keyboard states; prepare demo reset steps and record live/unavailable/sample provider status. |
 
-If saving and reopening a look is still impossible at hour 3, stop P1/P2. If
-the provider has no validated output at hour 5, leave it unavailable and
-demo the manual flow. The last hour is for stabilization, not for adding
-queues or auth.
-
-## Collaboration
-
-Integrate small changes regularly. Before editing someone else's files,
-share the contract need. Every PR states behavior changes, checks, and
-remaining limits. Do not wait for all branches to finish before testing
-integration.
-
-Agent tasks must include a concrete goal, edit areas, input/output
-contracts, remote-operation limits, checks, and handoff. An agent that hits
-a schema mismatch coordinates with the database owner instead of creating a
-second table.
+All features stay in the schedule. When a provider cannot be used, show an honest unavailable state and a clearly labeled sample/manual path so the feature remains demonstrable without claiming live integration.
 
 ## Smoke flow
 
-1. Add an item with a valid payload, reload, confirm it persists.
-2. Try empty/invalid payloads; the server rejects them with understandable
-   errors.
-3. Pick items, save a look, open detail and saved looks after reload.
-4. Try foreign IDs/workspaces in requests; the server must not read/write
-   outside the fixed workspace.
-5. Test look/capsule relations with other-workspace items; constraints reject.
-6. Direct Data API calls with anon/authenticated cannot read/write internal
-   tables.
-7. Try two browsers; both see the shared dataset per the demo scope.
-8. Test AI unavailable, job not found, network errors, and mobile/keyboard
-   views.
+1. Open the landing page at mobile and desktop widths; navigate to upload and a labeled demo example.
+2. Add, edit, and delete wardrobe metadata; reload and confirm persistence. Confirm the shared-workspace disclosure is visible.
+3. Save/update optional Style DNA and fit/body preferences; skip/clear them; confirm recommendations disclose which selected values were applied.
+4. Upload a supported non-sensitive outfit reference; reject invalid/oversized input; review and correct detected pieces.
+5. Match each piece to an owned item, alternative, or missing state; inspect the explanation and confidence.
+6. Compare all three generated outfit options and their “Why this?” reasoning; replace a piece and save/reopen the chosen outfit.
+7. Search for missing items; verify product links, returned fields, retrieval time, Value Score inputs, and no fabricated result behavior.
+8. Build a capsule from wardrobe items; inspect combinations, missing-item rationale, and reuse logic.
+9. Run single-item and combo preview paths, replace an item, and verify consent/status/failure/retry/deletion states with a non-identifying model input.
+10. Create a Social Fit catchphrase/snapshot link, open its public view, revoke it, and confirm no private profile/wardrobe fields are exposed.
+11. Try provider unavailable, malformed output, timeout, invalid IDs, cross-workspace IDs, and database-unconfigured paths.
+12. Verify direct anon/authenticated Data API access is denied and all server queries retain the fixed workspace scope.
 
-Record actual results with environment and commit. This list is not a claim
-that the checks were run.
+Record actual environment, commit, commands, results, and limitations in `../PROGRESS.md`. This checklist is not evidence that checks have run.
