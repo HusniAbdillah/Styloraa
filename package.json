@@ -13,10 +13,10 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "pnpm run lint && pnpm run typecheck && pnpm run test",
-    "db:start": "supabase start",
-    "db:stop": "supabase stop",
-    "db:reset": "supabase db reset --local",
-    "db:test": "supabase test db",
+    "db:start": "node scripts/run-supabase.mjs start",
+    "db:stop": "node scripts/run-supabase.mjs stop",
+    "db:reset": "node scripts/run-supabase.mjs db reset --local",
+    "db:test": "node scripts/run-supabase.mjs test db",
     "db:types": "node scripts/generate-db-types.mjs"
   },
   "repository": {
