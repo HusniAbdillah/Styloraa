@@ -40,6 +40,14 @@ function workspaceId() {
   return getServerEnv().STYLORA_WORKSPACE_ID;
 }
 
+export function buildWardrobeSearchFilter(search: string) {
+  const pattern = `%${search.replace(/[\\%_]/g, "\\$&")}%`;
+  const quotedPattern = `"${pattern
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')}"`;
+  return `name.ilike.${quotedPattern},color.ilike.${quotedPattern},category.ilike.${quotedPattern}`;
+}
+
 export async function listWardrobePage(
   filters: WardrobeListFilters = { search: "", limit: 100, offset: 0 },
 ) {
@@ -55,8 +63,7 @@ export async function listWardrobePage(
 
   if (filters.category) query = query.eq("category", filters.category);
   if (filters.search) {
-    const escapedSearch = filters.search.replace(/[\\%_]/g, "\\$&");
-    query = query.ilike("name", `%${escapedSearch}%`);
+    query = query.or(buildWardrobeSearchFilter(filters.search));
   }
 
   const { data, count, error } = await query;

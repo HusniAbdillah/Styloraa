@@ -16,8 +16,9 @@ its stable item IDs are consumed by outfit creation, saved looks, and capsules.
   pagination, edit/archive controls, image upload/removal, and signed image
   previews.
 
-The repository supports search/category filtering and offset pagination with a
-total count. Metadata-only items work without an image. Image files are capped
+The repository supports name/color/category search, exact category filtering,
+and offset pagination with a total count. Metadata-only items work without an
+image. Image files are capped
 at 10 MiB, checked against JPEG/PNG/WebP signatures, uploaded to the private
 workspace-prefixed bucket path, verified after upload, and associated through an
 `assets` row. Read URLs are signed on demand for five minutes and never stored.
@@ -26,3 +27,8 @@ so concurrent uploads cannot silently overwrite each other or leave the losing
 upload attached to the item. Image retirement removes the private object before
 marking its asset row deleted, so a failed Storage removal leaves the row
 available for a later cleanup retry.
+
+For files up to the 10 MiB bucket limit, Route Handlers prepare a short-lived
+signed upload capability and finalize the uploaded object server-side. The
+wardrobe controls still submit through the legacy Server Action path; wiring
+the controls to the signed-upload contract is a frontend integration task.

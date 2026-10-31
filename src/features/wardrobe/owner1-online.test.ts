@@ -135,6 +135,29 @@ describe.skipIf(!online)("Owner 1 hosted Supabase end-to-end", () => {
     expect(listed.total).toBe(1);
     itemId = listed.items[0].id;
     expect(Object.hasOwn(listed.items[0], "workspace_id")).toBe(false);
+    for (const search of ["cream", "top"]) {
+      const searchResult = await repository.listWardrobePage({
+        search,
+        limit: 10,
+        offset: 0,
+      });
+      expect(searchResult.items.map((item) => item.id)).toContain(itemId);
+    }
+    expect(
+      await repository.listWardrobePage({
+        search: "cream",
+        category: "bottom",
+        limit: 10,
+        offset: 0,
+      }),
+    ).toMatchObject({ total: 0, items: [] });
+    expect(
+      await repository.listWardrobePage({
+        search: 'x"),category.eq.top',
+        limit: 10,
+        offset: 0,
+      }),
+    ).toMatchObject({ total: 0, items: [] });
 
     const edited = await actions.editWardrobeItem(
       initialState,

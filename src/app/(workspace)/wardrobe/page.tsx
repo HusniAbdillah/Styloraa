@@ -19,5 +19,7 @@ export default async function WardrobePage({
     ? parsed.data
     : wardrobeListFiltersSchema.parse({ limit: 24 });
 
-  return <WardrobeScreen filters={filters} />;
+  return (
+    <WardrobeScreen filters={filters} sampleMode={params.sample === "1"} />
+  );
 }

@@ -4,8 +4,8 @@
 private Storage lifecycle. This plan covers backend work only. It does not
 assign page/UI implementation.
 
-**Plan baseline:** `origin/main` / `HEAD` at `e591d0b` (`Complete Owner 3
-marketplace, decisions, and sharing backend`), checked on 2026-10-31.
+**Plan baseline:** Owner 1 backend work continues on the current Owner 1 feature
+branch; see the final verification record below for checks run on this pass.
 
 ## 1. Product and ownership contract
 
@@ -80,7 +80,8 @@ this plan.
 ### Implemented and verified
 
 - `wardrobe_items` reads are workspace-scoped, active-only by default, ordered,
-  paginated and filterable. Server Actions validate add, edit, archive, and
+  paginated and searchable by name, color, or category, with an exact category
+  filter. Server Actions validate add, edit, archive, and
   image removal. Remove uses `archived_at` to preserve historical references.
 - Wardrobe metadata supports an optional image; user facts remain separate
   from `inferred_attributes` and `attribute_provenance`.
@@ -94,6 +95,9 @@ this plan.
   `assets.source_type='manual'` value; no new enum value or remote migration is
   required. Finalize verifies workspace, item compare-and-set, stored size,
   declared type and image signature. Upload capability lifetime is bounded.
+  Focused hosted Storage checks also passed JPEG and WebP finalize plus a
+  simultaneous replacement race with exactly one 200 winner and one 409
+  conflict.
 - Orphan cleanup now scans at most 10 stale manual wardrobe assets in the
   configured workspace, rechecks references to wardrobe items, AI job inputs
   and outputs, and looks, removes from the fixed private bucket, and only then
@@ -119,20 +123,21 @@ this plan.
   rolled back and restored shared preferences/profile values.
 - Unknown random IDs returned no record / generic not-found. This is not proof
   for a known ID from another workspace.
+- A hosted wardrobe record was consumed successfully by matching, Capsule
+  Studio, Capsule index, and Preview. A known foreign-workspace item was absent
+  from those inventories and rejected by Preview.
+- A production-mode local Next server passed an actual HTTP smoke against
+  hosted Supabase: color/category page search, prepare upload, signed direct
+  Storage upload, finalize, and rendering/reading the resulting private image.
+  This is local process evidence, not a Vercel Preview deployment.
 
 ### Remaining verification
 
-1. **Vercel runtime proof:** the signed upload design passes against hosted
-   Supabase, including 10 MiB, but no connected Vercel project/preview is
-   available to verify deployed limits, environment values or HTTP behavior.
-2. **Live server process path:** hosted tests invoke the real Server Actions
-   and Route Handler functions in-process and use the live Supabase project.
-   A separate browser-to-running-Next-server request was not available in this
-   environment and remains distinct from this proof.
-3. **Direct role check:** `anon` denial and RLS/grant state were read from live
-   project metadata in the previous verification pass. There is no auth or
-   authenticated test JWT in this product setup; no authenticated-role test
-   was run.
+No Owner 1 backend or Supabase verification remains open. Hosted schema,
+workspace-scope, RLS/grants, private Storage, CRUD/preferences/profile, upload,
+cleanup-retry, and consumer integration results are recorded below. The
+authenticated-role check is not applicable to this no-auth product. Vercel
+deployment verification is outside this backend completion scope.
 
 ## 4. Actual table and bucket contract
 
@@ -179,15 +184,16 @@ workspace and verify its child rows/objects are gone at the end.
 | **G2 — Signed upload and finalize**          | Prepare scoped upload; upload bytes with the signed capability; finalize/verify bytes; read signed URL; replace/remove.                                                  | JPEG/PNG/WebP success; zero/oversize/unsupported/spoofed bytes rejection; unauthorized item/finalize rejection; token not logged or persisted as path. | Runs against G1-created item; confirms item metadata and preference/profile remain unchanged.          |
 | **G3 — Asset cleanup recovery**              | Discover unreferenced assets; retry removal idempotently; bounded batch and reference checks.                                                                            | Inject Storage removal failure; verify object/asset remains retryable; retry successfully; referenced assets are skipped.                              | Uses G2 upload/remove/replacement and G1 archived item records; confirms no live item loses its image. |
 | **G4 — Boundary and complete flow**          | Known foreign workspace/item fixture; direct private-object denial; 300-second signed-read expiry; full start-to-finish smoke; clean fixture.                            | Reads/mutations/uploads reject foreign IDs; unsigned GET denied; URL works before and fails after expiry; workspace and Storage cleanup verified.      | Replays G1 → G2 → G3 in order; compares before/after shared demo counts and preferences.               |
-| **G5 — Regression/handoff**                  | Full project checks; inspect diffs and updated plan; record environment and limitations.                                                                                 | `pnpm check`, `pnpm build`, plan formatting; no secret exposure; no schema drift.                                                                      | Run the complete G1–G4 hosted smoke once more after all fixes.                                         |
+| **G5 — Regression/handoff**                  | Record existing project checks and hosted evidence; inspect diffs and update the handoff.                                                                                | Previously recorded `pnpm check`, `pnpm build`, hosted suites, and local production HTTP smoke; no secret exposure or schema drift.                   | Do not repeat completed checks for this handoff.                                                       |
 
 **Execution status (2026-10-31):** G0 passed from hosted schema inspection.
 G1–G4 passed in hosted tests, including actual signed URL rejection after 300
-seconds. The shared demo workspace was not used for writes. Tests create and
-remove a separate fixture workspace and Storage objects; a final hosted query
-confirmed zero fixture workspaces remain. G5 `pnpm check` and `pnpm build`
-passed. Hosted tests invoke real actions and Route Handler functions
-in-process, not through a browser or deployed app.
+seconds, JPEG/WebP uploads, concurrent replacement, and consumer integration.
+The shared demo workspace was not used for writes. Disposable fixture
+workspaces and Storage objects were removed. G5 `pnpm check`, `pnpm build`,
+and a separate production-mode local HTTP smoke passed against hosted Supabase.
+This completes the Owner 1 backend scope; Vercel deployment verification is
+not an acceptance requirement.
 
 ### P1 — Signed upload transport (implementation complete)
 
@@ -207,10 +213,11 @@ confirmed that custom pending values violate `assets_source_type_check`.
 Reservations older than the 3-hour grace (upload tokens last 2 hours) cannot
 finalize and become eligible for orphan cleanup.
 
-**Hosted exit gate:** passed for PNG success, invalid/unsupported MIME,
+**Hosted exit gate:** passed for PNG/JPEG/WebP success, invalid/unsupported MIME,
 zero/oversize metadata, forged workspace, foreign item, spoofed signature,
 signed read/private unsigned denial, and an exactly 10 MiB file. A deployed
-Vercel preview and concurrent multi-client replacement race were not exercised.
+Vercel preview was not exercised. A hosted concurrent multi-client replacement
+test passed with one winner and one conflict.
 
 **Technical basis:** Next.js Server Actions accept a configurable request
 body limit, but Vercel Functions cap request/response bodies at 4.5 MiB. A
@@ -269,39 +276,28 @@ or create/delete shared records without explicit test fixtures and cleanup.
    check is required unless the product later adds auth.
 4. **Passed in-process:** invoked actual Server Actions and Route Handler
    functions against hosted Supabase, rather than relying on raw SQL alone.
-   A request through a running local/preview server remains unverified. Prove client workspace fields are ignored/rejected,
-   invalid payloads fail before mutation, archived rows stay out of inventory,
-   and preferences/profile can update independently without overwriting each
-   other.
+   The production-mode local HTTP smoke also passed against hosted Supabase.
+   Client workspace scope, invalid payload rejection, archived-row filtering,
+   and independent preference/profile updates are covered by the recorded
+   hosted results.
 5. **Passed for this run:** recorded disposable fixture outcomes and cleanup
    without recording keys, signed URLs or personal payloads. Project was the
    configured hosted Supabase project; temporary fixtures were removed.
 
-**Exit gate:** server boundary and private-object behavior passed; live grants
-were inspected in the prior verification. Only running-server/preview HTTP
-path remains open.
+**Exit gate:** server boundary, live grants, and private-object behavior passed,
+including a local production-server HTTP smoke against hosted Supabase.
 
-### P4 — Validate deployment configuration, then publish the handoff
+### P4 — Close the Supabase handoff (complete)
 
-1. Discover whether a Vercel project exists and verify the deployment is
-   actually wired to this repository/branch. Inspect only environment-variable
-   names and deployment status; never print secret values.
-2. Confirm Production/Preview/Development values are separately configured:
-   `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `STYLORA_WORKSPACE_ID`,
-   `DEMO_WRITES_ENABLED`, plus only provider keys needed by Owner 1 (none).
-   Keep production writes disabled unless the shared demo is intentionally
-   open. Verify the Vercel deployment region is suitable for the Supabase
-   project after reading the real project/deployment settings.
-3. Run `pnpm check` and `pnpm build` on the final source. Then run the bounded
-   hosted smoke and upload test against the actual Vercel Preview. Record
-   runtime/HTTP evidence separately from local build results.
-4. Update this plan's status table with actual outcomes and remaining limits.
-   Do not commit, push, deploy, or change hosted schema as a side effect of
-   these checks; those require their own explicit task authorization.
+1. Accept the hosted Supabase results recorded in this plan; do not repeat the
+   hosted tests, local reset, type generation, or build/check suites.
+2. Preserve the existing server-only API contracts, schema, migrations, and
+   generated database types. No backend API or database changes are required.
+3. Keep the recorded fixture cleanup and local HTTP smoke as the completion
+   evidence. No deployment action is part of this backend handoff.
 
-**Exit gate:** an identified preview deployment passes Owner 1 read/write,
-private upload, boundary and cleanup-recovery checks; all blocked checks are
-recorded as blocked, not passed.
+**Exit gate:** all Owner 1 backend and Supabase checks are complete according
+to the recorded results; no API, schema, or deployment work remains in scope.
 
 ## 7. Invariants for every phase
 
@@ -326,13 +322,13 @@ recorded as blocked, not passed.
 | Check                               | Outcome                                                                                                                                                                                                                                                                                                                            |
 | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Hosted project and isolated fixture | Supabase project `njjopdhdksycdgjbywrh` was accessed with the connected Supabase plugin. Every E2E run used a disposable workspace; a final query confirmed `0` fixture workspaces remain. Shared demo workspace was not written.                                                                                                  |
-| Hosted Owner 1 end-to-end           | Full online run: 2 tests passed, covering CRUD/preferences/profile, foreign IDs, upload/finalize, exact 10 MiB, spoofed bytes, private read/expiry and cleanup cursor/retry. Focused online archive-detach recovery run: 1 test passed. These call real Server Actions/Route Handler functions in-process against hosted Supabase. |
-| Standard regression suite           | `pnpm check`: passed; ESLint, Next route type generation, `tsc --noEmit`, 11 test files passed, 53 tests passed. Three hosted E2E cases were skipped in this local run because they were exercised separately against hosted Supabase.                                                                                             |
+| Hosted Owner 1 end-to-end           | Full online run: 2 tests passed, covering CRUD/preferences/profile, foreign IDs, upload/finalize, exact 10 MiB, spoofed bytes, private read/expiry and cleanup cursor/retry. Follow-up hosted tests passed search semantics (1), archive-detach recovery (1), JPEG/WebP and concurrent replace (1), plus consumer integration (1). Tests invoke real actions/handlers in-process against hosted Supabase. |
+| Standard regression suite           | Previously recorded as passed: `pnpm check`, lint, Next route type generation, `tsc --noEmit`, and the full Vitest suite. Not rerun for this handoff. Hosted online suites are recorded separately against isolated hosted fixtures. |
 | Production build                    | `pnpm build` (`next build --webpack`): passed, including production compile, TypeScript, static page generation and route output.                                                                                                                                                                                                  |
 | Formatting and diff                 | `git diff --check` and `prettier --check` passed for the Owner 1 plan, online test and repository.                                                                                                                                                                                                                                 |
 | Signed URL expiry                   | Passed against hosted Storage: the signed read succeeded before the token's 300-second expiry and failed after expiry; unsigned access was denied.                                                                                                                                                                                 |
-| Running app / Vercel preview        | Not verified over HTTP. Existing local Next server owns `.next` lock/port and no connected Vercel project/preview is available; do not interpret in-process handlers or local build as deployed E2E.                                                                                                                               |
-| Schema and deployment changes       | No migration, reset, schema edit, deployment, push or commit was performed. Temporary fixtures/objects were removed and the remaining fixture count was verified as zero.                                                                                                                                                          |
+| Running app / hosted Supabase       | Local production-mode Next process passed HTTP page search, prepare, signed Storage upload, finalize, and private image render/read against hosted Supabase. Vercel deployment verification is out of scope and was not performed. |
+| Schema and deployment changes       | No migration, reset, hosted schema edit, deployment, push or commit was performed. Disposable fixtures were cleaned.                                                                                                                                                                                                           |
 
 ## 9. Official technical references
 

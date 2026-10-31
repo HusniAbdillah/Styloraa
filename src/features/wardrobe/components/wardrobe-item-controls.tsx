@@ -1,13 +1,25 @@
 "use client";
 
-import { useActionState } from "react";
+import {
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/arc/dialog/dialog";
 import {
   editWardrobeItem,
   removeWardrobeImage,
   removeWardrobeItem,
-  uploadWardrobeImage,
   type WardrobeActionState,
 } from "../actions";
 import { categories } from "../schema";
@@ -16,6 +28,28 @@ import type { WardrobeItem } from "../repository";
 const inputClass =
   "border-border bg-background focus:border-primary mt-2 block min-h-11 w-full rounded-xl border px-3 py-2 focus:outline-none";
 const initialState: WardrobeActionState = { ok: false, message: "" };
+const allowedImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+const maxImageBytes = 10 * 1024 * 1024;
+
+type PreparedUpload = {
+  assetId: string;
+  expectedAssetId: string | null;
+  uploadUrl: string;
+};
+
+type UploadState = {
+  pending: boolean;
+  progress: number | null;
+  message: string;
+  error: boolean;
+};
+
+const idleUpload: UploadState = {
+  pending: false,
+  progress: null,
+  message: "",
+  error: false,
+};
 
 function Status({ state }: { state: WardrobeActionState }) {
   return (
@@ -23,6 +57,70 @@ function Status({ state }: { state: WardrobeActionState }) {
       {state.message}
     </p>
   );
+}
+
+function responseCode(payload: unknown) {
+  if (!payload || typeof payload !== "object") return "";
+  const error = (payload as { error?: unknown }).error;
+  if (!error || typeof error !== "object") return "";
+  const code = (error as { code?: unknown }).code;
+  return typeof code === "string" ? code : "";
+}
+
+function preparedUpload(payload: unknown): PreparedUpload | null {
+  if (!payload || typeof payload !== "object") return null;
+  const data = (payload as { data?: unknown }).data;
+  if (!data || typeof data !== "object") return null;
+  const value = data as Record<string, unknown>;
+  if (
+    typeof value.assetId !== "string" ||
+    typeof value.uploadUrl !== "string" ||
+    !(
+      value.expectedAssetId === null ||
+      typeof value.expectedAssetId === "string"
+    )
+  )
+    return null;
+  return {
+    assetId: value.assetId,
+    expectedAssetId: value.expectedAssetId,
+    uploadUrl: value.uploadUrl,
+  };
+}
+
+function uploadFile(
+  uploadUrl: string,
+  file: File,
+  onProgress: (progress: number) => void,
+) {
+  return new Promise<void>((resolve, reject) => {
+    const request = new XMLHttpRequest();
+    request.open("PUT", uploadUrl);
+    request.setRequestHeader("x-upsert", "false");
+    request.upload.onprogress = (event) => {
+      if (event.lengthComputable)
+        onProgress(Math.round((event.loaded / event.total) * 100));
+    };
+    request.onload = () => {
+      if (request.status >= 200 && request.status < 300) resolve();
+      else reject(new Error("IMAGE_UPLOAD_FAILED"));
+    };
+    request.onerror = () => reject(new Error("IMAGE_UPLOAD_FAILED"));
+    request.onabort = () => reject(new Error("IMAGE_UPLOAD_FAILED"));
+
+    const body = new FormData();
+    body.append("cacheControl", "3600");
+    body.append("", file);
+    request.send(body);
+  });
+}
+
+function prepareError(code: string) {
+  if (code === "DEMO_WRITES_DISABLED")
+    return "Saving is disabled for this shared demo.";
+  if (code === "WARDROBE_ITEM_NOT_FOUND")
+    return "This wardrobe item is no longer available. Refresh and try again.";
+  return "The upload could not be prepared. Please try again.";
 }
 
 export function WardrobeItemControls({
@@ -34,6 +132,8 @@ export function WardrobeItemControls({
   imageUrl: string | null;
   enabled: boolean;
 }) {
+  const router = useRouter();
+  const fileInput = useRef<HTMLInputElement>(null);
   const [editState, editAction, editPending] = useActionState(
     editWardrobeItem,
     initialState,
@@ -42,17 +142,152 @@ export function WardrobeItemControls({
     removeWardrobeItem,
     initialState,
   );
-  const [uploadState, uploadAction, uploadPending] = useActionState(
-    uploadWardrobeImage,
-    initialState,
-  );
   const [imageState, imageAction, imagePending] = useActionState(
     removeWardrobeImage,
     initialState,
   );
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [confirmArchive, setConfirmArchive] = useState(false);
+  const [upload, setUpload] = useState(idleUpload);
+
+  useEffect(() => {
+    if (editState.ok || archiveState.ok || imageState.ok) {
+      router.refresh();
+    }
+  }, [archiveState.ok, editState.ok, imageState.ok, router]);
+
+  async function handleImageUpload(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const file = fileInput.current?.files?.[0];
+    if (!file) {
+      setUpload({
+        pending: false,
+        progress: null,
+        message: "Choose an image file to upload.",
+        error: true,
+      });
+      return;
+    }
+    if (
+      !allowedImageTypes.has(file.type) ||
+      file.size < 1 ||
+      file.size > maxImageBytes
+    ) {
+      setUpload({
+        pending: false,
+        progress: null,
+        message: "Choose a JPEG, PNG, or WebP image up to 10 MiB.",
+        error: true,
+      });
+      return;
+    }
+    if (!enabled) {
+      setUpload({
+        pending: false,
+        progress: null,
+        message: "Saving is disabled for this shared demo.",
+        error: true,
+      });
+      return;
+    }
+
+    setUpload({
+      pending: true,
+      progress: null,
+      message: "Preparing upload…",
+      error: false,
+    });
+    try {
+      const prepareResponse = await fetch(
+        `/api/wardrobe/${encodeURIComponent(item.id)}/image-uploads`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mimeType: file.type, byteSize: file.size }),
+        },
+      );
+      const preparePayload: unknown = await prepareResponse
+        .json()
+        .catch(() => null);
+      const prepared = preparedUpload(preparePayload);
+      if (!prepareResponse.ok || !prepared) {
+        setUpload({
+          pending: false,
+          progress: null,
+          message: prepareError(responseCode(preparePayload)),
+          error: true,
+        });
+        return;
+      }
+
+      setUpload({
+        pending: true,
+        progress: 0,
+        message: "Uploading image…",
+        error: false,
+      });
+      await uploadFile(prepared.uploadUrl, file, (progress) => {
+        setUpload({
+          pending: true,
+          progress,
+          message: "Uploading image…",
+          error: false,
+        });
+      });
+
+      setUpload({
+        pending: true,
+        progress: 100,
+        message: "Finishing upload…",
+        error: false,
+      });
+      const finalizeResponse = await fetch(
+        `/api/wardrobe/${encodeURIComponent(item.id)}/image-uploads/${encodeURIComponent(prepared.assetId)}/finalize`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ expectedAssetId: prepared.expectedAssetId }),
+        },
+      );
+      const finalizePayload: unknown = await finalizeResponse
+        .json()
+        .catch(() => null);
+      if (!finalizeResponse.ok) {
+        const conflict =
+          responseCode(finalizePayload) === "WARDROBE_IMAGE_CONFLICT";
+        setUpload({
+          pending: false,
+          progress: null,
+          message: conflict
+            ? "This image changed while you were uploading. The latest wardrobe image has been restored; choose the file again to retry."
+            : "The image could not be finalized. The current image was kept; choose the file again to retry.",
+          error: true,
+        });
+        router.refresh();
+        return;
+      }
+
+      setUpload({
+        pending: false,
+        progress: null,
+        message: "Image uploaded.",
+        error: false,
+      });
+      if (fileInput.current) fileInput.current.value = "";
+      router.refresh();
+    } catch {
+      setUpload({
+        pending: false,
+        progress: null,
+        message:
+          "The image could not be uploaded. The current image was kept; choose the file again to retry.",
+        error: true,
+      });
+    }
+  }
 
   return (
-    <div className="border-border mt-6 space-y-5 border-t pt-5">
+    <div className="mt-4 flex flex-wrap gap-2">
       {imageUrl && (
         <Image
           src={imageUrl}
@@ -60,128 +295,212 @@ export function WardrobeItemControls({
           width={1200}
           height={800}
           unoptimized
-          className="bg-background max-h-64 w-full rounded-xl object-contain"
+          className="bg-background mb-3 max-h-64 w-full rounded-xl object-contain"
         />
       )}
 
-      <form action={editAction} className="space-y-3">
-        <input type="hidden" name="id" value={item.id} />
-        <input
-          type="hidden"
-          name="attributes"
-          value={JSON.stringify(item.attributes)}
-        />
-        <h3 className="text-sm font-semibold">Edit item details</h3>
-        <label className="block text-sm">
-          Name
-          <input
-            name="name"
-            required
-            minLength={2}
-            maxLength={100}
-            defaultValue={item.name}
-            className={inputClass}
-          />
-        </label>
-        <label className="block text-sm">
-          Category
-          <select
-            name="category"
-            defaultValue={item.category}
-            className={inputClass}
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          if (upload.pending) return;
+          setDialogOpen(open);
+          if (!open) setConfirmArchive(false);
+        }}
+      >
+        <DialogTrigger asChild>
+          <Button
+            type="button"
+            className="border-border bg-background text-foreground hover:bg-muted min-h-11 border"
           >
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block text-sm">
-          Color
-          <input
-            name="color"
-            required
-            maxLength={40}
-            defaultValue={item.color}
-            className={inputClass}
-          />
-        </label>
-        <label className="block text-sm">
-          Subcategory
-          <input
-            name="subcategory"
-            maxLength={120}
-            defaultValue={item.subcategory ?? ""}
-            className={inputClass}
-          />
-        </label>
-        <label className="block text-sm">
-          Notes
-          <textarea
-            name="notes"
-            maxLength={4000}
-            defaultValue={item.notes}
-            className={`${inputClass} min-h-24`}
-          />
-        </label>
-        <Button type="submit" disabled={!enabled || editPending}>
-          {editPending ? "Saving…" : "Save changes"}
-        </Button>
-        <Status state={editState} />
-      </form>
-
-      <form action={uploadAction} className="space-y-3">
-        <input type="hidden" name="id" value={item.id} />
-        <label className="block text-sm">
-          Garment image
-          <input
-            name="image"
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            required
-            className={`${inputClass} file:bg-primary file:text-primary-foreground file:mr-3 file:rounded-full file:border-0 file:px-3 file:py-1`}
-          />
-        </label>
-        <Button type="submit" disabled={!enabled || uploadPending}>
-          {uploadPending
-            ? "Uploading…"
-            : imageUrl
-              ? "Replace image"
-              : "Upload image"}
-        </Button>
-        <Status state={uploadState} />
-      </form>
-
-      {item.asset_id && (
-        <form action={imageAction}>
-          <input type="hidden" name="id" value={item.id} />
-          <button
-            type="submit"
-            disabled={!enabled || imagePending}
-            className="text-secondary min-h-11 rounded-full px-4 text-sm underline underline-offset-4 disabled:opacity-50"
-          >
-            {imagePending ? "Removing…" : "Remove image"}
-          </button>
-          <Status state={imageState} />
-        </form>
-      )}
-
-      <form action={archiveAction}>
-        <input type="hidden" name="id" value={item.id} />
-        <button
-          type="submit"
-          disabled={!enabled || archivePending}
-          className="text-secondary min-h-11 rounded-full px-4 text-sm underline underline-offset-4 disabled:opacity-50"
+            Edit item
+          </Button>
+        </DialogTrigger>
+        <DialogContent
+          title={confirmArchive ? "Archive this item?" : item.name}
+          description={
+            confirmArchive
+              ? "It will leave the active wardrobe while saved-look references are kept."
+              : "Update the details or image for this wardrobe piece."
+          }
+          className="!inset-y-0 !right-0 !left-auto !m-0 !h-dvh !max-h-dvh !w-full !max-w-none !rounded-none sm:!w-[min(32rem,calc(100vw-2rem))] sm:!rounded-l-2xl [&>div:first-child>button]:!h-11 [&>div:first-child>button]:!w-11"
         >
-          {archivePending ? "Archiving…" : "Archive item"}
-        </button>
-        <p className="text-secondary text-xs">
-          Archiving hides the item from the active wardrobe and keeps its
-          saved-look references.
-        </p>
-        <Status state={archiveState} />
-      </form>
+          {confirmArchive ? (
+            <form action={archiveAction} className="space-y-4">
+              <input type="hidden" name="id" value={item.id} />
+              <p className="text-secondary">
+                This removes the item from active wardrobe results. Its
+                saved-look references remain available.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Button type="submit" disabled={!enabled || archivePending}>
+                  {archivePending ? "Archiving…" : "Archive item"}
+                </Button>
+                <Button
+                  type="button"
+                  className="border-border bg-background text-foreground hover:bg-muted border"
+                  disabled={archivePending}
+                  onClick={() => setConfirmArchive(false)}
+                >
+                  Keep item
+                </Button>
+              </div>
+              <Status state={archiveState} />
+            </form>
+          ) : (
+            <div className="space-y-7">
+              <form action={editAction} className="space-y-4">
+                <input type="hidden" name="id" value={item.id} />
+                <input
+                  type="hidden"
+                  name="attributes"
+                  value={JSON.stringify(item.attributes)}
+                />
+                <label className="block text-sm">
+                  Name
+                  <input
+                    name="name"
+                    required
+                    minLength={2}
+                    maxLength={100}
+                    defaultValue={item.name}
+                    className={inputClass}
+                  />
+                </label>
+                <label className="block text-sm">
+                  Category
+                  <select
+                    name="category"
+                    defaultValue={item.category}
+                    className={inputClass}
+                  >
+                    {categories.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="block text-sm">
+                  Color
+                  <input
+                    name="color"
+                    required
+                    maxLength={40}
+                    defaultValue={item.color}
+                    className={inputClass}
+                  />
+                </label>
+                <label className="block text-sm">
+                  Subcategory
+                  <input
+                    name="subcategory"
+                    maxLength={120}
+                    defaultValue={item.subcategory ?? ""}
+                    className={inputClass}
+                  />
+                </label>
+                <label className="block text-sm">
+                  Notes
+                  <textarea
+                    name="notes"
+                    maxLength={4000}
+                    defaultValue={item.notes}
+                    className={`${inputClass} min-h-24`}
+                  />
+                </label>
+                <Button type="submit" disabled={!enabled || editPending}>
+                  {editPending ? "Saving…" : "Save changes"}
+                </Button>
+                <Status state={editState} />
+              </form>
+
+              <form onSubmit={handleImageUpload} className="space-y-3">
+                <label className="block text-sm">
+                  Garment image
+                  <input
+                    ref={fileInput}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    required
+                    disabled={!enabled || upload.pending}
+                    aria-describedby={`wardrobe-image-help-${item.id}`}
+                    className={`${inputClass} file:bg-primary file:text-primary-foreground file:mr-3 file:rounded-full file:border-0 file:px-3 file:py-1`}
+                  />
+                </label>
+                <p
+                  id={`wardrobe-image-help-${item.id}`}
+                  className="text-secondary text-xs"
+                >
+                  JPEG, PNG, or WebP up to 10 MiB.
+                </p>
+                <Button type="submit" disabled={!enabled || upload.pending}>
+                  {upload.pending
+                    ? upload.progress === null
+                      ? "Preparing upload…"
+                      : "Uploading…"
+                    : imageUrl
+                      ? "Replace image"
+                      : "Upload image"}
+                </Button>
+                {upload.progress !== null && (
+                  <div className="space-y-1">
+                    <progress
+                      aria-label="Image upload progress"
+                      value={upload.progress}
+                      max={100}
+                      className="accent-primary h-2 w-full"
+                    />
+                    <p className="text-secondary text-xs" aria-hidden="true">
+                      {upload.progress}%
+                    </p>
+                  </div>
+                )}
+                {upload.message && (
+                  <p
+                    role={upload.error ? "alert" : "status"}
+                    aria-live={upload.error ? "assertive" : "polite"}
+                    className={`text-sm ${upload.error ? "text-primary" : "text-secondary"}`}
+                  >
+                    {upload.message}
+                  </p>
+                )}
+              </form>
+
+              {item.asset_id && (
+                <form action={imageAction}>
+                  <input type="hidden" name="id" value={item.id} />
+                  <Button
+                    type="submit"
+                    className="border-border bg-background text-foreground hover:bg-muted border"
+                    disabled={!enabled || imagePending}
+                  >
+                    {imagePending ? "Removing image…" : "Remove image"}
+                  </Button>
+                  <Status state={imageState} />
+                </form>
+              )}
+
+              <div className="border-border border-t pt-5">
+                <button
+                  type="button"
+                  disabled={!enabled || archivePending || upload.pending}
+                  onClick={() => setConfirmArchive(true)}
+                  className="text-secondary min-h-11 rounded-full px-4 text-sm underline underline-offset-4 disabled:opacity-50"
+                >
+                  Archive item
+                </button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Link
+        href={`/wardrobe/${item.id}/preview`}
+        className="border-border bg-background text-foreground hover:bg-card inline-flex min-h-11 items-center rounded-full border px-4 text-sm font-medium"
+      >
+        Preview
+      </Link>
     </div>
   );
 }
