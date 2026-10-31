@@ -16,6 +16,8 @@ Schema berasal dari migrations. Uji lokal sebelum penerapan remote pada project 
 
 Isi Development, Preview, dan Production terpisah. Jangan menganggap placeholder sebagai konfigurasi valid. Jangan mencetak nilai environment saat troubleshooting. Jangan commit `.env.local` atau direktori `.vercel`.
 
+`DEMO_WRITES_ENABLED` default `false`. Tetap nonaktif selama schema, seed workspace, dan koneksi database belum diverifikasi. Aktifkan `true` secara sengaja untuk environment demo yang menerima perubahan bersama; ini bukan kontrol identitas. Clean checkout dirancang tetap dapat build tanpa database, dengan empty state untuk wardrobe yang belum terhubung.
+
 ## Vercel
 
 Gunakan Git integration untuk preview setiap PR. Pilih repository ini, framework Next.js, root repository, install `npm ci`, build `npm run build`; tidak perlu output directory kustom.

@@ -15,6 +15,14 @@ Copy-Item .env.example .env.local
 
 Isi environment sesuai `.env.example`. `SUPABASE_SECRET_KEY` hanya untuk server; `STYLORA_WORKSPACE_ID` memilih workspace tetap di server. Jangan beri prefix `NEXT_PUBLIC_` pada secret. Belum ada project cloud yang dipilih atau deployment yang dilakukan oleh setup ini.
 
+`DEMO_WRITES_ENABLED=false` adalah default: form dan mutasi demo belum menerima penulisan. Ubah menjadi `true` hanya setelah database dimigrasikan, workspace seed tersedia, dan tim siap memakai dataset bersama. Pengaturan ini bukan autentikasi; saat aktif, semua pengunjung aplikasi dapat melakukan mutasi yang tersedia.
+
+Checkout bersih dirancang dapat dibuild tanpa koneksi atau credentials database. Wardrobe menampilkan empty state yang menjelaskan database belum terhubung; tidak ada data palsu yang ditampilkan sebagai data tersimpan.
+
+## Status implementasi
+
+Ini **scaffold parsial, belum MVP lengkap**. Shell, token UI, route boundaries, validasi env server, pola repository/action wardrobe, form tambah metadata, dan endpoint AI unavailable tersedia sebagai fondasi. Koneksi Supabase diperlukan untuk mencoba persistence wardrobe. Edit/hapus wardrobe, penyusunan dan penyimpanan look, preferences, capsule, sharing, upload, serta provider AI nyata masih memerlukan implementasi atau integrasi. Rencana sprint di bawah menjelaskan target berikutnya, bukan fitur yang semuanya sudah selesai.
+
 Jika memakai Supabase lokal, jalankan Docker lebih dahulu:
 
 ```powershell
@@ -66,15 +74,15 @@ Routes tersedia sebagai fondasi: `/create`, `/looks/[lookId]`, `/wardrobe`, `/ca
 
 ## Token visual
 
-| Token | Hex | Peran |
-| --- | --- | --- |
-| Porcelain | `#F5F2EC` | Latar utama |
-| Paper | `#FFFEFC` | Kartu dan panel |
-| Near-black | `#211F20` | Teks dan navigasi |
-| Oxblood | `#642E3B` | CTA dan selected state |
-| Deep wine | `#48212B` | Hover/active CTA |
-| Muted mauve | `#A18483` | Aksen kecil, bukan teks utama |
-| Stone | `#DCD6CE` | Border/divider |
-| Secondary text | `#706A66` | Teks pendukung |
+| Token          | Hex       | Peran                         |
+| -------------- | --------- | ----------------------------- |
+| Porcelain      | `#F5F2EC` | Latar utama                   |
+| Paper          | `#FFFEFC` | Kartu dan panel               |
+| Near-black     | `#211F20` | Teks dan navigasi             |
+| Oxblood        | `#642E3B` | CTA dan selected state        |
+| Deep wine      | `#48212B` | Hover/active CTA              |
+| Muted mauve    | `#A18483` | Aksen kecil, bukan teks utama |
+| Stone          | `#DCD6CE` | Border/divider                |
+| Secondary text | `#706A66` | Teks pendukung                |
 
 Gunakan token CSS; uji contrast saat menambah kombinasi/opacity. Selected dan error state harus mempunyai petunjuk selain warna.
