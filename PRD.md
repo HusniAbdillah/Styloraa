@@ -1,9 +1,9 @@
 # Stylora Product Requirements Document
 
-**Status:** Product and hackathon scope  
+**Status:** Full hackathon product scope  
 **Product:** Stylora  
 **Platform:** Responsive web application optimized for desktop and mobile browsers  
-**Hackathon timebox:** 7 hours  
+**Hackathon timebox:** 7 hours for the complete feature set in this document  
 **Primary stack:** Next.js App Router, TypeScript, Supabase, Muse vision API, Gemini text/image models, and a SERP-powered shopping search provider
 
 ## 1. Product summary
@@ -43,56 +43,40 @@ A fashion-interested person who saves looks from social media and wants to recre
 
 ## 5. Goals and non-goals
 
-### Hackathon demo goals
+### Hackathon goals
 
-- Demonstrate the end-to-end inspiration-to-outfit-shopping concept with a clear responsive interface.
-- Persist wardrobe items, preferences, and saved looks in Supabase within the configured demo workspace.
-- Provide a useful manual-review path if Muse, Gemini, or SERP credentials are unavailable or fail.
-- Show visible reasoning and confidence/uncertainty at each AI-assisted step.
-- Make at least one core path complete and reliable within seven hours; defer depth before compromising data safety or truthful status.
+- Deliver every feature defined in this PRD within the seven-hour hackathon, working in parallel across the four-person team defined by the repository sprint plan.
+- Demonstrate the complete connected journey: inspiration upload and analysis, editable garment detection, wardrobe matching, three outfit recommendations, shopping/value comparison, wardrobe management, Style DNA/body profile personalization, capsule building, Social Fit sharing, and single/combo try-on.
+- Persist wardrobe items, preferences, capsules, and saved looks in Supabase within the configured demo workspace.
+- Provide a manual-review and clearly labeled sample-data path if Muse, Gemini, or SERP credentials are unavailable or fail.
+- Show visible reasoning and confidence/uncertainty at every AI-assisted recommendation step.
 
-### Product goals after the hackathon
+### Boundaries
 
-- Support personal accounts and private wardrobes.
-- Provide robust image analysis, personalized outfit generation, virtual try-on, social sharing, capsule planning, and shopping comparisons.
-- Improve recommendation quality using user corrections and outcome signals, with explicit consent and privacy controls.
-
-### Non-goals for the 7-hour demo
-
-- Production-grade authentication, multi-tenant privacy, payments, order placement, or inventory integrations.
+- Production-grade authentication, payments, order placement, or inventory integrations.
 - Training a fashion model or claiming exact garment identification from an image.
 - Scraping arbitrary marketplace pages or guaranteeing price/stock freshness.
-- A durable background job system for long-running image generation.
-- Public sharing of private wardrobe data or upload of sensitive personal photographs.
+- A durable background job system beyond what is required to complete the demo try-on request.
+- Public access to private wardrobe records. Social Fit uses a separately scoped, revocable outfit snapshot.
 
-## 6. Scope and priority
+## 6. Complete feature scope (all required within 7 hours)
 
-### P0 — Demo-critical path
+Every feature below is in the hackathon deliverable. The team should implement in parallel by feature ownership, integrate continuously, and use provider-backed behavior where configured. A provider-unavailable path must still let the user inspect, edit, and complete the connected demo using visibly labeled sample data.
 
-1. **Responsive landing page:** a clear hero, example workflow/demo visual, primary upload call to action, and a secondary action to explore a sample inspiration. Explain the value in plain language.
-2. **Inspiration intake:** accept a supported image with file type and size validation; show preview, progress, retry, and remove/replace controls. Provide a seeded sample image/demo path if no provider key is configured.
-3. **Garment detection and review:** send the image to the configured Muse vision provider on the server; return a structured list of pieces and editable attributes. Clearly label the source and confidence of each detection.
-4. **Wardrobe matching:** compare detected pieces against saved wardrobe items. Classify each result as **Owned match**, **Wardrobe alternative**, or **Missing** and explain the match using shared attributes.
-5. **Three outfit concepts:** generate (a) a close recreation, (b) an alternative assembled primarily from owned items, and (c) a distinct alternative that may combine owned, wardrobe alternatives, and recommended missing pieces. Each has a title, short description, item list, and “Why this?” explanation.
-6. **Shopping shortlist:** for missing pieces, query the configured SERP shopping/search provider and show attributable product links with the available price, rating, seller, and freshness/source metadata. Let the user compare best value options using visible scoring factors.
-7. **Wardrobe and saved looks:** allow CRUD for wardrobe metadata and images where safely supported; save a look and reopen it. Persisted data must survive a reload.
-8. **Style profile basics:** offer optional, skippable style and fit preferences. The landing page may suggest completing them, but upload must remain available without them.
+1. **Responsive landing page and onboarding:** a catchy hero, visual example/demo, primary upload CTA, secondary sample path, and optional prompts to complete Style DNA and body profile.
+2. **Inspiration intake:** upload a supported image with server-side type/size validation, preview, progress, retry, replace, and remove controls.
+3. **AI garment analysis:** Muse reads the inspiration image and returns structured, editable pieces with category, color, pattern, apparent material/texture, silhouette/fit, cut/length, layering role, style tags, likely occasion, confidence, and source/provenance.
+4. **Wardrobe matching:** classify every detected piece as **Owned match**, **Wardrobe alternative**, or **Missing**; explain shared attributes and differences; allow user correction and manual matching.
+5. **Three AI outfit combinations:** (a) **Closest to the inspiration**, (b) **From your wardrobe**, and (c) **A fresh alternative** combining owned items, alternatives, and selected missing recommendations. Each has its own title, description, item list, fashion rationale, profile inputs used, uncertainty, and item replacement controls.
+6. **Shopping search and Value Score:** search only for missing items through the configured SERP provider; display source links and available title/price/rating/review data; compare best value with visible adjustable price, rating, and relevance factors.
+7. **Style DNA and body profile:** selectable, skippable visual options for style preferences, undertone, optional skin-depth preference, fit/coverage, and inclusive body-shape illustrations. Every option is labeled, editable, and clearable; users can skip without blocking analysis.
+8. **Wardrobe CRUD:** add, view, edit, and delete items with metadata and optional images; support metadata-only entry and preserve useful empty states.
+9. **Capsule builder:** generate multiple combinations from wardrobe item IDs and text attributes, explain each combination, favor reuse/versatility, and recommend missing additions with likely reuse opportunities.
+10. **Social Fit:** publish a selected outfit as a safe, user-approved snapshot with a custom catchphrase and revocable link; shared page is viewable without exposing internal wardrobe/profile data.
+11. **Single and combo try-on:** select one item or a complete outfit, change pieces, and request an AI-generated preview using the configured image provider. Personalization uses only user-selected skin/undertone and fit/body preferences; display consent, processing status, limitations, failure/retry, and deletion controls.
+12. **Saved looks and connected navigation:** save, reopen, and navigate among inspiration, wardrobe, outfit options, shopping results, capsules, profile, shared outfit, and try-on without losing the selected look context.
 
-### P1 — If the core path is stable
-
-- Capsule builder using wardrobe items to suggest multiple combinations, plus a small, high-utility “consider adding” list.
-- More complete Style DNA and body profile selections using inclusive, labeled illustrations and explicit “prefer not to say”/skip options.
-- Compare shopping results with adjustable best-value priorities (price, rating, relevance).
-- Social Fit share page with a user-controlled share link and a safe outfit snapshot.
-- Single-item and outfit-combination virtual try-on, only when an image generation provider is configured and completes successfully.
-
-### P2 — Post-hackathon roadmap
-
-- Authentication, private per-user workspaces, consent and account controls.
-- Durable jobs, notifications, provider quotas, monitoring, and retries for image generation.
-- Broader marketplace coverage, price history, stock checks, affiliate disclosure, and localized catalog ranking.
-- Outfit calendar, packing lists, community discovery, moderation, and collaborative styling.
-- Recommendation evaluation, opt-in feedback loops, and accessibility/localization expansion.
+This is a complete product scope, not a reduced MVP. The seven-hour constraint is addressed by four parallel owners, strict timeboxing, a shared contract, sample fallbacks, and a feature-complete vertical demo. If an external provider is unavailable, the feature remains present with a truthful unavailable state and a clearly identified sample path; the interface must not imply that sample output came from the live provider.
 
 ## 7. Primary user journey
 
@@ -103,6 +87,9 @@ A fashion-interested person who saves looks from social media and wants to recre
 5. **Explore outfits:** Stylora presents three clearly differentiated combinations. Each card explains silhouette, color relationship, material/texture balance, occasion/use, wardrobe reuse, and profile relevance where applicable. Users can replace individual items and regenerate a rationale.
 6. **Find missing pieces:** The user selects an outfit and searches only for its missing items. SERP results link to the original seller/product result and display the data available, its source, and an “as of” timestamp when provided. Best value is a transparent score, not an unexplained winner.
 7. **Save and reuse:** The user saves the selected look to their looks collection or adds a found item to the wardrobe manually. The saved look links to the wardrobe items and any product references.
+8. **Build a capsule:** The user selects a purpose or timeframe; Stylora creates multiple looks from existing wardrobe IDs, explains outfit logic, and suggests versatile additions with clear reasons.
+9. **Try on:** The user chooses a single item or the selected combination, swaps pieces if desired, selects an available avatar/model input, reviews consent and limitations, then views the generated preview or a truthful failure state.
+10. **Share with Social Fit:** The user adds a catchphrase, reviews exactly which outfit snapshot will be public, creates a revocable link, and opens its public-safe view.
 
 ### Journey states
 
@@ -230,7 +217,7 @@ Avoid unsupported claims such as “perfect for your body,” exact material com
 
 - Support a single-item preview and a selected outfit-combination preview as separate user actions.
 - Let users change selected pieces before generation.
-- Use a user-provided eligible model photo only after clear consent, explain provider processing/retention as configured, and offer deletion. If personal photos cannot be safely handled in the demo, use a non-identifying mannequin/illustration or defer the feature.
+- Use a non-identifying mannequin/illustration or provider-supported model asset for the shared no-auth demo. A personal model photo requires authenticated ownership, explicit consent, private storage, provider-processing disclosure, retention limits, and deletion controls; never silently retain it.
 - Never claim size accuracy, fit guarantees, or photorealistic fidelity unless validated. Respect user-selected skin/undertone and fit preferences only when provided.
 - Show a truthful pending/failed/completed state; a queued database row alone is not a completed try-on.
 
@@ -258,7 +245,7 @@ Avoid unsupported claims such as “perfect for your body,” exact material com
 - Current repository instructions define a **no-auth, single shared demo workspace**. All visitors can change the same synthetic demo dataset; it is not a private wardrobe. Make this visible in the interface and do not promise user ownership or privacy.
 - Obtain `STYLORA_WORKSPACE_ID` only from server environment; never accept it from request data. Apply it to every parent and child query.
 - Supabase access remains server-only. RLS is enabled and direct `anon`/`authenticated` access to internal tables is denied. The server secret bypasses RLS, so server query scope must be tested independently.
-- Do not accept sensitive personal uploads into this shared demo. Defer body-photo try-on until authenticated ownership, consent, private storage, retention/deletion, and provider handling are designed.
+- Do not accept sensitive personal uploads into this shared demo. Implement the try-on flow with a non-identifying model/illustration input; personal-photo try-on requires authenticated ownership, consent, private storage, retention/deletion, and provider handling.
 - AI providers that are not configured must be reported as unavailable. Demo/sample results must be labeled as sample data, not real provider output.
 
 ## 13. Success metrics
@@ -285,31 +272,35 @@ Do not optimize purchases as the only success outcome; wardrobe reuse and recomm
 
 ## 14. Seven-hour execution plan
 
-The repository's existing four-developer sprint plan is the execution baseline. Prioritize the user-facing story while protecting its already-defined persistence and workspace boundaries.
+All feature areas are in scope for the same seven-hour delivery. Follow the repository's four-person ownership plan and integrate continuously. Each stream ships its feature surface plus connected data contract; the integrator coordinates shared schema, environment, navigation, and end-to-end wiring.
 
-| Time | Outcome |
+| Time | Parallel work and integration outcome |
 | --- | --- |
-| 0:00–0:30 | Confirm demo workspace, env/provider availability, data schema, route contracts, owners, and sample data. |
-| 0:30–2:00 | Responsive shell/landing, wardrobe metadata CRUD, preferences basics, and persistent Supabase foundation. |
-| 2:00–3:00 | Create/save/reopen look using wardrobe items; this is the persistence milestone. |
-| 3:00–4:30 | Inspiration upload/review and wardrobe matching, with manual fallback. |
-| 4:30–5:30 | Three explained outfit cards; add live AI only if the adapter and structured output are ready. |
-| 5:30–6:00 | SERP shortlist and transparent value factors if credentials and time permit; otherwise show a labeled provider-unavailable state. |
-| 6:00–7:00 | Feature freeze, responsive/accessibility pass, smoke checks, demo reset/runbook, and honest handoff of deferred features. |
+| 0:00–0:30 | Agree shared schemas, route contracts, synthetic demo data, provider keys/status, file owners, workspace scope, and integration checkpoints. |
+| 0:30–2:00 | Integrator: responsive shell, landing, env/provider adapters. Wardrobe owner: CRUD and profile data. Looks owner: inspiration intake, detection/review, matching, outfit generation. Capsule/social owner: capsule, sharing snapshot, and try-on flow contracts. |
+| 2:00–3:30 | Wire persisted looks and preferences; complete all three outfit cards with “Why this?” details; connect wardrobe matches and profile personalization. |
+| 3:30–5:00 | Complete capsule combinations, SERP shopping results and Value Score, Social Fit snapshot/link, and single/combo try-on through configured provider or clearly labeled demo/unavailable state. |
+| 5:00–6:00 | Connect navigation and state across the full journey; fix integration gaps, persistence, share safety, upload validation, and provider error paths. |
+| 6:00–7:00 | Feature freeze; run agreed smoke checks; verify responsive/keyboard states; prepare demo data reset and a complete walkthrough of every feature. |
 
-**Scope guard:** if saving and reopening a look is not stable by hour 3, stop feature expansion and finish that path. Capsule, public sharing, and try-on are not allowed to destabilize the core demo. The sprint plan's named file ownership and single migration owner remain in effect.
+**Execution rule:** do not remove a feature area from the deliverable to create a smaller release. Parallelize and use truthful provider-unavailable states or clearly labeled sample results when a third-party integration cannot be exercised. The sprint plan's named file ownership and single migration owner remain in effect; update its task assignments with the team if needed to cover every scope item concurrently.
 
 ## 15. Acceptance criteria
 
-### P0 product acceptance
+### Complete product acceptance
 
 - Landing page explains the value and offers upload plus a sample/demo path.
-- A supported image can be selected, previewed, replaced, and submitted with useful validation/error feedback.
+- A supported image can be selected, previewed, replaced, and submitted with useful validation/error feedback; the sample path is visibly labeled.
 - Analysis output is schema-valid and editable, with uncertainty/source displayed where applicable.
 - Each detected piece maps to an owned match, wardrobe alternative, or missing state, with an understandable reason.
 - Three distinguishable outfit options are available; each has a title, item list, “Why this?” rationale, and profile-input disclosure.
 - User can replace a piece, save a selected look, and reopen it after reload.
 - Shopping links are provider-sourced and sanitized; value factors are visible. If unavailable, the UI says so and does not create fake listings.
+- Style DNA and body/fit preferences are selectable, skippable, editable, and visibly influence relevant recommendations.
+- Wardrobe CRUD, capsule generation, safe/revocable Social Fit sharing, and single-item plus combo try-on are available from connected navigation.
+- Try-on supports piece replacement, explicit consent/limitations, provider status, and a non-identifying model path compatible with the shared demo.
+- Capsule results explain outfit combinations and recommend useful missing items with a reuse rationale.
+- Social Fit exposes only the approved outfit snapshot and catchphrase, never internal profile or wardrobe records.
 - App supports narrow mobile and desktop widths, keyboard navigation, focus indicators, and accessible validation/status feedback.
 
 ### Engineering and data acceptance
@@ -327,7 +318,7 @@ The repository's existing four-developer sprint plan is the execution baseline. 
 | Risk | Mitigation |
 | --- | --- |
 | AI invents visual details or garment attributes | Structured schemas, confidence/provenance, human review, editable fields, conservative language. |
-| Demo scope exceeds seven hours | Prioritized P0, hour-3 persistence checkpoint, feature freeze, manual/sample fallback with clear labels. |
+| Demo scope exceeds seven hours | Four parallel feature owners, shared schemas and checkpoints, feature freeze in the final hour, manual/sample fallbacks clearly labeled. |
 | Shared no-auth demo exposes or overwrites visitor data | Synthetic data only, clear shared-workspace notice, no sensitive uploads, server workspace scoping, separate snapshot sharing contract. |
 | Recommendations encode body/skin bias | Optional self-selected context, preference-first matching, inclusive illustrations, neutral copy, user controls, no inferred body/skin attributes from inspiration images. |
 | Product listing is stale, incomplete, or misleading | Provider attribution, retrieval timestamp, only display returned fields, explain score, no invented stock/price. |
@@ -340,6 +331,6 @@ The repository's existing four-developer sprint plan is the execution baseline. 
 - Which SERP provider, marketplace region, currency, and result fields are available?
 - Is Gemini text generation and image generation enabled separately, and are the supplied model IDs supported by the selected account/API?
 - Which sample inspiration and synthetic wardrobe records are approved for the demo?
-- Which P0 integrations are live by hour 3, and which are explicitly represented as unavailable/sample states?
+- Which integrations are live during the demo, and which are explicitly represented as unavailable/sample states?
 
 These decisions must be reflected in environment examples and the demo handoff; secrets and private user information must never be added to the repository.
