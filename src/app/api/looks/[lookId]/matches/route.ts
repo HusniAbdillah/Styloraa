@@ -82,7 +82,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ loo
     return Response.json({ data: updated }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     if (error instanceof Error && error.message === "MUSE_PROFILE_SIGNAL_MISMATCH") return jsonError("MUSE_INVALID_OUTPUT", 502);
-    if (error && typeof error === "object" && "code" in error && error.code === "40001") return jsonError("REVISION_CONFLICT", 409);
+    if (error && typeof error === "object" && "code" in error && (error.code === "PT409" || error.code === "40001")) return jsonError("REVISION_CONFLICT", 409);
     return providerErrorResponse(error);
   }
 }

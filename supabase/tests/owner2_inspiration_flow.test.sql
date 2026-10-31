@@ -70,7 +70,7 @@ select is((select status from public.looks l join owner2_context c on l.id=c.loo
 select throws_ok(
   format('select public.persist_look_results(%L,%L,99,false,%L,%L)',
     '50000000-0000-4000-8000-000000000001',(select look_id from owner2_context),'[]','[]'),
-  '40001',null,'stale revisions are rejected');
+  'PT409',null,'stale revisions are rejected');
 
 select * from finish();
 rollback;

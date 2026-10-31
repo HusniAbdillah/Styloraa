@@ -50,7 +50,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ lo
     const updated = await getLook(lookId);
     return Response.json({ data: updated }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
-    if (error && typeof error === "object" && "code" in error && error.code === "40001") return jsonError("REVISION_CONFLICT", 409);
+    if (error && typeof error === "object" && "code" in error && (error.code === "PT409" || error.code === "40001")) return jsonError("REVISION_CONFLICT", 409);
     return jsonError("PERSISTENCE_FAILED", 503);
   }
 }

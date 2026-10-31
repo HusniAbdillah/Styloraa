@@ -280,3 +280,4 @@ revoke all on function public.persist_look_results(uuid, uuid, integer, boolean,
   from public, anon, authenticated;
 grant execute on function public.persist_look_results(uuid, uuid, integer, boolean, jsonb, jsonb)
   to service_role;
+
