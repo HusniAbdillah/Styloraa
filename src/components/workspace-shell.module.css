@@ -1,0 +1,158 @@
+.shell {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 224px minmax(0, 1fr);
+  grid-template-rows: 84px 1fr;
+  background: var(--porcelain);
+}
+.shell[data-collapsed="true"] {
+  grid-template-columns: 72px minmax(0, 1fr);
+}
+.header {
+  grid-column: 1/-1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--porcelain);
+}
+.wordmark {
+  flex-shrink: 0;
+  color: var(--oxblood);
+  font-family: var(--font-stylora-serif), Georgia, serif;
+  font-size: 36px;
+  line-height: 44px;
+  font-weight: 400;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+.wordmark img {
+  display: block;
+  width: 162px;
+  height: 54px;
+}
+.wordmark:active {
+  opacity: 0.8;
+}
+.header > .wordmark {
+  width: 180px;
+}
+.tagline {
+  color: var(--secondary-text);
+  font-size: 13px;
+}
+.iconButton {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  flex-shrink: 0;
+  color: var(--near-black);
+}
+.iconButton:hover {
+  background: var(--paper);
+}
+.mobileToggle {
+  display: none;
+}
+.sidebar {
+  padding: 20px;
+  position: sticky;
+  top: 84px;
+  height: calc(100dvh - 84px);
+  align-self: start;
+}
+.shell[data-collapsed="true"] .sidebar {
+  padding: 20px 14px;
+}
+.main {
+  min-width: 0;
+  padding: 40px;
+}
+.skip {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  padding: 12px;
+  background: var(--paper);
+  z-index: 50;
+  transform: translateY(-200%);
+}
+.skip:focus {
+  transform: translateY(0);
+}
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgb(33 31 32 / 0.3);
+}
+.drawer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: min(320px, calc(100vw - 40px));
+  z-index: 50;
+  background: var(--porcelain);
+  padding: 20px;
+  overflow-y: auto;
+}
+.drawerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+@media (max-width: 767px) {
+  .shell,
+  .shell[data-collapsed="true"] {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 76px 1fr;
+  }
+  .sidebar,
+  .desktopToggle,
+  .tagline {
+    display: none;
+  }
+  .mobileToggle {
+    display: inline-flex;
+  }
+  .header {
+    padding: 16px 20px;
+    gap: 8px;
+  }
+  .header > .wordmark {
+    width: auto;
+    font-size: 30px;
+  }
+  .main {
+    padding: 24px 20px 40px;
+  }
+}
+@media (min-width: 768px) {
+  .drawer,
+  .overlay {
+    display: none;
+  }
+}
+
+.header {
+  padding-block: 15px;
+}
+@media (max-width: 767px) {
+  .wordmark img {
+    width: 144px;
+    height: 48px;
+  }
+  .header {
+    padding-block: 14px;
+  }
+}

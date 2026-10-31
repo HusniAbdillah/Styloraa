@@ -1,6 +1,7 @@
 import { getServerEnv, isDatabaseConfigured } from "@/lib/env";
 import { listWardrobeItems } from "../repository";
 import { WardrobeForm } from "./wardrobe-form";
+import Link from "next/link";
 export async function WardrobeScreen() {
   const configured = isDatabaseConfigured();
   const items = configured ? await listWardrobeItems() : [];
@@ -15,7 +16,7 @@ export async function WardrobeScreen() {
           Your wardrobe, considered.
         </h1>
         <p className="text-secondary mt-4">
-          The shared demo collection behind every combination.
+          The owned pieces behind every combination.
         </p>
       </div>
       <div className="grid items-start gap-6 lg:grid-cols-[1fr_340px]">
@@ -29,8 +30,16 @@ export async function WardrobeScreen() {
                 <p className="text-secondary text-xs uppercase tracking-wider">
                   {item.category}
                 </p>
-                <h2 className="mt-4 font-serif text-2xl tracking-tight">{item.name}</h2>
+                <h2 className="mt-4 font-serif text-2xl tracking-tight">
+                  {item.name}
+                </h2>
                 <p className="text-secondary mt-2 text-sm">{item.color}</p>
+                <Link
+                  className="text-primary mt-3 inline-flex min-h-11 items-center text-sm underline underline-offset-4"
+                  href={`/wardrobe/${item.id}/preview`}
+                >
+                  Preview this piece
+                </Link>
               </article>
             ))
           ) : (

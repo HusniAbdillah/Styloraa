@@ -9,6 +9,21 @@
   --muted-mauve: #a18483;
   --stone: #dcd6ce;
   --secondary-text: #706a66;
+  --surface: var(--paper);
+  --background: var(--porcelain);
+  --border: var(--stone);
+  --surface-raised: var(--paper);
+  --surface-muted: var(--porcelain);
+  --foreground: var(--near-black);
+  --text-secondary: var(--secondary-text);
+  --text-muted: var(--secondary-text);
+  --border-strong: var(--secondary-text);
+  --accent: var(--oxblood);
+  --accent-strong: var(--deep-wine);
+  --accent-foreground: var(--paper);
+  --control-on: var(--oxblood);
+  --control-glyph: var(--paper);
+  --focus-outline: var(--oxblood);
 }
 @theme inline {
   --color-background: var(--porcelain);
@@ -20,14 +35,14 @@
   --color-accent: var(--muted-mauve);
   --color-border: var(--stone);
   --color-secondary: var(--secondary-text);
-  --font-sans: Arial, Helvetica, sans-serif;
-  --font-serif: Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-stylora-inter), Arial, Helvetica, sans-serif;
+  --font-serif: var(--font-stylora-serif), Georgia, "Times New Roman", serif;
 }
 body {
   margin: 0;
   background: var(--porcelain);
   color: var(--near-black);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-stylora-inter), Arial, Helvetica, sans-serif;
 }
 button,
 input,
