@@ -161,15 +161,47 @@ export async function getLook(lookId: string) {
         .order("position")
     : { data: [], error: null };
   if (itemsResult.error) throw new Error("DATABASE_UNAVAILABLE");
+  const wardrobeItemIds = [
+    ...new Set([
+      ...(matchesResult.data ?? []).flatMap((match) =>
+        match.wardrobe_item_id ? [match.wardrobe_item_id] : [],
+      ),
+      ...(itemsResult.data ?? []).flatMap((item) =>
+        item.wardrobe_item_id ? [item.wardrobe_item_id] : [],
+      ),
+    ]),
+  ];
+  const wardrobeResult = wardrobeItemIds.length
+    ? await supabase
+        .from("wardrobe_items")
+        .select("id,name,category,color")
+        .eq("workspace_id", workspaceId)
+        .in("id", wardrobeItemIds)
+        .is("archived_at", null)
+    : { data: [], error: null };
+  if (wardrobeResult.error) throw new Error("DATABASE_UNAVAILABLE");
+  const wardrobeById = new Map(
+    (wardrobeResult.data ?? []).map((item) => [item.id, item]),
+  );
   return {
     ...look,
     pieces: piecesResult.data ?? [],
-    matches: matchesResult.data ?? [],
+    matches: (matchesResult.data ?? []).map((match) => ({
+      ...match,
+      wardrobe_item: match.wardrobe_item_id
+        ? (wardrobeById.get(match.wardrobe_item_id) ?? null)
+        : null,
+    })),
     options: (optionsResult.data ?? []).map((option) => ({
       ...option,
       items: (itemsResult.data ?? []).filter(
         (item) => item.option_id === option.id,
-      ),
+      ).map((item) => ({
+        ...item,
+        wardrobe_item: item.wardrobe_item_id
+          ? (wardrobeById.get(item.wardrobe_item_id) ?? null)
+          : null,
+      })),
     })),
   };
 }

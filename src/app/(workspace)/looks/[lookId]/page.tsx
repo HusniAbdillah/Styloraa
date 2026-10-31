@@ -1,10 +1,12 @@
-import { FeaturePlaceholder } from "@/components/ui/feature-placeholder";
-export default function Page() {
-  return (
-    <FeaturePlaceholder
-      title="Look details"
-      description="Outfit combinations and styling decisions will live here."
-      owner="Developer 3"
-    />
-  );
+import { LookStudio } from "@/features/inspiration/components/look-studio";
+
+export default async function LookPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ lookId: string }>;
+  searchParams: Promise<{ option_id?: string }>;
+}) {
+  const [{ lookId }, query] = await Promise.all([params, searchParams]);
+  return <LookStudio lookId={lookId} selectedOptionId={query.option_id ?? null} />;
 }
