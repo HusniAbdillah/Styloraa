@@ -58,7 +58,7 @@ Routes tersedia sebagai fondasi: `/create`, `/looks/[lookId]`, `/wardrobe`, `/ca
 
 ## Dokumen tim
 
-- [PRD dan scope](PRD.md)
+- [Product requirements and scope](prd.md)
 - [Arsitektur](docs/architecture.md)
 - [Pembagian 4 developer dan jadwal 7 jam](docs/sprint-plan.md)
 - [Deployment](docs/deployment.md)
