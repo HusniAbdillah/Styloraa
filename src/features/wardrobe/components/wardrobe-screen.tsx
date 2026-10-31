@@ -1,9 +1,21 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getServerEnv, isDatabaseConfigured } from "@/lib/env";
 import { categories, type WardrobeListFilters } from "../schema";
-import { getWardrobeImageUrl, listWardrobePage } from "../repository";
+import {
+  getWardrobeImageUrl,
+  listMaterializedStaticWardrobeEntryIds,
+  listWardrobePage,
+} from "../repository";
+import {
+  demoWardrobeEntries,
+  getLocalSeedWardrobeEntryId,
+  getLocalSeedWardrobeImage,
+} from "../demo-wardrobe";
+import { wardrobeItemMatchesSearch } from "../search";
 import { WardrobeForm } from "./wardrobe-form";
 import { WardrobeItemControls } from "./wardrobe-item-controls";
+import { StaticWardrobeControls } from "./static-wardrobe-controls";
 
 function pageHref(filters: WardrobeListFilters, offset: number) {
   const params = new URLSearchParams();
@@ -21,62 +33,65 @@ export async function WardrobeScreen({
   sampleMode?: boolean;
 }) {
   const configured = isDatabaseConfigured();
-  const { items, total } =
+  const firstSavedPage =
     configured && !sampleMode
-      ? await listWardrobePage(filters)
+      ? await listWardrobePage({ ...filters, offset: 0 })
       : { items: [], total: 0 };
   const enabled = configured && getServerEnv().DEMO_WRITES_ENABLED === "true";
-  const sampleItems = [
-    {
-      id: "sample-linen-shirt",
-      name: "Linen shirt",
-      category: "top",
-      color: "Cream",
-      subcategory: "Relaxed fit",
-    },
-    {
-      id: "sample-wide-trousers",
-      name: "Wide-leg trousers",
-      category: "bottom",
-      color: "Navy",
-      subcategory: "Full length",
-    },
-    {
-      id: "sample-leather-loafers",
-      name: "Leather loafers",
-      category: "shoes",
-      color: "Brown",
-      subcategory: "Low profile",
-    },
-    {
-      id: "sample-knit-layer",
-      name: "Fine-knit cardigan",
-      category: "outerwear",
-      color: "Oatmeal",
-      subcategory: "Light layer",
-    },
-  ];
-  const visibleSampleItems = sampleItems.filter((item) => {
-    const matchesCategory =
-      !filters.category || item.category === filters.category;
-    const search = filters.search.toLocaleLowerCase();
-    const matchesSearch =
-      !search ||
-      `${item.name} ${item.color} ${item.category} ${item.subcategory}`
-        .toLocaleLowerCase()
-        .includes(search);
-    return matchesCategory && matchesSearch;
-  });
+  const visibleSampleItems = demoWardrobeEntries.filter(
+    (item) =>
+      (!filters.category || item.category === filters.category) &&
+      wardrobeItemMatchesSearch(item, filters.search),
+  );
+  const savedStaticIds =
+    configured && !sampleMode
+      ? await listMaterializedStaticWardrobeEntryIds()
+      : new Set<string>();
+  const starterItems = !sampleMode
+    ? visibleSampleItems.filter((item) => !savedStaticIds.has(item.id))
+    : [];
+  const visibleStarterItems = starterItems.slice(
+    filters.offset,
+    filters.offset + filters.limit,
+  );
+  const starterOffset = Math.max(0, filters.offset - starterItems.length);
+  const savedItemsNeeded = filters.limit - visibleStarterItems.length;
+  const savedPage =
+    configured && !sampleMode && filters.offset > 0 && savedItemsNeeded > 0
+      ? await listWardrobePage({
+          ...filters,
+          limit: savedItemsNeeded,
+          offset: starterOffset,
+        })
+      : firstSavedPage;
+  const items =
+    !sampleMode && filters.offset === 0
+      ? savedPage.items.slice(0, savedItemsNeeded)
+      : savedItemsNeeded > 0
+        ? savedPage.items
+        : [];
+  const total = firstSavedPage.total;
+  const totalMatches = total + starterItems.length;
   const cards = await Promise.all(
     items.map(async (item) => ({
       item,
+      previewHref: `/wardrobe/${getLocalSeedWardrobeEntryId(item.attribute_provenance) ?? item.id}/preview`,
       imageUrl: item.asset_id
         ? await getWardrobeImageUrl(item.asset_id).catch(() => null)
-        : null,
+        : getLocalSeedWardrobeImage(item.attribute_provenance),
     })),
   );
   const previousOffset = Math.max(0, filters.offset - filters.limit);
   const nextOffset = filters.offset + filters.limit;
+  const wardrobeCards = [
+    ...visibleStarterItems.map((item) => ({
+      item,
+      imageUrl: item.image,
+      previewHref: `/wardrobe/${item.id}/preview`,
+      isStatic: true as const,
+    })),
+    ...cards.map((card) => ({ ...card, isStatic: false as const })),
+  ];
 
   return (
     <section className="space-y-8">
@@ -87,12 +102,11 @@ export async function WardrobeScreen({
         <h1 className="font-serif text-4xl md:text-5xl">
           Your wardrobe, considered.
         </h1>
-        <p className="text-secondary mt-4">
-          The owned pieces behind every combination.
-        </p>
+        <p className="text-secondary mt-4">Your pieces, all in one place.</p>
         {configured && !sampleMode && (
           <p className="text-secondary mt-2 text-sm" aria-live="polite">
-            {total} {total === 1 ? "item" : "items"} match these filters
+            {totalMatches} {totalMatches === 1 ? "item" : "items"} match these
+            filters
           </p>
         )}
       </div>
@@ -110,7 +124,7 @@ export async function WardrobeScreen({
           className="border-border bg-card flex flex-wrap items-end gap-3 rounded-2xl border p-4"
         >
           <label className="min-w-48 flex-1 text-sm">
-            Search name, color, or category
+            Search any clothing detail
             <input
               name="search"
               maxLength={100}
@@ -163,15 +177,29 @@ export async function WardrobeScreen({
                 {visibleSampleItems.map((item) => (
                   <article
                     key={item.id}
-                    className="border-border bg-card rounded-2xl border p-6"
+                    className="border-border bg-card overflow-hidden rounded-2xl border"
                   >
-                    <p className="text-secondary text-xs tracking-wider uppercase">
-                      {item.category} · {item.subcategory}
-                    </p>
-                    <h3 className="mt-3 font-serif text-2xl tracking-tight">
-                      {item.name}
-                    </h3>
-                    <p className="text-secondary mt-2 text-sm">{item.color}</p>
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      width={960}
+                      height={960}
+                      className="bg-background h-64 w-full object-contain p-4"
+                    />
+                    <div className="p-5">
+                      <p className="text-secondary text-xs tracking-wider uppercase">
+                        {item.category} · {item.subcategory}
+                      </p>
+                      <h3 className="mt-2 font-serif text-2xl tracking-tight">
+                        {item.name}
+                      </h3>
+                      <p className="text-secondary mt-1 text-sm">
+                        {item.color}
+                      </p>
+                      <p className="text-secondary mt-3 text-sm">
+                        {item.notes}
+                      </p>
+                    </div>
                   </article>
                 ))}
               </div>
@@ -182,76 +210,98 @@ export async function WardrobeScreen({
               </p>
             )}
           </section>
-        ) : cards.length ? (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {cards.map(({ item, imageUrl }) => (
-              <article
-                key={item.id}
-                className="border-border bg-card hover:border-primary/40 rounded-2xl border p-6 transition-[border-color,box-shadow] duration-200 ease-out hover:shadow-xs"
-              >
-                <p className="text-secondary text-xs tracking-wider uppercase">
-                  {item.category}
-                  {item.subcategory ? ` · ${item.subcategory}` : ""}
-                </p>
-                <h2 className="mt-3 font-serif text-2xl tracking-tight">
-                  {item.name}
-                </h2>
-                <p className="text-secondary mt-2 text-sm">{item.color}</p>
-                {item.notes && (
-                  <p className="text-secondary mt-2 text-sm whitespace-pre-wrap">
-                    {item.notes}
-                  </p>
-                )}
-                <Link
-                  className="text-primary mt-3 inline-flex min-h-11 items-center text-sm underline underline-offset-4"
-                  href={`/wardrobe/${item.id}/preview`}
-                >
-                  Preview this piece
-                </Link>
-                <WardrobeItemControls
-                  item={item}
-                  imageUrl={imageUrl}
-                  enabled={enabled}
-                />
-              </article>
-            ))}
-          </div>
-        ) : filters.search || filters.category ? (
-          <div className="border-border rounded-2xl border border-dashed p-8">
-            <h2 className="font-serif text-2xl">
-              No pieces match these filters.
-            </h2>
-            <p className="text-secondary mt-3 text-sm">
-              Your wardrobe may still contain other items. Clear the filters or
-              broaden your search.
-            </p>
-            <Link
-              href="/wardrobe"
-              className="text-primary mt-3 inline-flex min-h-11 items-center rounded-full px-4 text-sm underline underline-offset-4"
-            >
-              Clear filters
-            </Link>
-          </div>
         ) : (
-          <div className="border-border rounded-2xl border border-dashed p-8">
-            <h2 className="font-serif text-2xl">Room for your picks.</h2>
-            <p className="text-secondary mt-3 text-sm">
-              {configured
-                ? "Your shared wardrobe is empty. Add an item with or without an image."
-                : "Database not connected. You can still browse an example wardrobe."}
-            </p>
-            {!sampleMode && (
-              <Link
-                href="/wardrobe?sample=1"
-                className="text-primary mt-3 inline-flex min-h-11 items-center rounded-full px-4 text-sm underline underline-offset-4"
-              >
-                Browse sample wardrobe
-              </Link>
+          <>
+            {wardrobeCards.length > 0 && (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {wardrobeCards.map(
+                  ({ item, imageUrl, previewHref, isStatic }) => (
+                    <article
+                      key={item.id}
+                      className="border-border bg-card hover:border-primary/40 overflow-hidden rounded-2xl border transition-[border-color,box-shadow] duration-200 ease-out hover:shadow-xs"
+                    >
+                      {imageUrl ? (
+                        <Image
+                          src={imageUrl}
+                          alt={item.name}
+                          width={960}
+                          height={960}
+                          unoptimized
+                          className="bg-background h-64 w-full object-contain p-4"
+                        />
+                      ) : (
+                        <div className="bg-muted text-secondary flex h-64 items-center justify-center text-sm">
+                          No photo available
+                        </div>
+                      )}
+                      <div className="p-5">
+                        <p className="text-secondary text-xs tracking-wider uppercase">
+                          {item.category}
+                          {item.subcategory ? ` · ${item.subcategory}` : ""}
+                        </p>
+                        <h2 className="mt-2 font-serif text-2xl tracking-tight">
+                          {item.name}
+                        </h2>
+                        <p className="text-secondary mt-1 text-sm">
+                          {item.color}
+                        </p>
+                        {item.notes && (
+                          <p className="text-secondary mt-3 text-sm whitespace-pre-wrap">
+                            {item.notes}
+                          </p>
+                        )}
+                        {isStatic ? (
+                          <StaticWardrobeControls item={item} />
+                        ) : (
+                          <>
+                            <Link
+                              className="text-primary mt-2 inline-flex min-h-11 items-center text-sm underline underline-offset-4"
+                              href={previewHref}
+                            >
+                              Preview this piece
+                            </Link>
+                            <WardrobeItemControls
+                              item={item}
+                              imageUrl={imageUrl}
+                              enabled={enabled}
+                            />
+                          </>
+                        )}
+                      </div>
+                    </article>
+                  ),
+                )}
+              </div>
             )}
-          </div>
+
+            {wardrobeCards.length === 0 && (
+              <div className="border-border rounded-2xl border border-dashed p-8">
+                <h2 className="font-serif text-2xl">
+                  {filters.search || filters.category
+                    ? "No pieces match these filters."
+                    : "Room for your picks."}
+                </h2>
+                <p className="text-secondary mt-3 text-sm">
+                  {filters.search || filters.category
+                    ? "Clear the filters or broaden your search."
+                    : configured
+                      ? "Your saved wardrobe is empty."
+                      : "Database not connected. Static starter pieces are available when no filters are applied."}
+                </p>
+                {(filters.search || filters.category) && (
+                  <Link
+                    href="/wardrobe"
+                    className="text-primary mt-3 inline-flex min-h-11 items-center rounded-full px-4 text-sm underline underline-offset-4"
+                  >
+                    Clear filters
+                  </Link>
+                )}
+              </div>
+            )}
+          </>
         )}
 
-        {!sampleMode && total > filters.limit && (
+        {!sampleMode && totalMatches > filters.limit && (
           <nav
             aria-label="Wardrobe pages"
             className="flex items-center justify-between"
@@ -273,9 +323,10 @@ export async function WardrobeScreen({
             )}
             <span className="text-secondary text-sm">
               {filters.offset + 1}–
-              {Math.min(filters.offset + filters.limit, total)} of {total}
+              {Math.min(filters.offset + filters.limit, totalMatches)} of{" "}
+              {totalMatches}
             </span>
-            {nextOffset >= total ? (
+            {nextOffset >= totalMatches ? (
               <span
                 aria-disabled="true"
                 className="text-secondary px-3 py-2 text-sm opacity-50"

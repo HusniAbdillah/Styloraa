@@ -7,7 +7,7 @@ import {
   useState,
   type FormEvent,
 } from "react";
-import Image from "next/image";
+import type { ImageProps } from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -24,18 +24,17 @@ import {
 } from "../actions";
 import { categories } from "../schema";
 import type { WardrobeItem } from "../repository";
+import {
+  preparedWardrobeUpload,
+  responseCode,
+  uploadWardrobeFile,
+} from "./image-upload-client";
 
 const inputClass =
   "border-border bg-background focus:border-primary mt-2 block min-h-11 w-full rounded-xl border px-3 py-2 focus:outline-none";
 const initialState: WardrobeActionState = { ok: false, message: "" };
 const allowedImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 const maxImageBytes = 10 * 1024 * 1024;
-
-type PreparedUpload = {
-  assetId: string;
-  expectedAssetId: string | null;
-  uploadUrl: string;
-};
 
 type UploadState = {
   pending: boolean;
@@ -59,62 +58,6 @@ function Status({ state }: { state: WardrobeActionState }) {
   );
 }
 
-function responseCode(payload: unknown) {
-  if (!payload || typeof payload !== "object") return "";
-  const error = (payload as { error?: unknown }).error;
-  if (!error || typeof error !== "object") return "";
-  const code = (error as { code?: unknown }).code;
-  return typeof code === "string" ? code : "";
-}
-
-function preparedUpload(payload: unknown): PreparedUpload | null {
-  if (!payload || typeof payload !== "object") return null;
-  const data = (payload as { data?: unknown }).data;
-  if (!data || typeof data !== "object") return null;
-  const value = data as Record<string, unknown>;
-  if (
-    typeof value.assetId !== "string" ||
-    typeof value.uploadUrl !== "string" ||
-    !(
-      value.expectedAssetId === null ||
-      typeof value.expectedAssetId === "string"
-    )
-  )
-    return null;
-  return {
-    assetId: value.assetId,
-    expectedAssetId: value.expectedAssetId,
-    uploadUrl: value.uploadUrl,
-  };
-}
-
-function uploadFile(
-  uploadUrl: string,
-  file: File,
-  onProgress: (progress: number) => void,
-) {
-  return new Promise<void>((resolve, reject) => {
-    const request = new XMLHttpRequest();
-    request.open("PUT", uploadUrl);
-    request.setRequestHeader("x-upsert", "false");
-    request.upload.onprogress = (event) => {
-      if (event.lengthComputable)
-        onProgress(Math.round((event.loaded / event.total) * 100));
-    };
-    request.onload = () => {
-      if (request.status >= 200 && request.status < 300) resolve();
-      else reject(new Error("IMAGE_UPLOAD_FAILED"));
-    };
-    request.onerror = () => reject(new Error("IMAGE_UPLOAD_FAILED"));
-    request.onabort = () => reject(new Error("IMAGE_UPLOAD_FAILED"));
-
-    const body = new FormData();
-    body.append("cacheControl", "3600");
-    body.append("", file);
-    request.send(body);
-  });
-}
-
 function prepareError(code: string) {
   if (code === "DEMO_WRITES_DISABLED")
     return "Saving is disabled for this shared demo.";
@@ -129,7 +72,7 @@ export function WardrobeItemControls({
   enabled,
 }: {
   item: WardrobeItem;
-  imageUrl: string | null;
+  imageUrl: ImageProps["src"] | null;
   enabled: boolean;
 }) {
   const router = useRouter();
@@ -209,7 +152,7 @@ export function WardrobeItemControls({
       const preparePayload: unknown = await prepareResponse
         .json()
         .catch(() => null);
-      const prepared = preparedUpload(preparePayload);
+      const prepared = preparedWardrobeUpload(preparePayload);
       if (!prepareResponse.ok || !prepared) {
         setUpload({
           pending: false,
@@ -226,7 +169,7 @@ export function WardrobeItemControls({
         message: "Uploading image…",
         error: false,
       });
-      await uploadFile(prepared.uploadUrl, file, (progress) => {
+      await uploadWardrobeFile(prepared.uploadUrl, file, (progress) => {
         setUpload({
           pending: true,
           progress,
@@ -288,17 +231,6 @@ export function WardrobeItemControls({
 
   return (
     <div className="mt-4 flex flex-wrap gap-2">
-      {imageUrl && (
-        <Image
-          src={imageUrl}
-          alt={item.name}
-          width={1200}
-          height={800}
-          unoptimized
-          className="bg-background mb-3 max-h-64 w-full rounded-xl object-contain"
-        />
-      )}
-
       <Dialog
         open={dialogOpen}
         onOpenChange={(open) => {

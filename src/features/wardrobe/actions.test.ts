@@ -12,10 +12,13 @@ vi.mock("@/lib/env", () => ({
   getServerEnv: () => ({ DEMO_WRITES_ENABLED: mocks.writes }),
 }));
 vi.mock("./repository", () => ({
-  insertWardrobeItem: mocks.insert,
+  insertWardrobeItemWithImage: mocks.insert,
   WardrobeItemNotFoundError: class WardrobeItemNotFoundError extends Error {},
+  WardrobeAssetConflictError: class WardrobeAssetConflictError extends Error {},
 }));
 import { addWardrobeItem } from "./actions";
+
+const imageAssetId = "00000000-0000-4000-8000-000000000001";
 
 function form(overrides: Record<string, string> = {}) {
   const data = new FormData();
@@ -23,6 +26,7 @@ function form(overrides: Record<string, string> = {}) {
     name: "Linen shirt",
     category: "top",
     color: "Cream",
+    image_asset_id: imageAssetId,
     ...overrides,
   }).forEach(([key, value]) => data.set(key, value));
   return data;
@@ -40,17 +44,24 @@ describe("public demo mutation boundary", () => {
       form({ workspace_id: "foreign-workspace" }),
     );
     expect(result.ok).toBe(true);
-    expect(mocks.insert).toHaveBeenCalledWith({
-      name: "Linen shirt",
-      category: "top",
-      color: "Cream",
-    });
+    expect(mocks.insert).toHaveBeenCalledWith(
+      { name: "Linen shirt", category: "top", color: "Cream" },
+      imageAssetId,
+    );
     expect(mocks.revalidate).toHaveBeenCalledWith("/wardrobe");
   });
   it("rejects invalid inputs before any database write", async () => {
     const result = await addWardrobeItem(
       { ok: false, message: "" },
       form({ category: "unsupported" }),
+    );
+    expect(result.ok).toBe(false);
+    expect(mocks.insert).not.toHaveBeenCalled();
+  });
+  it("requires an uploaded image before saving", async () => {
+    const result = await addWardrobeItem(
+      { ok: false, message: "" },
+      form({ image_asset_id: "" }),
     );
     expect(result.ok).toBe(false);
     expect(mocks.insert).not.toHaveBeenCalled();

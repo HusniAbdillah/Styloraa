@@ -11,7 +11,10 @@ export default async function WardrobePage({
   const params = await searchParams;
   const parsed = wardrobeListFiltersSchema.safeParse({
     search: typeof params.search === "string" ? params.search : "",
-    category: typeof params.category === "string" ? params.category : undefined,
+    category:
+      typeof params.category === "string" && params.category.length > 0
+        ? params.category
+        : undefined,
     offset: typeof params.offset === "string" ? params.offset : 0,
     limit: 24,
   });

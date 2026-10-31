@@ -7,6 +7,7 @@ import {
   BookmarkIcon,
   LayersIcon,
   MixerHorizontalIcon,
+  PersonIcon,
 } from "@radix-ui/react-icons";
 import { cn } from "@/lib/utils";
 import { WorkflowExitLink } from "@/components/workflow-exit-link";
@@ -17,6 +18,7 @@ const links = [
   { href: "/saved-looks", label: "Saved looks", icon: BookmarkIcon },
   { href: "/capsules", label: "Capsules", icon: LayersIcon },
   { href: "/preferences", label: "Preferences", icon: MixerHorizontalIcon },
+  { href: "/profile", label: "Profile", icon: PersonIcon },
 ] as const;
 
 export function WorkspaceNav({
@@ -48,7 +50,12 @@ export function WorkspaceNav({
                 "bg-primary text-primary-foreground hover:bg-primary-hover hover:text-primary-foreground",
             )}
           >
-            <Icon width={20} height={20} className="shrink-0" aria-hidden="true" />
+            <Icon
+              width={20}
+              height={20}
+              className="shrink-0"
+              aria-hidden="true"
+            />
             {!collapsed ? <span>{label}</span> : null}
           </WorkflowExitLink>
         );

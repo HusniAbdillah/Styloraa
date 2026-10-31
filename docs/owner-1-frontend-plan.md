@@ -193,11 +193,12 @@ URL filters and four primary states are verified against actual backend data.
    the collection. Use desktop contextual editor behavior and a mobile
    full-screen sheet; keep route/back state stable with the selected item and
    filters.
-2. Build one form for create and edit using only the stable field contract:
-   name, category, color, optional subcategory, notes and supported attributes.
-   Metadata-only save is valid.
-3. Use `useActionState` for pending/result messaging. Disable duplicate submit
-   while pending. Preserve the entered values after validation/network failure.
+2. Build the create dialog with required name, category, color, and clothing
+   photo fields; subcategory and notes are optional. Show Save changes only
+   after the photo upload succeeds and place it after the upload controls. Keep
+   the existing editor for edits and supported attributes.
+3. Show upload and save pending/result states. Disable duplicate submissions
+   while pending and preserve entered details after validation/network failure.
 4. Add explicit cancel/close and archive action. Confirm archive if the current
    design/system supports a confirmation dialog; do not silently hard-delete.
 5. After a successful save/archive, close the editor, refresh the collection,
@@ -206,9 +207,9 @@ URL filters and four primary states are verified against actual backend data.
 
 **Focused checks**
 
-- Create metadata-only item; edit every supported user field; reject missing
-  name/color and invalid category; verify field errors/status announced to
-  assistive technology.
+- Create an item with an uploaded photo; reject missing name/category/color,
+  missing photo, and invalid category; verify field errors/status announced to
+  assistive technology. Subcategory and notes may remain empty.
 - Pending state prevents repeated submission; success state closes/refreshes;
   failure state keeps form contents.
 - Archive asks for a clear user action, removes item from active results, and
@@ -348,8 +349,8 @@ claims and without overwriting preferences.
 
 **Small tasks**
 
-1. Walk through collection → add metadata-only item → edit → add/replace image
-   → remove image → archive; then Preferences save/clear and Profile save/clear.
+1. Walk through collection → add item with photo → edit → replace image →
+   remove image → archive; then Preferences save/clear and Profile save/clear.
 2. Check all pages in read-only mode, no-data mode and after online fixture
    cleanup. Confirm no demo shared workspace record was changed.
 3. Verify desktop at 1440px/1280px and mobile at 390px/360px, including long

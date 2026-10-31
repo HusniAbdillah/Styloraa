@@ -5,17 +5,21 @@ import { getServerEnv, isDatabaseConfigured } from "@/lib/env";
 import {
   archiveWardrobeItem as archiveWardrobeItemInRepository,
   attachWardrobeImage,
-  insertWardrobeItem,
+  insertWardrobeItemWithImage,
   removeWardrobeImage as removeWardrobeImageInRepository,
+  saveStaticWardrobeItem as saveStaticWardrobeItemInRepository,
   updateWardrobeItem as updateWardrobeItemInRepository,
+  WardrobeAssetConflictError,
   WardrobeItemNotFoundError,
 } from "./repository";
 import {
   imageBytesMatchMimeType,
+  wardrobeAssetIdSchema,
   wardrobeImageMetadataSchema,
   wardrobeItemIdSchema,
   wardrobeItemSchema,
 } from "./schema";
+import { isDemoWardrobeEntryId } from "./demo-wardrobe";
 
 export type WardrobeActionState = { ok: boolean; message: string };
 
@@ -67,13 +71,23 @@ export async function addWardrobeItem(
 ): Promise<WardrobeActionState> {
   const input = parseItemInput(formData);
   if (!input.success) return { ok: false, message: input.message };
+  const assetId = wardrobeAssetIdSchema.safeParse(
+    formData.get("image_asset_id"),
+  );
+  if (!assetId.success)
+    return { ok: false, message: "Upload a clothing photo before saving." };
   if (!writesEnabled())
     return { ok: false, message: "Demo writes are not enabled." };
   try {
-    await insertWardrobeItem(input.data);
+    await insertWardrobeItemWithImage(input.data, assetId.data);
     invalidateWardrobe();
     return { ok: true, message: "Item added to the shared wardrobe." };
   } catch (error) {
+    if (error instanceof WardrobeAssetConflictError)
+      return {
+        ok: false,
+        message: "The image upload expired. Upload the photo again, then save.",
+      };
     return actionError(
       error,
       "Could not save the item. Check the database configuration and migrations.",
@@ -93,6 +107,26 @@ export async function editWardrobeItem(
     return { ok: false, message: "Demo writes are not enabled." };
   try {
     await updateWardrobeItemInRepository(id.data, input.data);
+    invalidateWardrobe();
+    return { ok: true, message: "Wardrobe item updated." };
+  } catch (error) {
+    return actionError(error, "Could not update the item. Please try again.");
+  }
+}
+
+export async function saveStaticWardrobeItem(
+  _previous: WardrobeActionState,
+  formData: FormData,
+): Promise<WardrobeActionState> {
+  const staticEntryId = formData.get("static_entry_id");
+  if (!isDemoWardrobeEntryId(staticEntryId))
+    return { ok: false, message: "Invalid starter wardrobe item." };
+  const input = parseItemInput(formData);
+  if (!input.success) return { ok: false, message: input.message };
+  if (!writesEnabled())
+    return { ok: false, message: "Demo writes are not enabled." };
+  try {
+    await saveStaticWardrobeItemInRepository(staticEntryId, input.data);
     invalidateWardrobe();
     return { ok: true, message: "Wardrobe item updated." };
   } catch (error) {

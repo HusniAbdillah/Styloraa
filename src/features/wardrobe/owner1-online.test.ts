@@ -30,6 +30,29 @@ describe.skipIf(!online)("Owner 1 hosted Supabase end-to-end", () => {
   let finalizeRoute: typeof import("@/app/api/wardrobe/[itemId]/image-uploads/[assetId]/finalize/route");
   let cleanupRoute: typeof import("@/app/api/wardrobe/assets/cleanup/route");
 
+  async function createUploadedItem(values: Record<string, string>) {
+    const png = Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a2ioAAAAASUVORK5CYII=",
+      "base64",
+    );
+    const reserved = await repository.createWardrobeImageUploadForNewItem({
+      mimeType: "image/png",
+      byteSize: png.byteLength,
+    });
+    const { error } = await supabase.storage
+      .from("wardrobe")
+      .uploadToSignedUrl(reserved.storagePath, reserved.uploadToken, png, {
+        contentType: "image/png",
+        cacheControl: "300",
+      });
+    if (error)
+      throw new Error("Could not upload the online test fixture image.");
+    return actions.addWardrobeItem(
+      { ok: false, message: "" },
+      form({ ...values, image_asset_id: reserved.assetId }),
+    );
+  }
+
   beforeAll(async () => {
     loadEnvConfig(process.cwd());
     const env = await import("@/lib/env");
@@ -116,15 +139,12 @@ describe.skipIf(!online)("Owner 1 hosted Supabase end-to-end", () => {
     expect(empty.items).toEqual([]);
 
     const initialState = { ok: false, message: "" };
-    const created = await actions.addWardrobeItem(
-      initialState,
-      form({
-        name: "Synthetic owner one item",
-        category: "top",
-        color: "Cream",
-        workspace_id: foreignWorkspaceId,
-      }),
-    );
+    const created = await createUploadedItem({
+      name: "Synthetic owner one item",
+      category: "top",
+      color: "Cream",
+      workspace_id: foreignWorkspaceId,
+    });
     expect(created.ok).toBe(true);
 
     const listed = await repository.listWardrobePage({
@@ -269,14 +289,11 @@ describe.skipIf(!online)("Owner 1 hosted Supabase end-to-end", () => {
   it("cleans up an archived image after a transient detach failure", async () => {
     const initialState = { ok: false, message: "" };
     expect(
-      await actions.addWardrobeItem(
-        initialState,
-        form({
-          name: "Synthetic archive recovery item",
-          category: "top",
-          color: "Ivory",
-        }),
-      ),
+      await createUploadedItem({
+        name: "Synthetic archive recovery item",
+        category: "top",
+        color: "Ivory",
+      }),
     ).toMatchObject({ ok: true });
     const listed = await repository.listWardrobePage({
       search: "Synthetic archive recovery item",
@@ -284,14 +301,6 @@ describe.skipIf(!online)("Owner 1 hosted Supabase end-to-end", () => {
       offset: 0,
     });
     const archivedItemId = listed.items[0].id;
-    const png = Buffer.from(
-      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a2ioAAAAASUVORK5CYII=",
-      "base64",
-    );
-    await repository.attachWardrobeImage(archivedItemId, {
-      bytes: png,
-      mimeType: "image/png",
-    });
     const attached = await repository.getWardrobeItem(archivedItemId);
     expect(attached?.asset_id).toBeTruthy();
     const assetId = attached!.asset_id!;
@@ -365,16 +374,12 @@ describe.skipIf(!online)("Owner 1 hosted Supabase end-to-end", () => {
   }, 60_000);
 
   it("completes signed upload and server finalization while preserving workspace and bucket boundaries", async () => {
-    const initialState = { ok: false, message: "" };
     expect(
-      await actions.addWardrobeItem(
-        initialState,
-        form({
-          name: "Synthetic image upload item",
-          category: "top",
-          color: "Ivory",
-        }),
-      ),
+      await createUploadedItem({
+        name: "Synthetic image upload item",
+        category: "top",
+        color: "Ivory",
+      }),
     ).toMatchObject({ ok: true });
     const itemList = await repository.listWardrobePage({
       search: "Synthetic image upload item",

@@ -1,31 +1,42 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
+import { wardrobeItemMatchesSearch } from "./search";
 
-vi.mock("server-only", () => ({}));
+const item = {
+  name: "Blue denim A-line skirt",
+  category: "bottom",
+  color: "Blue",
+  subcategory: "Denim skirt",
+  notes: "Easy to pair with a tucked tee.",
+  attributes: {
+    material: "denim",
+    pattern: "solid",
+    style: ["casual", "classic"],
+  },
+  inferred_attributes: { silhouette: "A-line" },
+};
 
-import { buildWardrobeSearchFilter } from "./repository";
-
-describe("Wardrobe search filter", () => {
-  it("searches item name, color and category as one phrase", () => {
-    expect(buildWardrobeSearchFilter("linen shirt, blue (cotton)")).toBe(
-      'name.ilike."%linen shirt, blue (cotton)%",color.ilike."%linen shirt, blue (cotton)%",category.ilike."%linen shirt, blue (cotton)%"',
-    );
+describe("wardrobe item search", () => {
+  it("matches each clothing detail field and structured attributes", () => {
+    for (const search of [
+      "blue denim",
+      "bottom",
+      "blue",
+      "denim skirt",
+      "tucked tee",
+      "material denim",
+      "casual",
+      "silhouette A-line",
+    ]) {
+      expect(wardrobeItemMatchesSearch(item, search)).toBe(true);
+    }
   });
 
-  it("treats SQL LIKE wildcards as literal search text", () => {
-    expect(buildWardrobeSearchFilter("red%_coat")).toBe(
-      'name.ilike."%red\\\\%\\\\_coat%",color.ilike."%red\\\\%\\\\_coat%",category.ilike."%red\\\\%\\\\_coat%"',
-    );
+  it("matches case-insensitively and ignores blank searches", () => {
+    expect(wardrobeItemMatchesSearch(item, "  CLASSIC ")).toBe(true);
+    expect(wardrobeItemMatchesSearch(item, "   ")).toBe(true);
   });
 
-  it("quotes reserved PostgREST syntax so search text cannot add filters", () => {
-    expect(buildWardrobeSearchFilter('red"),category.eq.top')).toBe(
-      'name.ilike."%red\\"),category.eq.top%",color.ilike."%red\\"),category.eq.top%",category.ilike."%red\\"),category.eq.top%"',
-    );
-  });
-
-  it("escapes backslashes before composing quoted filters", () => {
-    expect(buildWardrobeSearchFilter(String.raw`cotton\linen`)).toBe(
-      String.raw`name.ilike."%cotton\\\\linen%",color.ilike."%cotton\\\\linen%",category.ilike."%cotton\\\\linen%"`,
-    );
+  it("returns false when no clothing detail contains the search phrase", () => {
+    expect(wardrobeItemMatchesSearch(item, "wool coat")).toBe(false);
   });
 });
