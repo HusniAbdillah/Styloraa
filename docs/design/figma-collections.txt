@@ -1,0 +1,60 @@
+{
+ const s=shell('Wardrobe','A wardrobe with possibility.','Find what is already here before looking for something new.','Wardrobe');
+ const toolbar=row(s.main,s.w,16);field(toolbar,'Search wardrobe','Name, color or category',600);button(toolbar,'Add item','Add item',false,180);button(toolbar,'Filters','Wardrobe filtered',true,180);
+ for(let j=0;j<2;j++){const r=row(s.main,s.w,24);for(const [kind,name]of(j===0?[['shirt','Ivory linen shirt'],['trousers','Wide-leg trousers'],['jacket','Relaxed blazer'],['bag','Oxblood tote']]:[['dress','Soft knit dress'],['shirt','Cotton poplin shirt'],['shoe','Leather loafers'],['jacket','Light overshirt']])){const c=garment(r,kind,name,'Sample inventory',268);c.name='Go/Item detail';}}
+}
+{
+ const s=shell('Wardrobe filtered','Find the piece you have in mind.','Filters: Tops / Ivory. Clear filters returns to the full collection.','Wardrobe');
+ const r=row(s.main,s.w,24);garment(r,'shirt','Ivory linen shirt','Sample / Tops',330);garment(r,'shirt','Cotton poplin shirt','Sample / Tops',330);actions(s.main,s.w,'Add another item','Add item','Clear filters','Wardrobe');
+}
+{
+ const s=shell('Add item','Give a piece its place.','Images are optional. Start with the details you know.','Wardrobe');const r=row(s.main,s.w,32);
+ const img=panel(r,'Optional image',400);text(img,'Optional garment image','Section');note(img,'Choose a JPEG, PNG or WebP, or continue with metadata only.',352);button(img,'Choose sample image','Edit item',true,240);
+ const p=panel(r,'Item metadata',650);field(p,'Item name','Enter a useful name',602);field(p,'Category','Choose category',602);field(p,'Color','Choose or describe the color',602);field(p,'Additional details (optional)','Fit, texture, style tags, notes',602);actions(p,602,'Save item','Wardrobe','Cancel','Wardrobe');
+}
+{
+ const s=shell('Item detail','Ivory linen shirt','Sample inventory / Top / Ivory','Wardrobe');const r=row(s.main,s.w,32);garment(r,'shirt','Ivory linen shirt','Illustrated sample',440);const p=panel(r,'Item details',620);text(p,'A light layer for everyday combinations.','Section',572);text(p,'Category: Top\nColor: Ivory\nFit: Relaxed\nTexture: User-entered linen description','Body',572);tag(p,'Source: sample wardrobe / editable metadata');button(p,'Edit details','Edit item',false,220);button(p,'Delete item','Delete item',true,220);button(p,'Use in a look','Match picker',true,220);
+}
+{
+ const s=shell('Edit item','Update the piece.','Changing this item does not silently regenerate saved looks.','Wardrobe');const r=row(s.main,s.w,32);garment(r,'shirt','Current image','Illustrated sample',370);const p=panel(r,'Edit item',650);field(p,'Name','Ivory linen shirt',602);field(p,'Category','Top',602);field(p,'Color','Ivory',602);field(p,'Fit and notes','Relaxed, light layer',602);actions(p,602,'Save changes','Item detail','Cancel','Item detail');
+}
+{
+ const s=shell('Delete item','Remove this wardrobe item?','Shared changes affect everyone using this demo.','Wardrobe');const p=panel(s.main,'Delete confirmation',760);text(p,'Check affected looks before removing it.','Section',712);text(p,'Saved outfit snapshots should retain a visible unavailable-piece reference. The final data contract must support this behavior.','Body',712,'Subtle');note(p,'This prototype demonstrates confirmation only. It does not delete database data.',712);actions(p,712,'Remove item','Wardrobe','Keep item','Item detail');
+}
+{
+ const s=shell('Saved looks','Looks worth returning to.','Saved combinations and unfinished drafts stay clearly separate.','Saved looks');const r=row(s.main,s.w,24);for(const [title,status]of[['Light layers, deep accents','Saved · Sample'],['An everyday alternative','Saved · Sample'],['A look in progress','Draft · Not saved']]){const p=panel(r,title,365);outfit(p,317);text(p,title,'Section',317);tag(p,status);button(p,'Open look','Look detail',true,220);}
+}
+{
+ const s=shell('Look detail','Light layers, deep accents','Saved looks / Sample look / Saved revision','Saved looks');const r=row(s.main,s.w,32);outfit(r,660,'Illustrated sample / Selected outfit');const p=panel(r,'Look decision',452);
+ text(p,'Why this works','Section',404);text(p,'The relaxed shirt and wide-leg trousers keep a consistent silhouette. Oxblood accessories bring a single, deliberate accent.','Body',404);tag(p,'Sample rationale / not a live AI result');
+ text(p,'Inputs used','Label',404);text(p,'Selected garments and relaxed-fit preference. No body or skin attributes inferred.','Meta',404,'Subtle');
+ button(p,'Replace a piece','Match picker',true,230);button(p,'Save changes','Look saved',false,230);button(p,'Find missing pieces','Shopping',true,230);button(p,'Preview outfit','Preview setup',true,230);button(p,'Share this look','Share composer',true,230);
+}
+{
+ const s=shell('Look saved','Saved, ready to revisit.','Your look remains connected to its reference and selected pieces.','Saved looks');outfit(s.main,500,'Illustrated sample / Saved look');const r=row(s.main,s.w,16);button(r,'View saved looks','Saved looks',false,220);button(r,'Continue editing','Look detail',true,220);button(r,'Share look','Share composer',true,180);
+}
+{
+ const s=shell('Capsules','More combinations. Fewer new pieces.','Collections of looks built around what is already in the wardrobe.','Capsules');const r=row(s.main,s.w,24);const p=panel(r,'Sample capsule',550);outfit(p,430,'Illustrated sample / Capsule cover');text(p,'Everyday, considered','Section');button(p,'Open capsule','Capsule results',true,220);const intro=auto(r,'Create capsule',550,'VERTICAL',24);text(intro,'Build around a purpose.','Page');text(intro,'Choose a timeframe or occasion, select existing pieces, then review combinations and optional additions.','Body',500,'Subtle');button(intro,'Create capsule','Capsule builder',false,220);
+}
+{
+ const s=shell('Capsule builder','A smaller collection. More ways to wear it.','Choose existing pieces and tell us where they need to work.','Capsules');const r=row(s.main,s.w,24);const p=panel(r,'Capsule brief',360);field(p,'Capsule name','Everyday, considered',312);field(p,'Purpose','Workdays and relaxed evenings',312);field(p,'Timeframe (optional)','Choose dates or skip',312);field(p,'Season and fit (optional)','Use current preferences',312);button(p,'Generate combinations','Capsule results',false,312);
+ const pick=auto(r,'Wardrobe selection',760,'VERTICAL',24);const a=row(pick,760,16);for(const [k,n]of[['shirt','Ivory shirt'],['trousers','Wide-leg trousers'],['jacket','Relaxed blazer']])garment(a,k,n,'Selected · Sample',240);note(pick,'Select the pieces you want to reuse. No wardrobe images need to be sent when the provider uses text and item IDs.',760);
+}
+{
+ const s=shell('Capsule results','Everyday, considered','Selected pieces, explained combinations and optional additions.','Capsules');const r=row(s.main,s.w,24);for(const title of ['Light layers','A tailored contrast','An evening accent']){const p=panel(r,title,365);outfit(p,317);text(p,title,'Section');text(p,'Sample rationale: reuses the selected pieces with a different layering balance.','Meta',317,'Subtle');button(p,'Save this look','Look saved',true,230);}button(s.main,'Review suggested additions','Capsule additions',true,280);
+}
+{
+ const s=shell('Capsule additions','What would extend this capsule?','Optional additions should earn their place through reuse.','Capsules');const r=row(s.main,s.w,32);garment(r,'jacket','A warm neutral layer','Illustrated suggestion / Sample',400);const p=panel(r,'Reuse reasoning',650);text(p,'Why consider this addition?','Section');text(p,'It introduces a layering option for the existing light shirt and dark trousers. Check that it adds useful combinations rather than duplicating an owned piece.','Body',602);note(p,'No cost-per-wear, price or usage metric is estimated from sample data.',602);actions(p,602,'Compare purchase options','Shopping','Back to capsule','Capsule results');
+}
+{
+ const s=shell('Style DNA','Your direction, with room to change.','Shared demo defaults. Skip any question or use an override for this look only.','Style preferences');const r=row(s.main,s.w,24);const p=panel(r,'Style and fit',650);text(p,'Style references','Section');const labels=row(p,602,12);button(labels,'Minimal / Selected','Style DNA',false,190);button(labels,'Classic','Style DNA',true,180);button(labels,'Experimental','Style DNA',true,208);
+ field(p,'Color families','Ivory, charcoal, oxblood',602);field(p,'Fit and coverage','Relaxed / Choose coverage or skip',602);button(p,'Optional body and undertone','Body preferences',true,320);
+ const side=panel(r,'Preference scope',470);text(side,'Choose where changes apply.','Section',422);text(side,'Shared defaults affect all visitors. A current-look override does not create a private profile.','Body',422,'Subtle');button(side,'Use for this look','Outfits',false,260);button(side,'Save shared defaults','Preferences saved',true,260);button(side,'Clear preferences','Preferences cleared',true,260);
+}
+{
+ const s=shell('Body preferences','Optional context. Always your choice.','Use only synthetic demo settings. No body, skin or measurements are inferred.','Style preferences');const p=panel(s.main,'Optional preferences',1000);field(p,'Undertone','Warm / Cool / Neutral / Unsure / Skip',952);field(p,'Skin-depth preference (optional)','Choose a labeled swatch / Unsure / Skip',952);field(p,'Proportion guidance (optional)','Choose a labeled diagram / Not considered',952);note(p,'Inclusive illustrations are pending approved assets. Fit and coverage preferences take priority over body labels. Clear any selection at any time.',952);actions(p,952,'Apply to this look','Outfits','Skip these questions','Style DNA');
+}
+{
+ const s=shell('Workspace info','A shared space to explore style.','No account, no private wardrobe, no personal model-photo uploads.','');const r=row(s.main,s.w,24);const p=panel(r,'Shared demo',550);text(p,'Changes are shared.','Section');text(p,'Anyone using this demo can change the available dataset. Use sample garments and synthetic preferences.','Body',502);button(p,'Style preferences','Style DNA',true,250);const q=panel(r,'Capabilities',550);text(q,'Provider capability states','Section');text(q,'Image analysis: not configured\nOutfit suggestions: sample path\nShopping: not configured\nTry-on: sample illustration only','Body',502);note(q,'These labels must reflect real server capability in implementation. Never reveal API keys or environment values.',502);
+}
+return evidence();

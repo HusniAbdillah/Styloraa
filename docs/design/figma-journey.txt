@@ -1,0 +1,74 @@
+{
+ const s=shell('Landing','A considered way to get dressed.','Inspiration, made wearable.', '',true);
+ const r=row(s.main,s.w,64);const left=auto(r,'Editorial introduction',540,'VERTICAL',32);
+ text(left,'Recreate the look.\nStart with what\nyou own.','Display',540);
+ text(left,'Turn an outfit reference into pieces you can understand, wardrobe matches you can change, and a look worth saving.','Body',480,'Subtle');
+ button(left,'Upload inspiration','Upload',false,220);button(left,'Open sample look','Review',true,220);
+ text(left,'JPEG, PNG or WebP · Up to 10 MiB','Meta',480,'Subtle');
+ note(left,'Shared demo. Changes are visible to everyone. Use sample data only.',500);
+ const right=auto(r,'Editorial outfit',640,'VERTICAL',16);outfit(right,560,'Illustrated sample / Reference to wardrobe');
+}
+{
+ const s=shell('Upload','Begin with an inspiration.','Upload an outfit image or continue with an illustrated sample.');
+ const r=row(s.main,s.w,32);const drop=panel(r,'Upload surface',650);
+ text(drop,'Bring a look you want to recreate.','Section');text(drop,'Drop your image here','Page',560);
+ note(drop,'JPEG, PNG, WebP · 10 MiB maximum\nWe validate the image before analysis.',602);
+ button(drop,'Choose image','Image selected',false,200);button(drop,'Use sample image','Image selected',true,200);
+ const side=auto(r,'Before you upload',462,'VERTICAL',24);text(side,'A little context helps.','Section');field(side,'Occasion (optional)','Everyday / Work / Evening',430);
+ text(side,'Review detected garments before matching. Style preferences are optional.','Body',430,'Subtle');
+ note(side,'No personal model photos in this shared demo. Image analysis sends the selected reference to the configured provider.',430);
+ button(side,'Set style preferences','Style DNA',true,230);
+}
+{
+ const s=shell('Image selected','Ready to read the look.','Upload / Review pieces / Match / Choose outfit / Save');
+ const r=row(s.main,s.w,32);outfit(r,620,'Illustrated sample / inspiration selected');const side=auto(r,'Image controls',492,'VERTICAL',24);
+ text(side,'Sample inspiration','Section');text(side,'An ivory shirt, relaxed tailoring and oxblood accessories. This is a labeled illustration, not provider output.','Body',460,'Subtle');
+ button(side,'Replace image','Upload',true,200);button(side,'Remove image','Upload',true,200);
+ note(side,'When analysis is enabled, the reference is sent for garment detection. You can review and correct every piece.',460);
+ button(side,'Analyze image','Review',false,220);
+}
+{
+ const s=shell('Review','Review the pieces.','Keep the details you trust. Correct the ones you do not.');
+ const r=row(s.main,s.w,24);outfit(r,400,'Illustrated sample / Reference');const list=auto(r,'Detected pieces',720,'VERTICAL',16);
+ for(const [name,detail,state]of[['Ivory shirt','Top · Ivory · Relaxed · Likely linen texture','Sample detection'],['Wide-leg trousers','Bottom · Charcoal · Full length','Sample detection'],['Oxblood bag','Accessory · Leather-like finish','Review needed: material is uncertain']]){const p=panel(list,name,720);tag(p,state);text(p,name,'Section');text(p,detail,'Body',672,'Subtle');button(p,'Edit piece','Edit detection',true,150);}
+ const a=row(list,720,12);button(a,'Add piece','Edit detection',true,180);button(a,'Match wardrobe','Match',false,220);
+}
+{
+ const s=shell('Edit detection','Correct a piece.','Your correction stays attached to this garment, not to a new image.');const r=row(s.main,s.w,32);
+ garment(r,'shirt','Reference piece','Illustrated sample',370);const p=panel(r,'Edit detection',650);
+ field(p,'Piece name','Ivory relaxed shirt',602);field(p,'Category','Top',602);field(p,'Color','Ivory',602);
+ field(p,'Fit and texture','Relaxed / likely linen texture',602);tag(p,'Edited / Original sample detection retained');
+ actions(p,602,'Save correction','Review','Remove piece','Review');
+}
+{
+ const s=shell('Match','Start with what is already here.','Compare the reference with owned pieces, alternatives and missing items.');
+ for(const [kind,name,state,reason]of[['shirt','Ivory shirt','Owned match · Confirmed sample','Same color and relaxed cut.'],['trousers','Wide-leg trousers','Wardrobe alternative','Similar silhouette; darker than the reference.'],['bag','Oxblood tote','Missing','No selected wardrobe piece. Keep as missing or choose an alternative.']]){const p=panel(s.main,'Comparison/'+name,s.w);const r=row(p,s.w-48,24);illustration(r,kind,110,105);const middle=auto(r,'Comparison evidence',610,'VERTICAL',8);tag(middle,state);text(middle,name,'Section');text(middle,reason,'Body',610,'Subtle');button(r,'Change match','Match picker',true,200);}
+ actions(s.main,s.w,'Create outfit options','Outfits','Back to review','Review');
+}
+{
+ const s=shell('Match picker','Choose a wardrobe alternative.','Your current look and filters stay in place while you compare.');field(s.main,'Search wardrobe','Search by name, category or color',s.w);
+ const r=row(s.main,s.w,24);garment(r,'trousers','Charcoal wide-leg trousers','Selected · Sample inventory',265);garment(r,'trousers','Straight-leg trousers','Sample inventory',265);garment(r,'dress','Soft knit dress','Sample inventory',265);garment(r,'jacket','Relaxed blazer','Sample inventory',265);
+ actions(s.main,s.w,'Use selected item','Match','Keep as missing','Match');
+}
+{
+ const s=shell('Outfits','Three ways to make it yours.','Choose a direction. Every piece can be replaced.');const r=row(s.main,s.w,24);
+ for(const [title,state,reason]of[['Closest to the inspiration','Reference-led','Keeps the light upper half and relaxed proportions.'],['From your wardrobe','Selected direction','Reuses the selected shirt and trousers before suggesting additions.'],['A fresh alternative','A different balance','Adds warm tailoring while keeping the reference color relationship.']]){const p=panel(r,title,365);tag(p,state);text(p,title,'Section',317);outfit(p,317,'Illustrated sample');text(p,reason,'Body',317,'Subtle');button(p,'Choose this outfit','Look detail',title!=='From your wardrobe',230);}
+}
+{
+ const s=shell('Shopping','Find only what is missing.','Compare source evidence for the selected piece, with your look still in view.');const r=row(s.main,s.w,24);
+ const context=panel(r,'Missing-piece brief',280);garment(context,'bag','Oxblood tote','Missing piece',232);text(context,'Structured shape. Deep red tone. Everyday capacity.','Body',232);button(context,'Adjust Value Score','Value settings',true,232);
+ const results=auto(r,'Shopping results',840,'VERTICAL',16);note(results,'Sample layout. No live listings, seller links, prices or ratings are represented.',840);
+ const cards=row(results,840,24);for(let i=0;i<3;i++){const p=panel(cards,'Product evidence slot',264);illustration(p,'bag',216,180);text(p,'Product title from provider','Label',216);text(p,'Price unavailable\nRating unavailable\nSource required','Meta',216,'Subtle');text(p,'Unscored: incomplete evidence','Meta',216,'Action');button(p,'Inspect evidence','Product evidence',true,216);}
+ button(results,'Back to selected look','Look detail',true,230);
+}
+{
+ const s=shell('Value settings','Make value mean something.','Choose the factors to compare. Incomplete entries remain unscored.');const p=panel(s.main,'Score controls',820);
+ for(const [name,value]of[['Relevance to the garment brief','Favor closest attributes'],['Price','Compare only the same currency'],['Rating and reviews','Use rating together with review count']])field(p,name,value,772);
+ note(p,'A score is available only when factors and normalization are defined. Unknown shipping is not free shipping. Changing weights cannot turn missing data into evidence.',772);
+ actions(p,772,'Apply preferences','Shopping','Cancel','Shopping');
+}
+{
+ const s=shell('Product evidence','Check the source before deciding.','No exact match, price, rating or stock is assumed.');const r=row(s.main,s.w,32);garment(r,'bag','Missing-item brief','Illustrated sample',400);const p=panel(r,'Evidence',620);
+ text(p,'Listing evidence is not available.','Section');text(p,'A live result should show source URL, title, price/currency when returned, rating and review count when returned, and retrieval time.','Body',572,'Subtle');note(p,'No seller destination is attached to this sample. You can return to the look without shopping.',572);button(p,'Return to comparison','Shopping',true,240);
+}
+return evidence();
