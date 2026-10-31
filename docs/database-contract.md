@@ -16,19 +16,19 @@ not by granting public table access. No auth/client configuration is introduced.
 
 ## Feature coverage
 
-| PRD area | Tables and stored state |
-| --- | --- |
-| Foundation | `workspaces`, `assets`: private bucket/path, MIME, size, source, deletion state |
-| Wardrobe CRUD | `wardrobe_items`: metadata, user facts, inferred attributes/provenance, optional asset, archive state |
-| Style DNA/body/fit | `user_preferences`: optional, clearable `style_dna`, `fit_preferences`, `body_profile` |
-| Inspiration/review | `looks`: source asset, status, revision, provider/source; `inspiration_pieces`: stable IDs, attributes, corrections, confidence |
-| Matching | `wardrobe_matches`: owned match/wardrobe alternative/missing, explanation, differences, manual override and source revision |
-| Three options | `outfit_options`, `outfit_option_items`: explained options and independent per-slot owned/product/missing choices |
+| PRD area             | Tables and stored state                                                                                                                      |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Foundation           | `workspaces`, `assets`: private bucket/path, MIME, size, source, deletion state                                                              |
+| Wardrobe CRUD        | `wardrobe_items`: metadata, user facts, inferred attributes/provenance, optional asset, archive state                                        |
+| Style DNA/body/fit   | `user_preferences`: optional, clearable `style_dna`, `fit_preferences`, `body_profile`                                                       |
+| Inspiration/review   | `looks`: source asset, status, revision, provider/source; `inspiration_pieces`: stable IDs, attributes, corrections, confidence              |
+| Matching             | `wardrobe_matches`: owned match/wardrobe alternative/missing, explanation, differences, manual override and source revision                  |
+| Three options        | `outfit_options`, `outfit_option_items`: explained options and independent per-slot owned/product/missing choices                            |
 | Shopping/Value Score | `products`, `shopping_searches`, `shopping_results`: provider evidence, nullable money/rating fields, query context, weights/factors/version |
-| Saved looks | `looks`, `look_items`, `saved_look_snapshots`: active context, owned relations and immutable historical decisions |
-| Social Fit | `share_links`: hash-only token storage, safe snapshot, catchphrase, expiry, one-way revocation |
-| Capsule builder | `capsules`, `capsule_items`, `capsule_outfits`, `capsule_outfit_items`: selected inventory, detailed brief, combinations and rationale |
-| Single/combo try-on | `ai_jobs`: contextual references, provider/model, acknowledgments, mannequin/provider model, output asset and completion |
+| Saved looks          | `looks`, `look_items`, `saved_look_snapshots`: active context, owned relations and immutable historical decisions                            |
+| Social Fit           | `share_links`: hash-only token storage, safe snapshot, catchphrase, expiry, one-way revocation                                               |
+| Capsule builder      | `capsules`, `capsule_items`, `capsule_outfits`, `capsule_outfit_items`: selected inventory, detailed brief, combinations and rationale       |
+| Single/combo try-on  | `ai_jobs`: contextual references, provider/model, acknowledgments, mannequin/provider model, output asset and completion                     |
 
 The new option enum is `closest`, `from_wardrobe`, `fresh_alternative`. Do not reuse
 the previous project's Closest/No-Buy enum as this repository's contract.
@@ -49,8 +49,9 @@ shape, while semantic validation remains a server responsibility.
   material composition from reference pixels.
 - `style_dna`: style tags, color families/contrast and optional user-selected
   undertone/skin-depth choices. `fit_preferences`: fit, coverage, lengths, layering.
-  `body_profile`: optional self-selected proportions/illustration choice. Empty
-  objects mean skipped/reset; no gender or body classification is mandatory.
+  `body_profile`: optional self-selected body-shape, proportions, and illustration
+  references. Empty objects mean skipped/reset; no gender or body classification is
+  mandatory.
 - `capsules.brief`: purpose, required/excluded pieces and user instructions;
   timeframe/season/occasion also have explicit nullable columns. Purchase suggestions
   stay in `missing_additions`, outside owned capsule membership.
@@ -90,13 +91,13 @@ collecting sensitive personal photos or imply user-private storage.
 Functions use `SECURITY INVOKER`, a fixed empty search path and explicit qualified
 table names. Only `service_role` gets execution permission.
 
-| Function | Input and result |
-| --- | --- |
-| `save_look` | Server workspace, title, notes, 1-20 distinct wardrobe IDs. Atomically creates a manual saved look, ordered members and snapshot; returns look ID. |
-| `save_outfit_option` | Server workspace, option ID, expected look revision. Saves current per-slot selections and snapshot atomically; returns snapshot ID. |
-| `create_share_link` | Server workspace, saved snapshot ID, catchphrase, future expiry up to 30 days. Returns share ID and a raw token once; database stores SHA-256 hash. |
-| `create_capsule` | Server workspace, title, description, JSON brief and 1-100 distinct wardrobe IDs. Validates current inventory and persists membership atomically; returns capsule ID. |
-| `create_capsule_from_saved_look` | Server workspace, snapshot ID, title, description and brief. Rejects product/missing snapshots and rechecks actual inventory; returns capsule ID. |
+| Function                         | Input and result                                                                                                                                                      |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `save_look`                      | Server workspace, title, notes, 1-20 distinct wardrobe IDs. Atomically creates a manual saved look, ordered members and snapshot; returns look ID.                    |
+| `save_outfit_option`             | Server workspace, option ID, expected look revision. Saves current per-slot selections and snapshot atomically; returns snapshot ID.                                  |
+| `create_share_link`              | Server workspace, saved snapshot ID, catchphrase, future expiry up to 30 days. Returns share ID and a raw token once; database stores SHA-256 hash.                   |
+| `create_capsule`                 | Server workspace, title, description, JSON brief and 1-100 distinct wardrobe IDs. Validates current inventory and persists membership atomically; returns capsule ID. |
+| `create_capsule_from_saved_look` | Server workspace, snapshot ID, title, description and brief. Rejects product/missing snapshots and rechecks actual inventory; returns capsule ID.                     |
 
 The public share response may contain only snapshot title, source label, item
 name/category/color/kind and the catchphrase. The insert trigger constructs this
