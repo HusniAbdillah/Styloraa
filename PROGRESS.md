@@ -47,7 +47,7 @@ See `TASK.md` for exact boundaries and integration checkpoints.
 When a feature changes, update its status only after reviewing the implementation. Record the actual command, environment, commit, output, and limitations for checks. Never mark a provider or end-to-end flow complete based only on a route placeholder, seed/sample result, or passing unit test.
 ## Owner 2 backend delivery — 2026-10-31
 
-The backend implementation is now on `feat/owner-2-backend-flow`. It connects to the hosted Supabase project `njjopdhdksycdgjbywrh` and uses the real Meta Muse API (`muse-spark-1.3`); the local Supabase Docker stack was not used. See [plan/OWNER_2_BACKEND.md](plan/OWNER_2_BACKEND.md) for the complete scope, implementation contract, test gates, and limitations.
+The backend implementation is pushed on `feat/owner-2-backend-flow` at `ed0e2ba`. It connects to the hosted Supabase project `njjopdhdksycdgjbywrh` and uses the real Meta Muse API (`muse-spark-1.3`); the local Supabase Docker stack was not used. See [plan/OWNER_2_BACKEND.md](plan/OWNER_2_BACKEND.md) for the complete scope, implementation contract, test gates, and limitations.
 
 | Backend area | Delivery status | Verification |
 | --- | --- | --- |
