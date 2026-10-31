@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+:root {
+  --porcelain: #f5f2ec;
+  --paper: #fffefc;
+  --near-black: #211f20;
+  --oxblood: #642e3b;
+  --deep-wine: #48212b;
+  --muted-mauve: #a18483;
+  --stone: #dcd6ce;
+  --secondary-text: #706a66;
+}
+@theme inline {
+  --color-background: var(--porcelain);
+  --color-card: var(--paper);
+  --color-foreground: var(--near-black);
+  --color-primary: var(--oxblood);
+  --color-primary-hover: var(--deep-wine);
+  --color-primary-foreground: var(--paper);
+  --color-accent: var(--muted-mauve);
+  --color-border: var(--stone);
+  --color-secondary: var(--secondary-text);
+  --font-sans: Arial, Helvetica, sans-serif;
+  --font-serif: Georgia, "Times New Roman", serif;
+}
+body { margin: 0; background: var(--porcelain); color: var(--near-black); font-family: Arial, Helvetica, sans-serif; }
+button, input, select, textarea { font: inherit; }
+button:not(:disabled), select { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--oxblood); outline-offset: 4px; }
+::selection { background: var(--oxblood); color: var(--paper); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0s !important; animation-duration: 0s !important; } }
