@@ -59,6 +59,11 @@ export function StudioLink({
   );
 }
 
+function monogramLetter(name: string) {
+  const letter = name.trim().charAt(0);
+  return letter ? letter.toLocaleUpperCase() : "?";
+}
+
 export function ItemVisual({
   item,
   compact = false,
@@ -76,8 +81,11 @@ export function ItemVisual({
         />
       ) : (
         <div className={styles.noPhoto}>
-          <BackpackIcon width={28} height={28} aria-hidden="true" />
-          <span>Photo not added</span>
+          <span className={styles.monogram} aria-hidden="true">
+            {monogramLetter(item.name)}
+          </span>
+          <span>{item.category}</span>
+          <span className={styles.pill}>Sample visual</span>
         </div>
       )}
     </div>

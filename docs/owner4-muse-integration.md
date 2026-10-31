@@ -162,3 +162,17 @@ evidence above comes from the isolated local app using a real Muse credential.
 The final code passed pnpm check (80 tests), production build and a browser
 chunk scan with zero credential-value matches before hosted type generation.
 The follow-up check/build with hosted-generated types is recorded in the PR.
+
+## Latest main integration
+
+Before final review, main advanced to bbe9626 with the Owner 1 backend and
+PR #12 monogram fallback. Those changes were merged without dropping their
+files. GitHub caught an undeclared direct import of @next/env in the newly
+merged online-test suite; @next/env 16.4.3 is now explicitly pinned as a dev
+dependency, matching Next. The lockfile importer was updated without upgrading
+other packages. The merged check passed 80 tests; three opt-in Owner 1 online
+tests were skipped. The build follows main's webpack configuration.
+
+The generated next-env.d.ts is no longer tracked and is ignored by Git and
+Prettier. Next type generation/build recreates it in a clean checkout, avoiding
+repeated VS Code source changes when dev and production route types differ.
