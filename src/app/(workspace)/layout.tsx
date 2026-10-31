@@ -1,42 +1,32 @@
 import Link from "next/link";
-import { WorkspaceNav } from "@/components/workspace-nav";
 import { WorkspaceMobileNav } from "@/components/workspace-mobile-nav";
-export default function WorkspaceLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+import { WorkspaceNav } from "@/components/workspace-nav";
+
+export default function WorkspaceLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen md:grid md:grid-cols-[240px_minmax(0,1fr)]">
-      <a
-        href="#main"
-        className="focus:bg-card sr-only focus:not-sr-only focus:absolute focus:z-10 focus:p-4"
-      >
-        Skip to content
-      </a>
-      <aside className="border-border hidden border-r p-7 md:block">
-        <Link
-          href="/create"
-          className="mb-8 block font-serif text-4xl tracking-tight"
-        >
-          stylora<span className="text-primary">.</span>
+    <div className="workspace-shell">
+      <a href="#main" className="skip-link">Skip to content</a>
+      <aside className="workspace-sidebar">
+        <Link href="/create" className="brand-lockup workspace-brand" aria-label="Stylora studio home">
+          <span className="brand-symbol" aria-hidden="true">✳</span>
+          <span>Stylora<span className="brand-period">.</span></span>
         </Link>
         <WorkspaceNav />
-        <p className="text-secondary mt-8 hidden text-xs leading-5 md:block">
-          A little intention.
-          <br />A style of your own.
-        </p>
+        <div className="sidebar-mantra"><span aria-hidden="true">✳</span><p>Dress with intention.<br /><em>Wear what you love.</em></p></div>
       </aside>
-      <div className="min-w-0">
-        <header className="border-border flex min-h-18 items-center justify-between gap-3 border-b px-5 py-3 md:px-10">
-          <div className="flex items-center gap-3 md:hidden"><WorkspaceMobileNav /><Link href="/create" className="font-serif text-3xl tracking-tight">stylora<span className="text-primary">.</span></Link></div>
-          <span className="text-secondary hidden text-sm md:block">
-            Your everyday style studio
-          </span>
+      <div className="workspace-main-column">
+        <header className="workspace-topbar">
+          <div className="workspace-mobile-brand">
+            <WorkspaceMobileNav />
+            <Link href="/create" className="brand-lockup" aria-label="Stylora studio home">
+              <span className="brand-symbol" aria-hidden="true">✳</span>
+              <span>Stylora<span className="brand-period">.</span></span>
+            </Link>
+          </div>
+          <div className="workspace-breadcrumb"><span>Style studio</span><span aria-hidden="true">/</span><span>Make it yours</span></div>
+          <Link href="/preferences" className="profile-shortcut" aria-label="Style preferences"><span>✳</span><span className="profile-shortcut-label">Your style</span></Link>
         </header>
-        <main id="main" className="min-w-0 p-5 sm:p-6 md:p-10 lg:p-14">
-          {children}
-        </main>
+        <main id="main" className="workspace-main">{children}</main>
       </div>
     </div>
   );
