@@ -4,7 +4,10 @@ export type PreviewScreenData = {
     type: "wardrobe_item" | "look" | "capsule_outfit";
     id: string;
     capsuleId?: string;
+    optionId?: string;
   };
+  visualAi: boolean;
+  latestJob: PreviewJob | null;
   title: string;
   items: StudioItem[];
   pool: StudioItem[];
@@ -17,10 +20,12 @@ export type PreviewJob = {
   error_code: string | null;
   image_url?: string | null;
   stale?: boolean;
+  preview_mode?: string | null;
   input: {
     subject_type?: string;
     subject_id?: string;
     capsule_id?: string;
     item_ids?: string[];
+    mode?: string;
   };
 };

@@ -7,12 +7,14 @@ const mocks = vi.hoisted(() => ({
   writes: "true",
   build: vi.fn(),
   inventory: vi.fn(),
+  generate: vi.fn(),
 }));
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/env", () => ({
   isDatabaseConfigured: () => mocks.configured,
   getServerEnv: () => ({ DEMO_WRITES_ENABLED: mocks.writes }),
 }));
+vi.mock("./generation", () => ({ generateOwnedPreview: mocks.generate }));
 vi.mock("./repository", () => ({
   buildItemPreview: mocks.build,
   buildLookPreview: mocks.build,
@@ -52,16 +54,21 @@ beforeEach(() => {
   mocks.writes = "true";
   mocks.build.mockResolvedValue({ items: [piece] });
   mocks.inventory.mockResolvedValue([piece]);
+  mocks.generate.mockResolvedValue({
+    id: b,
+    status: "succeeded",
+    image_url: "https://example.com/generated.png",
+  });
 });
 describe("preview request route boundary", () => {
-  it("reports a missing visual provider after validating a real owned selection", async () => {
+  it("invokes generation only after validating a real owned selection", async () => {
     const response = await requestOwnedPreview(request(), {
       type: "wardrobe_item",
       id: a,
     });
-    expect(response.status).toBe(503);
-    expect((await response.json()).error.code).toBe(
-      "VISUAL_PROVIDER_NOT_CONFIGURED",
+    expect(response.status).toBe(201);
+    expect(mocks.generate).toHaveBeenCalledWith(
+      expect.objectContaining({ subject_id: a, mode: "single", item_ids: [a] }),
     );
   });
   it("rejects a body pointing at another subject before querying", async () => {
@@ -74,6 +81,7 @@ describe("preview request route boundary", () => {
       ).status,
     ).toBe(400);
     expect(mocks.build).not.toHaveBeenCalled();
+    expect(mocks.generate).not.toHaveBeenCalled();
   });
   it("rejects archived and unowned pieces instead of returning provider unavailable", async () => {
     mocks.build.mockResolvedValueOnce({

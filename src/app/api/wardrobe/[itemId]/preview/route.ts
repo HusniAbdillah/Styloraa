@@ -32,3 +32,5 @@ export async function GET(_request: Request, { params }: Params) {
     return mapRouteError(error);
   }
 }
+
+export const maxDuration = 240;

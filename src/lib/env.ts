@@ -9,9 +9,6 @@ const schema = z.object({
     .uuid()
     .default("00000000-0000-4000-8000-000000000001"),
   DEMO_WRITES_ENABLED: z.enum(["true", "false"]).default("false"),
-  META_API_KEY: z.string().min(1).optional(),
-  META_API_BASE_URL: z.url().optional(),
-  META_TEXT_MODEL: z.string().min(1).optional(),
 });
 
 export function isDatabaseConfigured() {
@@ -33,9 +30,6 @@ export function getServerEnv() {
     MODEL_API_KEY: process.env.MODEL_API_KEY || undefined,
     STYLORA_WORKSPACE_ID: process.env.STYLORA_WORKSPACE_ID || undefined,
     DEMO_WRITES_ENABLED: process.env.DEMO_WRITES_ENABLED || undefined,
-    META_API_KEY: process.env.META_API_KEY || undefined,
-    META_API_BASE_URL: process.env.META_API_BASE_URL || undefined,
-    META_TEXT_MODEL: process.env.META_TEXT_MODEL || undefined,
   });
   if (!result.success)
     throw new Error("Invalid server configuration. See .env.example.");

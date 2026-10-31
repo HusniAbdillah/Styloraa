@@ -1,4 +1,5 @@
 import "server-only";
+import { generateOwnedPreview } from "./generation";
 import { createPreviewJobSchema } from "./schema";
 import {
   buildItemPreview,
@@ -56,7 +57,7 @@ export async function requestOwnedPreview(request: Request, subject: Subject) {
       subject.type === "wardrobe_item"
         ? await buildItemPreview(subject.id)
         : subject.type === "look"
-          ? await buildLookPreview(subject.id)
+          ? await buildLookPreview(subject.id, input.option_id)
           : await buildOutfitPreview(subject.capsuleId!, subject.id);
     requireOwnedPreviewItems(composition.items);
     const selection =
@@ -76,10 +77,9 @@ export async function requestOwnedPreview(request: Request, subject: Subject) {
             }))
           : composition.items;
     validatePreviewSelection(pool, selection, input.mode);
-    return jsonError(
-      "VISUAL_PROVIDER_NOT_CONFIGURED",
-      503,
-      "Visual previews are currently unavailable. Your selected pieces have been kept.",
+    return Response.json(
+      { data: await generateOwnedPreview(input) },
+      { status: 201, headers: { "Cache-Control": "no-store" } },
     );
   } catch (error) {
     return mapRouteError(error);

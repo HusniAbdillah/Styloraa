@@ -9,9 +9,11 @@ export const previewSubjectSchema = z.enum([
 ]);
 
 export const createPreviewJobSchema = z.object({
+  request_id: z.uuid().default(() => crypto.randomUUID()),
   subject_type: previewSubjectSchema,
   subject_id: uuidSchema,
   capsule_id: uuidSchema.optional(),
+  option_id: uuidSchema.optional(),
   mode: previewModeSchema,
   model_source: z.enum(["mannequin", "provider_model"]).default("mannequin"),
   item_ids: z.array(uuidSchema).min(1).max(20).optional(),

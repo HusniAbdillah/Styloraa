@@ -6,10 +6,12 @@ export function SaveAsCapsule({
   lookId,
   selectedItemIds,
   disabled = false,
+  sourceOptionId,
 }: {
   lookId: string;
   selectedItemIds: string[];
   disabled?: boolean;
+  sourceOptionId?: string;
 }) {
   const router = useRouter();
   return (
@@ -18,7 +20,7 @@ export function SaveAsCapsule({
       disabled={disabled || !selectedItemIds.length}
       onClick={() =>
         router.push(
-          `/capsules?fromLook=${encodeURIComponent(lookId)}&pieces=${encodeURIComponent(selectedItemIds.join(","))}`,
+          `/capsules?fromLook=${encodeURIComponent(lookId)}&pieces=${encodeURIComponent(selectedItemIds.join(","))}${sourceOptionId ? `&fromOption=${encodeURIComponent(sourceOptionId)}` : ""}`,
         )
       }
     >

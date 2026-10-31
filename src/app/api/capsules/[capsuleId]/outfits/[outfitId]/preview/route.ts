@@ -30,3 +30,5 @@ export async function POST(request: Request, { params }: Params) {
     capsuleId,
   });
 }
+
+export const maxDuration = 240;

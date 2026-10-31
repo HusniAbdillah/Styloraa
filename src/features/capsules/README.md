@@ -1,20 +1,12 @@
-# capsules
+# Capsule Studio
 
-Owner: Developer 4. The responsive Capsule Studio and server API are implemented.
-See `docs/owner4-implementation.md` and `docs/api-capsule-preview.md`.
+Owner 4. The builder persists the full brief and exact owned selection.
+Generation uses the shared MODEL_API_KEY with Muse Spark 1.3.
 
-- `schema.ts`: brief, create/update validation, combination request, raw AI
-  combination shape.
-- `repository.ts`: server-only; workspace always comes from the environment.
-  Create/update use `save_capsule_studio` to persist metadata, brief and exact
-  membership atomically. Stale revisions and referenced-piece removal return 409.
-- `src/features/outfits/`: capsule outfits, owned-look copy, combination
-  generator with ownership verification.
-- `src/features/preview/`: composition builders plus preview job create/read.
-- `src/lib/ai/meta.ts`: Meta Llama-compatible text client (server-only).
-- `components/`: owned-piece selector, brief, existing capsules, overview and
-  combinations. Manual combinations use the user's own choices; AI has no
-  synthetic fallback. Photos come only from persisted private wardrobe assets.
+- generation.ts reserves bounded, idempotent requests and persists missing additions.
+- Owned combinations contain only selected inventory IDs; additions remain separate and unowned.
+- Queries sign only workspace-scoped private wardrobe assets.
+- Revision checks protect editing and saving generated drafts.
+- Removing a capsule cleans terminal outfit previews; active generation blocks deletion.
 
-Never accept a workspace ID from the browser. Never import repositories or
-secrets into Client Components.
+See docs/owner4-muse-integration.md for provider evidence and rollout.
