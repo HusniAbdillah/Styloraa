@@ -65,3 +65,35 @@ See `TASK.md` for exact boundaries and integration checkpoints.
 ## Update protocol
 
 When a feature changes, update its status only after reviewing the implementation. Record the actual command, environment, commit, output, and limitations for checks. Never mark a provider or end-to-end flow complete based only on a route placeholder, seed/sample result, or passing unit test.
+## Owner 2 backend delivery — 2026-10-31
+
+The backend implementation is pushed on `feat/owner-2-backend-flow` at `ed0e2ba`. It connects to the hosted Supabase project `njjopdhdksycdgjbywrh` and uses the real Meta Muse API (`muse-spark-1.3`); the local Supabase Docker stack was not used. See [plan/OWNER_2_BACKEND.md](plan/OWNER_2_BACKEND.md) for the complete scope, implementation contract, test gates, and limitations.
+
+| Backend area | Delivery status | Verification |
+| --- | --- | --- |
+| Private inspiration upload | **Complete** | Hosted signed upload using the provided JPG; private Storage object removed after E2E |
+| Muse image analysis and garment persistence | **Complete** | Real provider analysis returned 7–8 detected pieces across runs and persisted successfully |
+| Editable review and revision control | **Complete** | Hosted correction/revision flow passed after an RPC ambiguity fix |
+| Wardrobe matching and explanation | **Complete for current hosted data** | Muse explanations persisted; empty live wardrobe truthfully yields `missing`; deterministic rank fixtures cover positive match classes |
+| Manual match override | **Complete** | Hosted missing-item override passed |
+| Three outfit options | **Complete** | Real Muse returned and persisted `closest`, `from_wardrobe`, `fresh_alternative`; no owned items were fabricated |
+| Reload and cleanup | **Complete** | Results reloaded from hosted DB; test look, asset, and Storage object cleaned up |
+| Supabase migrations and types | **Complete** | Three additive migrations applied; generated database types include the RPC contract |
+| Unit and SQL tests | **Complete** | `pnpm check` passed (15 tests); hosted pgTAP passed 13 assertions |
+| Production build | **Complete** | `corepack pnpm@10.26.2 build` passed after the repository isolation fix |
+| Provider/transport negative matrix | **Not run** | 401/429/timeout and database/storage failure injection still need dedicated coverage |
+
+The shared hosted wardrobe was empty during testing, and no synthetic wardrobe records were inserted. The E2E used the actual supplied image and real Muse requests; it did not mock AI output. The initial review attempt exposed an ambiguous `look_id` in the hosted RPC; an additive follow-up migration fixed it. A later E2E check found match reloads were not scoped to the current look piece list; the repository now filters by those piece IDs. The full hosted flow passed after both fixes.
+
+
+## Merge regression check — 2026-10-31
+
+Merged fetched `origin/main` (`a10e849`, responsive design and updated product flow) into `feat/owner-2-backend-flow`. The `PROGRESS.md` conflict was resolved by retaining the updated main handoff and carrying forward the Owner 2 backend delivery section. No backend API, schema, or migration files were dropped; main's PRD, rules, task, design documentation, and layout changes were retained.
+
+| Verification after merge | Result |
+| --- | --- |
+| `corepack pnpm@10.26.2 check` | PASS — ESLint, route type generation, TypeScript, 4 files / 15 tests |
+| `corepack pnpm@10.26.2 build` | PASS — optimized Next.js production build |
+| `node scripts/owner2-e2e.mjs` against local Next.js + hosted Supabase | PASS — real Muse inference, review, matching, three options, reload, and cleanup |
+| E2E negative cases | PASS — unsupported upload, missing asset, stale review revision, stale matching revision |
+| Hosted cleanup | PASS — temporary Storage object, asset, and look removed; shared wardrobe remained empty |

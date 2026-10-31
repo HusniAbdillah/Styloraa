@@ -1163,6 +1163,34 @@ export type Database = {
           share_token: string
         }[]
       }
+      persist_inspiration_revision: {
+        Args: {
+          p_asset_id: string
+          p_expected_revision: number
+          p_look_id: string
+          p_notes: string
+          p_pieces: Json
+          p_provider_metadata: Json
+          p_source_type: string
+          p_title: string
+          p_workspace_id: string
+        }
+        Returns: {
+          look_id: string
+          revision: number
+        }[]
+      }
+      persist_look_results: {
+        Args: {
+          p_expected_revision: number
+          p_look_id: string
+          p_matches: Json
+          p_options: Json
+          p_replace_matches: boolean
+          p_workspace_id: string
+        }
+        Returns: Json
+      }
       save_look: {
         Args: {
           p_item_ids: string[]
