@@ -27,7 +27,7 @@ These rules apply to every feature in `PRD.md`. `AGENTS.md` adds repository exec
 
 ## Privacy and shared demo
 
-- The current app has no authentication and one shared workspace. Every visitor can see/change the same synthetic wardrobe and profile data. State this clearly in the interface; never promise private or per-user storage.
+- The current app has no authentication and one shared workspace. Every visitor can see/change the same synthetic wardrobe and profile data. Preserve this contract in deployment documentation and relevant data-handling context; the current design omits persistent Shared demo / Sample content banners. Never promise private or per-user storage.
 - Never use real personal wardrobe/profile content in the shared demo. Do not accept sensitive images. Inspiration uploads must be limited to non-sensitive outfit references and processed/stored through the approved server path.
 - Social Fit uses a separate, minimal snapshot with a random token, explicit user review, revocation, and no profile/private storage paths. Never grant direct public database access to internal tables.
 - Do not add authentication or claim per-person ownership without an explicit product scope change.

@@ -1,0 +1,39 @@
+const states=[
+ ['Wardrobe empty','A wardrobe starts with one useful piece.','No items have been saved. Add metadata without an image, or use labeled sample inventory.','Add item','Add item','Open sample','Wardrobe'],
+ ['Wardrobe no results','No pieces match these filters.','The wardrobe is not empty. Clear filters or try a broader search.','Clear filters','Wardrobe','Edit search','Wardrobe filtered'],
+ ['Wardrobe loading','Loading the wardrobe.','Reserve the garment-cell space. Announce loading without implying that items have already arrived.','View populated state','Wardrobe','View error state','Wardrobe error'],
+ ['Wardrobe error','The wardrobe could not be loaded.','Keep the current search and filters. Offer retry and a return to the current look.','Retry','Wardrobe','Back to look','Look detail'],
+ ['Write disabled','Saving is not enabled in this demo.','Keep the entered item details. This is configuration state, not an empty wardrobe.','Keep editing','Add item','Workspace details','Workspace info'],
+ ['Upload invalid','This image could not be accepted.','Use JPEG, PNG or WebP up to 10 MiB. A corrupt or unsupported file is rejected before analysis.','Choose another image','Upload','Open sample','Review'],
+ ['Upload failed','The image was not uploaded.','Keep the local selection where possible. A selected file is not proof of a successful upload.','Retry upload','Image selected','Remove image','Upload'],
+ ['Analysis pending','Reading the outfit reference.','Show the real request stage. Do not invent confidence, progress percentages or an ETA.','View review state','Review','Stop waiting','Image selected'],
+ ['Analysis unavailable','Image analysis is unavailable.','You can review the image manually or open a labeled sample. No provider output is fabricated.','Add pieces manually','Edit detection','Open sample','Review'],
+ ['Analysis partial','Some pieces need your review.','Keep valid detections. Add missed pieces or correct uncertain attributes before matching.','Review pieces','Review','Add a piece','Edit detection'],
+ ['Analysis invalid result','The analysis could not be read.','Malformed provider data must not become garment cards. Preserve the image and valid corrections.','Retry analysis','Analysis pending','Review manually','Edit detection'],
+ ['No wardrobe matches','No suitable wardrobe piece is selected.','Keep the piece missing, choose manually, or add an item. Saving does not require a purchase.','Choose manually','Match picker','Continue with missing pieces','Outfits'],
+ ['Outfit partial','Some outfit options are not ready.','Keep usable options. Invalid wardrobe IDs and malformed results are not displayed as real combinations.','Review available options','Outfits','Retry generation','Analysis pending'],
+ ['Outfit unavailable','Outfit generation is unavailable.','Build a look manually from known wardrobe items or continue with a labeled sample.','Choose pieces manually','Match picker','Open sample options','Outfits'],
+ ['Save failed','Your look has not been saved.','Keep the edited board and selected pieces. Announce success only after persistence succeeds.','Retry save','Look saved','Keep editing','Look detail'],
+ ['Shared conflict','This shared look changed elsewhere.','Reload the latest revision or preserve your edits as a new look. Do not overwrite silently.','Save as new look','Look saved','Reload latest','Look detail'],
+ ['Saved looks empty','Keep the combinations you want to revisit.','No saved looks yet. Create a look from inspiration or open a labeled sample.','Create a look','Upload','Open sample','Look detail'],
+ ['Missing saved item','A piece is no longer available.','Retain the saved snapshot and show the missing reference. Replacement must be explicit.','Replace piece','Match picker','Keep snapshot','Look detail'],
+ ['Capsules empty','Build a collection around your week.','Choose existing pieces and a purpose. No invented versatility or cost-per-wear metric is shown.','Create capsule','Capsule builder','Open sample capsule','Capsule results'],
+ ['Capsule partial','Review the combinations that are ready.','Reject duplicates and unknown item IDs. Keep the brief and wardrobe selection when retrying.','Review combinations','Capsule results','Edit selection','Capsule builder'],
+ ['Shopping empty','No products were returned.','Keep the garment brief and selected outfit. Do not fabricate a seller link, price or rating.','Change search brief','Shopping','Save without shopping','Look saved'],
+ ['Shopping unavailable','Shopping search is unavailable.','No live listings are available. Your look can still be saved and edited.','Return to look','Look detail','Review product evidence','Product evidence'],
+ ['Preferences saved','Shared preferences saved.','These defaults affect every visitor. The current look can still use an explicit override.','Return to preferences','Style DNA','Use for a look','Outfits'],
+ ['Preferences cleared','Neutral defaults restored.','No skin, body or fit selection is required to continue. Clearing a profile must not block a look.','Continue without preferences','Outfits','Choose preferences','Style DNA'],
+ ['Preview stale','This preview belongs to an earlier selection.','A replaced garment invalidates the generated preview. Do not label the old image as the new outfit.','Generate updated preview','Preview setup','Keep editing','Look detail'],
+ ['Preview timeout','The preview is taking longer than expected.','Show timeout based on the actual request lifecycle. Preserve the look; retry must not create accidental duplicate jobs.','Review request','Preview processing','Return to look','Look detail'],
+ ['Share copy failed','The link could not be copied.','Show selectable URL text and offer a retry. Never announce copied before clipboard success.','Retry copy','Share copied','Open public view','Public Social Fit'],
+ ['Share expired','This snapshot is no longer available.','Expired, revoked and unknown links never expose internal wardrobe or profile data.','Create a new look','Landing','Back to workspace','Workspace info'],
+ ['Preview delete failed','The preview could not be deleted.','Keep a truthful failure state until storage and applicable provider handling succeed.','Retry deletion','Preview delete','Keep preview','Preview result']
+];
+for(const [key,title,desc,primary,target,secondary,back]of states){const s=shell(key,title,desc);const p=panel(s.main,'Recovery state',940);tag(p,'State specification / Prototype demonstration');text(p,title,'Section',892);text(p,desc,'Body',892,'Subtle');actions(p,892,primary,target,secondary,back);}
+{
+ const s=shell('Handoff','Every feature has a place.','Full PRD coverage / Desktop 1440 / Sample illustrations / No auth');
+ for(const line of ['01 Inspiration: landing, image intake, validation, editable detection and manual fallback.','02 Decisions: owned / alternative / missing, three outfits, replacement and explained shopping.','03 Collections: wardrobe CRUD, saved revisions, capsule brief, combinations and additions.','04 Personalization: skippable Style DNA, optional undertone/body guide and shared defaults.','05 Preview: single/combo, consent, pending, result, timeout, stale output and deletion.','06 Social Fit: snapshot approval, catchphrase, link/copy, public view and revocation.'])text(s.main,line,'Body',s.w);
+ note(s.main,'Prototype links demonstrate navigation and state transitions. Fields and external integrations are design specifications, not working application services. All clothing imagery is editable sample illustration.',s.w);
+ button(s.main,'Start desktop prototype','Landing',false,300);
+}
+return evidence();

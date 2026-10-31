@@ -1,0 +1,36 @@
+{
+  "frames": 57,
+  "primaryDestinations": 8,
+  "desktopMain": 9,
+  "mobileMain": 9,
+  "horizontalOverflow": [],
+  "smallTargets": [],
+  "invalid": [],
+  "forbiddenText": [],
+  "fontFamilies": [
+    "Instrument Serif",
+    "Inter"
+  ],
+  "links": 371,
+  "backActions": 14,
+  "widths": [
+    1440,
+    390,
+    1280,
+    360
+  ],
+  "scrollModes": [
+    "VERTICAL",
+    "NONE"
+  ],
+  "flows": [
+    {
+      "nodeId": "44:5",
+      "name": "Desktop / Item to outfit"
+    },
+    {
+      "nodeId": "44:637",
+      "name": "Mobile / Item to outfit"
+    }
+  ]
+}
