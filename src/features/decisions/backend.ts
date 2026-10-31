@@ -44,7 +44,7 @@ export function checkDatabase(
       "The shared search limit was reached. Try again later.",
     );
   }
-  if (error.code === "40001") {
+  if (error.code === "PT409" || error.code === "40001") {
     throw new BackendError(
       409,
       "stale_revision",

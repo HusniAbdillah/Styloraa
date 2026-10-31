@@ -100,7 +100,7 @@ select throws_ok($$delete from public.wardrobe_items where id='41000000-0000-400
   '23503',null,'physical deletion cannot silently remove a referenced garment');
 select throws_ok($$select public.save_outfit_option('40000000-0000-4000-8000-000000000001',
   '44000000-0000-4000-8000-000000000001',2)$$,
-  '40001',null,'stale inspiration revisions cannot be saved');
+  'PT409',null,'stale inspiration revisions cannot be saved');
 select lives_ok($$update pg_temp.contract_context set snapshot_id=public.save_outfit_option(
   '40000000-0000-4000-8000-000000000001','44000000-0000-4000-8000-000000000001',1)$$,
   'current option saves its actual selected composition');

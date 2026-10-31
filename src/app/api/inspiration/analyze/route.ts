@@ -101,7 +101,7 @@ export async function POST(request: Request) {
   } catch (error) {
     if (error instanceof Error && error.message === "ASSET_NOT_UPLOADED") return jsonError("ASSET_NOT_UPLOADED", 409);
     if (error instanceof Error && error.message === "DATABASE_UNAVAILABLE") return jsonError("DATABASE_UNAVAILABLE", 503);
-    if (error && typeof error === "object" && "code" in error && error.code === "40001") return jsonError("REVISION_CONFLICT", 409);
+    if (error && typeof error === "object" && "code" in error && (error.code === "PT409" || error.code === "40001")) return jsonError("REVISION_CONFLICT", 409);
     return providerErrorResponse(error);
   }
 }

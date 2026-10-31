@@ -49,6 +49,9 @@ describe("Owner 3 HTTP boundary", () => {
     );
   });
   it("maps concurrency and search budget failures to stable responses", () => {
+    expect(() => checkDatabase({ code: "PT409" }, "ignored")).toThrow(
+      "The outfit changed.",
+    );
     expect(() => checkDatabase({ code: "40001" }, "ignored")).toThrow(
       "The outfit changed.",
     );
