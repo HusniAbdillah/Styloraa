@@ -23,7 +23,6 @@ describe("capsule input boundaries", () => {
         title: "Everyday",
         description: "",
         brief,
-        item_ids: [],
         from_saved_look_id: item,
       }).success,
     ).toBe(true);

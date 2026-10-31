@@ -67,7 +67,7 @@ describe("meta text provider", () => {
     const { extractJsonObject } = await import("./meta");
     expect(extractJsonObject('note {"a":1} tail')).toEqual({ a: 1 });
     expect(() => extractJsonObject("no json here")).toThrow(/no JSON object/);
-    expect(() => extractJsonObject("{broken")).toThrow(/malformed JSON/);
+    expect(() => extractJsonObject("{broken}")).toThrow(/malformed JSON/);
   });
 });
 vi.mock("server-only", () => ({}));

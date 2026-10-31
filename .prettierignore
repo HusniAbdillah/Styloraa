@@ -3,3 +3,6 @@ node_modules
 pnpm-lock.yaml
 src/types/database.ts
 supabase/.temp
+
+node_modules.bak
+.build-tmp

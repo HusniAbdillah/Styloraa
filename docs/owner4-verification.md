@@ -1,6 +1,7 @@
 # Owner 4 verification, 31 October 2026
 
-Baseline: merged main `e591d0b`, including Owner 3's selection contract.
+Baseline: merged main `3905a6e`, including Owner 3's selection contract,
+responsive product/saved-look flows and PWA shell.
 Work was isolated from the shared checkout
 after the user confirmed another dependency installation was active there.
 
@@ -52,3 +53,17 @@ try-on request was performed. The visual provider is a separate integration;
 its executor and successful result flow cannot be claimed as end-to-end
 verified while it is unconfigured. No sample/manual result is presented as
 live provider output.
+
+## Follow-up local audit and main integration
+
+Audited all modified/untracked paths in the original checkout against the
+PR and preserved new branding assets, license, tagline, and test refinements.
+See docs/owner4-local-audit.md for the file-by-file disposition. The original
+checkout was left unchanged; its local changes do not disappear when this
+worktree commits. No new migrations or schema changes were needed.
+
+After merging main 3905a6e, the production build and real local API walkthrough
+passed again. Desktop/mobile browser checks passed for Capsules, selected look,
+saved looks, drawer interaction and all linked brand/PWA assets, with no
+horizontal overflow or page errors. Database results above remain from the
+unchanged merged schema; database tests were not repeated for this UI merge.

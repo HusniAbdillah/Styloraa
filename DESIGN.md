@@ -111,7 +111,8 @@ use tabular numerals. No giant serif headers inside the item picker.
 - Workspace sidebar: 216px. Content horizontal padding: 40px at 1440,
   24px at compact desktop. Working content max-width: 1328px.
 - Top bar uses the same Porcelain background as the canvas. The Stylora
-  wordmark uses Instrument Serif, with a 44px hamburger control. Do not show
+  logo pairs the interwoven-silk symbol with an outlined Instrument Serif
+  wordmark, with a 44px hamburger control. Do not show
   a persistent environment/sample-content banner.
 - Spacing scale: 4, 8, 12, 16, 24, 32, 48, 64px. Related controls use 8 to
   12px; task groups 24 to 32px; independent sections 48 to 64px.
@@ -128,8 +129,10 @@ boards use 3:4 or 4:5. Catalog images retain their source and are not passed
 off as owned garments. Lifestyle crops can use `cover` only where no garment
 review depends on the crop.
 
-Do not synthesize people, customer photos, or a final logo. Use the Stylora
-wordmark as text. Unapproved assets remain visibly labeled placeholders.
+Do not synthesize people or customer photos. The owner requested a new vector
+logo on 31 October 2026: use the interwoven-silk symbol and outlined Stylora
+wordmark in `public/brand/`. See [brand assets](docs/design/brand.md).
+Unapproved assets remain visibly labeled placeholders.
 Static prototype illustrations are disclosed in the design handoff rather
 than repeated as Sample content badges across the product chrome. Keep
 contextual preview limitations; no invented price, confidence or score is live.

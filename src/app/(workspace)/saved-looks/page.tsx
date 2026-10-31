@@ -1,10 +1,12 @@
-import { FeaturePlaceholder } from "@/components/ui/feature-placeholder";
-export default function Page() {
-  return (
-    <FeaturePlaceholder
-      title="Saved looks"
-      description="Favorite combinations you want to wear again."
-      owner="Developer 3"
-    />
-  );
+import { SavedLooksScreen } from "@/features/sharing/components/saved-looks-screen";
+
+export const dynamic = "force-dynamic";
+
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page } = await searchParams;
+  return <SavedLooksScreen page={page} />;
 }

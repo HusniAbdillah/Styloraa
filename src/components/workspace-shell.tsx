@@ -63,9 +63,7 @@ export function WorkspaceShell({ children }: { children: React.ReactNode }) {
         >
           <BrandLogo />
         </Link>
-        <span className={styles.tagline}>
-          A little intention. A style of your own.
-        </span>
+        <span className={styles.tagline}>Where Style Meets Aura.</span>
       </header>
       <aside className={styles.sidebar} id="desktop-navigation">
         <WorkspaceNav collapsed={collapsed} />
