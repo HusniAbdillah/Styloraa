@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { WorkspaceMobileNav } from "@/components/workspace-mobile-nav";
 import { WorkspaceNav } from "@/components/workspace-nav";
+import { WorkflowExitLink } from "@/components/workflow-exit-link";
 
 export default function WorkspaceLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -24,7 +25,7 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
             </Link>
           </div>
           <div className="workspace-breadcrumb"><span>Style studio</span><span aria-hidden="true">/</span><span>Make it yours</span></div>
-          <Link href="/preferences" className="profile-shortcut" aria-label="Style preferences"><span>✳</span><span className="profile-shortcut-label">Your style</span></Link>
+          <WorkflowExitLink href="/preferences" className="profile-shortcut" aria-label="Style preferences"><span>✳</span><span className="profile-shortcut-label">Your style</span></WorkflowExitLink>
         </header>
         <main id="main" className="workspace-main">{children}</main>
       </div>
