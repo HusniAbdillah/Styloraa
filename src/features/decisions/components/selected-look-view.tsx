@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight, Check, ShoppingBag } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getLook } from "@/features/inspiration/repository";
 import { getSelectedLook } from "@/features/decisions/repository";
@@ -25,23 +25,8 @@ function PieceCard({ item }: { item: Piece }) {
   const owned = item.ownership === "owned";
   const price = money(item.price_minor, item.currency);
   return (
-    <li className="bg-card border-border flex min-w-0 gap-4 rounded-2xl border p-3 sm:p-4">
-      <div className="bg-background relative h-22 w-20 shrink-0 overflow-hidden rounded-xl sm:h-26 sm:w-24">
-        {item.image_url ? (
-          <Image
-            src={item.image_url}
-            alt={item.name ?? "Outfit piece"}
-            fill
-            sizes="96px"
-            className="object-cover"
-            unoptimized
-          />
-        ) : (
-          <div className="text-secondary flex h-full items-center justify-center px-2 text-center text-xs">
-            No image
-          </div>
-        )}
-      </div>
+    <li className="selected-piece-card bg-card border-border flex min-w-0 gap-4 rounded-2xl border p-4">
+      <div className="piece-monogram" aria-hidden="true">{(item.category ?? "✦").slice(0, 1).toUpperCase()}</div>
       <div className="min-w-0 flex-1 py-1">
         <span className="text-secondary text-[11px] font-semibold tracking-[0.16em] uppercase">
           {item.category ?? "Outfit piece"}
@@ -82,6 +67,10 @@ function PieceCard({ item }: { item: Piece }) {
   );
 }
 
+function whyPoints(value: string) {
+  return value.replace(/^Why this\?\s*/i, "").replace(/\s*Profile signals used:.*$/i, "").split(/(?<=[.!?])\s+|;\s+/).map((part) => part.trim()).filter(Boolean).slice(0, 4);
+}
+
 export async function SelectedLookView({
   lookId,
   optionId,
@@ -107,6 +96,7 @@ export async function SelectedLookView({
     selected.spend && !selected.spend.incomplete
       ? money(selected.spend.estimated_spend_minor, selected.spend.currency)
       : null;
+  const why = whyPoints(selected.selected_option?.rationale ?? "This combination follows the selected wardrobe direction.");
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 pb-12">
@@ -128,10 +118,7 @@ export async function SelectedLookView({
           <h1 className="mt-2 font-serif text-4xl leading-tight sm:text-5xl">
             {selected.selected_option?.title ?? selected.look.title}
           </h1>
-          <p className="text-secondary mt-3 max-w-2xl text-sm leading-6">
-            {selected.selected_option?.rationale ??
-              "Your selected wardrobe pieces."}
-          </p>
+          <p className="text-secondary mt-3 max-w-2xl text-sm leading-6">A considered combination, with the pieces and reasoning laid out below.</p>
         </div>
         {index >= 0 && (
           <span className="border-border bg-card rounded-full border px-4 py-2 text-sm">
@@ -152,7 +139,7 @@ export async function SelectedLookView({
               aria-current={
                 option.id === selected.selected_option?.id ? "page" : undefined
               }
-              className={`rounded-full border px-4 py-2 text-sm ${option.id === selected.selected_option?.id ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:border-primary"}`}
+              className={`rounded-full border px-4 py-2 text-sm ${option.id === selected.selected_option?.id ? "border-[#d7c5a4] bg-[#eee5d7] text-[#211f20]" : "border-border bg-card hover:border-primary"}`}
             >
               {optionIndex + 1}. {option.title}
             </Link>
@@ -169,8 +156,10 @@ export async function SelectedLookView({
           changed.
         </p>
       )}
+      {comparisonUrl && missing.length > 0 && <section className="marketplace-callout"><div className="marketplace-callout-icon"><ShoppingBag size={22}/></div><div className="marketplace-callout-copy"><p className="text-xs font-semibold tracking-[0.14em] uppercase">Complete the look</p><h2>You’re missing {missing.length} {missing.length === 1 ? "piece" : "pieces"} for this outfit.</h2><p>Explore matching marketplace options for {missing.slice(0, 3).map((item) => item.name ?? item.category ?? "a piece").join(", ")}{missing.length > 3 ? ` and ${missing.length - 3} more` : ""}.</p></div><Link href={comparisonUrl} className="marketplace-callout-button">Search marketplace <ArrowRight size={16}/></Link></section>}
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
         <div className="space-y-8">
+          <section className="why-list-panel"><h2 className="font-serif text-2xl">Why this works</h2><ul>{why.map((point, pointIndex) => <li key={`${pointIndex}-${point}`}><span><Check size={14}/></span>{point}</li>)}</ul></section>
           <section aria-labelledby="owned-title">
             <div className="mb-4 flex items-end justify-between">
               <h2 id="owned-title" className="font-serif text-2xl sm:text-3xl">
@@ -260,14 +249,6 @@ export async function SelectedLookView({
                 />
               </>
             ) : null}
-            {comparisonUrl && missing.length > 0 && (
-              <Link
-                href={comparisonUrl}
-                className="border-primary text-primary hover:bg-background rounded-full border px-5 py-3 text-center text-sm font-semibold"
-              >
-                Compare products
-              </Link>
-            )}
             {selected.selected_option && !selected.stale && (
               <SaveLookButton
                 lookId={lookId}

@@ -1,7 +1,6 @@
 "use client";
-import Link from "next/link";
+
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
 import {
   PlusIcon,
   BackpackIcon,
@@ -9,13 +8,17 @@ import {
   LayersIcon,
   MixerHorizontalIcon,
 } from "@radix-ui/react-icons";
+import { cn } from "@/lib/utils";
+import { WorkflowExitLink } from "@/components/workflow-exit-link";
+
 const links = [
   { href: "/create", label: "Create", icon: PlusIcon },
   { href: "/wardrobe", label: "Wardrobe", icon: BackpackIcon },
   { href: "/saved-looks", label: "Saved looks", icon: BookmarkIcon },
   { href: "/capsules", label: "Capsules", icon: LayersIcon },
   { href: "/preferences", label: "Preferences", icon: MixerHorizontalIcon },
-];
+] as const;
+
 export function WorkspaceNav({
   collapsed = false,
   onNavigate,
@@ -32,27 +35,22 @@ export function WorkspaceNav({
           path.startsWith(`${href}/`) ||
           (href === "/create" && path.startsWith("/looks/"));
         return (
-          <Link
+          <WorkflowExitLink
             key={href}
             href={href}
+            onExitConfirmed={onNavigate}
             aria-current={active ? "page" : undefined}
             aria-label={collapsed ? label : undefined}
             title={collapsed ? label : undefined}
-            onClick={onNavigate}
             className={cn(
               "text-secondary hover:bg-card hover:text-foreground flex min-h-11 items-center gap-3 rounded-lg p-3 text-sm font-medium transition-colors duration-150",
               active &&
                 "bg-primary text-primary-foreground hover:bg-primary-hover hover:text-primary-foreground",
             )}
           >
-            <Icon
-              width={20}
-              height={20}
-              className="shrink-0"
-              aria-hidden="true"
-            />
+            <Icon width={20} height={20} className="shrink-0" aria-hidden="true" />
             {!collapsed ? <span>{label}</span> : null}
-          </Link>
+          </WorkflowExitLink>
         );
       })}
     </nav>

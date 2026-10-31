@@ -53,7 +53,7 @@ export function SaveLookButton({
         type="button"
         onClick={save}
         disabled={busy}
-        className="bg-primary text-primary-foreground hover:bg-primary-hover min-h-12 rounded-full px-7 text-sm font-semibold disabled:opacity-60"
+        className="bg-primary text-white hover:bg-primary-hover min-h-12 rounded-full px-7 text-sm font-semibold disabled:opacity-60"
       >
         {busy ? "Saving…" : "Save this look"}
       </button>

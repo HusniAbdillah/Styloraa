@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ArrowRight, CalendarDays, Check, CloudUpload, ImagePlus, Info, LoaderCircle, Sparkles, X } from "lucide-react";
 import { MAX_INSPIRATION_BYTES, supportedImageTypes } from "../schema";
+import { WorkflowExitLink } from "@/components/workflow-exit-link";
 
 type UploadResponse = {
   data?: { assetId: string; uploadUrl: string; uploadToken: string };
@@ -142,8 +143,7 @@ export function CreateLookFlow() {
           </select></div>
           <div className="context-divider" />
           <div className="context-note"><Info size={17} aria-hidden="true" /><p>Review the detected garment descriptions before we compare them with your wardrobe. Style preferences are optional.</p></div>
-          <div className="privacy-note"><span className="privacy-icon">i</span><p>This shared demo analyzes the image you choose with the configured provider. Avoid uploading sensitive personal photos.</p></div>
-          <a className="button button-outline preferences-link" href="/preferences">Set style preferences <ArrowRight size={16} aria-hidden="true" /></a>
+          <section className="style-profile-card" aria-labelledby="style-profile-title"><div className="style-profile-heading"><span className="sparkle-seal"><Sparkles size={16} /></span><div><h3 id="style-profile-title">Make the ideas feel like you</h3><p>Optional details help shape color and silhouette suggestions.</p></div></div><div className="style-profile-signals"><div><span className="profile-swatch undertone-swatch" /><span><strong>Undertone</strong><small>Colors that harmonize with your natural warmth or coolness.</small></span></div><div><span className="profile-swatch skin-swatch" /><span><strong>Skin tone</strong><small>More thoughtful color contrast and palette guidance.</small></span></div><div><span className="profile-swatch shape-swatch">◯</span><span><strong>Body shape</strong><small>Silhouette and proportion ideas that suit your preferences.</small></span></div></div><WorkflowExitLink className="button button-outline preferences-link" href="/preferences">Set style preferences <ArrowRight size={16} aria-hidden="true" /></WorkflowExitLink></section>
         </aside>
       </div>
 
