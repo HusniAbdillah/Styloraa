@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   requireOwnedPreviewItems,
   validatePreviewSelection,
+  selectedOwnedPieces,
 } from "./ownership";
 const pieces = [
   {
@@ -20,6 +21,21 @@ const pieces = [
   },
 ];
 describe("preview ownership boundary", () => {
+  it("uses actual selected inventory IDs and refuses suggested or stale selections", () => {
+    const selected = {
+      ownership: "owned",
+      wardrobe_item_id: pieces[0].id,
+      name: pieces[0].name,
+      category: pieces[0].category,
+      color: pieces[0].color,
+      available: true,
+    };
+    expect(selectedOwnedPieces([selected], false)[0].id).toBe(pieces[0].id);
+    expect(() =>
+      selectedOwnedPieces([{ ...selected, ownership: "suggested" }], false),
+    ).toThrow(/owned/);
+    expect(() => selectedOwnedPieces([selected], true)).toThrow(/changed/);
+  });
   it("rejects empty and archived compositions before provider submission", () => {
     expect(() => requireOwnedPreviewItems([])).toThrow(/owned/);
     expect(() =>

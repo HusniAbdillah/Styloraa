@@ -1,6 +1,8 @@
 import "server-only";
 import { MetaAiError } from "@/lib/ai/meta";
-import { requireOwnedPreviewItems } from "./ownership";
+import { requireOwnedPreviewItems, selectedOwnedPieces } from "./ownership";
+import { getSelectedLook } from "@/features/decisions/repository";
+import { BackendError } from "@/features/decisions/backend";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { getServerEnv } from "@/lib/env";
 import { ConflictError, InvalidInputError, NotFoundError } from "@/lib/errors";
@@ -86,44 +88,36 @@ async function requireLook(lookId: string) {
       items,
     };
   }
-  const { data: look, error } = await db
+  const { data: source, error: sourceError } = await db
     .from("looks")
-    .select("id,title,notes,is_saved")
+    .select("source_type")
     .eq("workspace_id", workspaceId())
     .eq("id", lookId)
-    .neq("source_type", "sample")
     .maybeSingle();
-  if (error) throw new Error("Could not load the look.");
-  if (!look) throw new NotFoundError("Look not found.");
-  const { data: members, error: membersError } = await db
-    .from("look_items")
-    .select(
-      "position, wardrobe_items!inner(id,name,category,color,archived_at)",
-    )
-    .eq("workspace_id", workspaceId())
-    .eq("look_id", lookId)
-    .eq("wardrobe_items.workspace_id", workspaceId())
-    .order("position", { ascending: true });
-  if (membersError) throw new Error("Could not load the look.");
-  const items = (
-    members as Array<{
-      position: number;
-      wardrobe_items: {
-        id: string;
-        name: string;
-        category: string;
-        color: string;
-        archived_at: string | null;
-      };
-    }>
-  ).map((row) => ({
-    id: row.wardrobe_items.id,
-    name: row.wardrobe_items.name,
-    category: row.wardrobe_items.category,
-    color: row.wardrobe_items.color,
-    available: row.wardrobe_items.archived_at === null,
-  }));
-  return { look, items };
+  if (sourceError) throw new Error("Could not load the look.");
+  if (!source) throw new NotFoundError("Look not found.");
+  if (source.source_type === "sample")
+    throw new InvalidInputError("Sample looks cannot be previewed.");
+  try {
+    const selection = await getSelectedLook(lookId);
+    if (selection.selected_option?.source_type === "sample")
+      throw new InvalidInputError("Sample looks cannot be previewed.");
+    return {
+      look: {
+        id: selection.look.id,
+        title: selection.selected_option?.title ?? selection.look.title,
+        notes: selection.look.notes,
+        is_saved: selection.look.is_saved,
+      },
+      items: selectedOwnedPieces(selection.items, selection.stale),
+    };
+  } catch (error) {
+    if (error instanceof BackendError && error.status === 404)
+      throw new NotFoundError("Look not found.");
+    if (error instanceof BackendError && error.status === 409)
+      throw new ConflictError(error.message);
+    throw error;
+  }
 }
 
 export async function buildItemPreview(itemId: string) {

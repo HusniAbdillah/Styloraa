@@ -1,19 +1,20 @@
 # Owner 4 verification, 31 October 2026
 
-Baseline: merged main `cee20b5`. Work was isolated from the shared checkout
+Baseline: merged main `e591d0b`, including Owner 3's selection contract.
+Work was isolated from the shared checkout
 after the user confirmed another dependency installation was active there.
 
 | Check | Actual result |
 | --- | --- |
-| `pnpm check` | PASS: ESLint, TypeScript, 37 tests in 11 files |
+| `pnpm check` | PASS: ESLint, TypeScript, 76 tests in 18 files |
 | `pnpm build` | PASS: all eight requested UI routes and their APIs compile |
 | Local database reset | PASS: all migrations, including atomic capsule save, applied |
 | `pnpm db:types` | PASS: generated from the migrated local database; no hand-edited types |
-| `pnpm db:test` | PASS: 82 assertions across six SQL test files |
+| `pnpm db:test` | PASS: 98 assertions across seven SQL test files |
 | `node --env-file=.env.local scripts/verify-owner4.mjs` | PASS: actual browser-facing HTTP APIs and local PostgreSQL |
 | Browser | PASS: eight routes, real selected-item save/reload, desktop rail, mobile drawer/Escape/focus, 390/360px geometry |
 | Mobile refinement | PASS: native composition disclosure, no horizontal overflow at both widths |
-| `git diff --check` | PASS |
+| `git diff origin/main --check` | PASS: Owner 4 changes; existing main migrations were retained byte-for-byte |
 
 The API walkthrough persisted a complete brief, timeframe/season/occasion,
 and exact owned-item IDs. It verified updates, atomic rollback on referenced
@@ -21,6 +22,12 @@ piece removal, stale revision rejection, saved-look creation, forged AI
 provenance rejection, foreign-workspace rejection, archived-piece rejection,
 and all three preview contexts. Unconfigured preview requests returned 503
 and created no queued jobs.
+
+After integrating Owner 3, the actual HTTP walkthrough also verified that
+preview follows the selected option's wardrobe IDs rather than legacy look
+membership. Missing pieces and sample sources were rejected; stale selected
+options returned a conflict. The preview page presents a review state for
+expected invalid or stale selections.
 
 The browser selected a single owned piece from a two-piece look, used Save as
 Capsule, submitted the real form, reloaded, and checked the persisted item ID

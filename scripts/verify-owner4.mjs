@@ -266,6 +266,69 @@ for (const [route, subject] of [
   assert.equal(result.code, "VISUAL_PROVIDER_NOT_CONFIGURED");
 }
 assert.equal((await api(`looks/${snapshots[0].id}/preview`)).items.length, 2);
+const optionId = randomUUID();
+await db("outfit_options", "POST", {
+  id: optionId,
+  workspace_id: workspace,
+  look_id: lookId,
+  option_type: "closest",
+  title: "The current owned selection",
+  rationale: "An explicit local verification selection.",
+  source_type: "manual",
+  source_revision: 1,
+});
+await db("outfit_option_items", "POST", {
+  workspace_id: workspace,
+  look_id: lookId,
+  option_id: optionId,
+  slot_id: "selected-top",
+  item_kind: "owned",
+  wardrobe_item_id: ids[0],
+});
+const lookFilter = `looks?id=eq.${lookId}&workspace_id=eq.${workspace}`;
+await db(lookFilter, "PATCH", { selected_option_id: optionId });
+assert.deepEqual(
+  (await api(`looks/${lookId}/preview`)).items.map((item) => item.id),
+  [ids[0]],
+  "Preview must follow the selected option rather than legacy look membership.",
+);
+const missingId = randomUUID();
+await db("outfit_option_items", "POST", {
+  id: missingId,
+  workspace_id: workspace,
+  look_id: lookId,
+  option_id: optionId,
+  slot_id: "missing-shoes",
+  item_kind: "missing",
+  missing_brief: "Shoes that are not owned",
+});
+await api(`looks/${lookId}/preview`, "GET", undefined, 400);
+await api(
+  `looks/${lookId}/preview`,
+  "POST",
+  {
+    subject_type: "look",
+    subject_id: lookId,
+    mode: "single",
+    item_ids: [ids[0]],
+    model_source: "mannequin",
+    consent_acknowledged: true,
+    limitations_acknowledged: true,
+  },
+  400,
+);
+await db(
+  `outfit_option_items?id=eq.${missingId}&workspace_id=eq.${workspace}`,
+  "DELETE",
+);
+await db(lookFilter, "PATCH", { revision: 2 });
+await api(`looks/${lookId}/preview`, "GET", undefined, 409);
+await db(lookFilter, "PATCH", { revision: 1, source_type: "sample" });
+await api(`looks/${lookId}/preview`, "GET", undefined, 400);
+await db(lookFilter, "PATCH", {
+  source_type: "manual",
+  selected_option_id: null,
+});
 assert.equal(
   (await db(`ai_jobs?workspace_id=eq.${workspace}&kind=eq.preview&select=id`))
     .length,

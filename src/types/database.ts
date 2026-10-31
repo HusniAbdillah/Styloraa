@@ -562,6 +562,8 @@ export type Database = {
           position: number;
           product_id: string | null;
           rationale: string;
+          requested_brief: string | null;
+          requested_category: string | null;
           slot_id: string;
           wardrobe_item_id: string | null;
           workspace_id: string;
@@ -577,6 +579,8 @@ export type Database = {
           position?: number;
           product_id?: string | null;
           rationale?: string;
+          requested_brief?: string | null;
+          requested_category?: string | null;
           slot_id: string;
           wardrobe_item_id?: string | null;
           workspace_id: string;
@@ -591,6 +595,8 @@ export type Database = {
           position?: number;
           product_id?: string | null;
           rationale?: string;
+          requested_brief?: string | null;
+          requested_category?: string | null;
           slot_id?: string;
           wardrobe_item_id?: string | null;
           workspace_id?: string;
@@ -958,6 +964,7 @@ export type Database = {
       user_preferences: {
         Row: {
           body_profile: NonNullable<Json>;
+          display_name: string | null;
           fit_preferences: NonNullable<Json>;
           style_dna: NonNullable<Json>;
           style_notes: string;
@@ -967,6 +974,7 @@ export type Database = {
         ComputedFields: never;
         Insert: {
           body_profile?: NonNullable<Json>;
+          display_name?: string | null;
           fit_preferences?: NonNullable<Json>;
           style_dna?: NonNullable<Json>;
           style_notes?: string;
@@ -975,6 +983,7 @@ export type Database = {
         };
         Update: {
           body_profile?: NonNullable<Json>;
+          display_name?: string | null;
           fit_preferences?: NonNullable<Json>;
           style_dna?: NonNullable<Json>;
           style_notes?: string;
@@ -1245,6 +1254,16 @@ export type Database = {
       save_outfit_option: {
         Args: {
           p_expected_revision: number;
+          p_option_id: string;
+          p_workspace_id: string;
+        };
+        Returns: string;
+      };
+      select_outfit_products: {
+        Args: {
+          p_choices: Json;
+          p_expected_revision: number;
+          p_look_id: string;
           p_option_id: string;
           p_workspace_id: string;
         };

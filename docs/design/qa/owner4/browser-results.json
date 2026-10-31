@@ -1,7 +1,10 @@
 {
   "routes": 8,
   "desktopWidth": 1440,
-  "mobileWidths": [390, 360],
+  "mobileWidths": [
+    390,
+    360
+  ],
   "horizontalOverflow": 0,
   "pageErrors": [],
   "selectionPreservedAfterReload": true,

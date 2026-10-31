@@ -51,7 +51,10 @@ drawer. Other feature screens are not redesigned by this work.
 
 Owner 3 can use `SaveAsCapsule` with a real look ID and the current selected
 owned-item IDs. Wardrobe/selected-look entry links should point to the preview
-routes above. A visual-provider integration must supply a real executor and
+routes above. Look previews read Owner 3's selected-option contract, map actual
+wardrobe IDs, and reject stale, suggested, missing or sample compositions.
+Legacy owned looks and saved snapshot IDs remain supported.
+A visual-provider integration must supply a real executor and
 persist live jobs/results before enabling generation; the current endpoints
 deliberately do not fabricate this work.
 

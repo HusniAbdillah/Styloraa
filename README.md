@@ -44,13 +44,19 @@ connected; no fake data is shown as stored data.
 
 ## Implementation status
 
-This is a **partial scaffold, not a complete MVP**. Shell, UI tokens, route
-boundaries, server env validation, the wardrobe repository/action pattern,
-the metadata add form, and the AI-unavailable endpoint are the foundation.
-A Supabase connection is required to try wardrobe persistence. Wardrobe
-edit/delete, look composing and saving, preferences, capsules, sharing,
-uploads, and a real AI provider still need implementation or integration.
-The sprint plan below describes next targets, not finished features.
+Owner 2 and Owner 3 backend integration now includes persisted inspiration,
+matching/options, live SerpAPI search, independent product selection, immutable
+saves and revocable minimal shares. See the
+[backend handoff](docs/owner-23-backend-handoff.md) for exact HTTP contracts and
+verification. Frontend Compare/saved/share pages still need to consume them;
+backend completion does not imply the full UI is implemented.
+
+This is a **partial application, not a complete MVP**. Shell, UI tokens,
+server configuration, wardrobe metadata and the Owner 2–3 backend are present.
+A configured Supabase connection is required for persistence. Feature UI,
+remaining wardrobe/preferences operations, capsules and preview integration
+still need work. The sprint plan describes ownership and targets; feature
+handoffs and `PROGRESS.md` record actual implementation evidence.
 
 With local Supabase, start Docker first:
 
