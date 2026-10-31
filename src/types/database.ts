@@ -1,6 +1,6 @@
 /**
  * Bootstrap contract matching supabase/migrations/20261031055618_shared_workspace.sql.
- * Replace using `npm run db:types` after starting local Supabase or selecting a project.
+ * Replace using `pnpm db:types` after starting local Supabase or selecting a project.
  * This initial contract is NOT claimed to be CLI-generated.
  */
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];

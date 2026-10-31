@@ -7,6 +7,10 @@ import type { Database } from "@/types/database";
 export function createServerSupabase() {
   const env = getServerEnv();
   return createClient<Database>(env.SUPABASE_URL, env.SUPABASE_SECRET_KEY, {
-    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
   });
 }

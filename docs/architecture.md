@@ -1,45 +1,92 @@
-# Arsitektur
+# Architecture
 
-## Keputusan inti
+## Core decisions
 
-Satu aplikasi Next.js dan Supabase project per environment cukup untuk sprint empat developer. App Router menangani UI server, Server Actions, dan Route Handlers. Supabase menyediakan PostgreSQL dan Storage privat. Tidak perlu ORM tambahan: supabase-js serta generated types memenuhi query awal.
+One Next.js app and one Supabase project per environment are enough for a
+four-developer sprint. The App Router handles server UI, Server Actions, and
+Route Handlers. Supabase provides PostgreSQL and private Storage. No extra
+ORM is needed: supabase-js plus generated types cover the early queries.
 
-Aplikasi tanpa auth memakai satu workspace demo bersama. Semua pengunjung mempunyai kemampuan aplikasi yang sama. Jangan memperlakukan workspace ID sebagai identitas atau rahasia. Ini mempercepat demo, tetapi tidak memberikan privasi per pengguna.
+The app has no auth and uses one shared demo workspace. All visitors have
+the same app capabilities. Never treat the workspace ID as an identity or a
+secret. This speeds up the demo but gives no per-user privacy.
 
-## Struktur dan aliran data
+## Structure and data flow
 
-`src/app` mengomposisikan fitur dan menangani routing. `src/features/<fitur>` memiliki schema Zod, query, aksi, serta UI miliknya. `components/ui` untuk primitive bersama yang benar-benar dipakai. Jangan membuat banyak lapisan repository/service/hook kosong.
+`src/app` composes features and handles routing. `src/features/<feature>`
+owns its Zod schema, queries, actions, and UI. `components/ui` holds shared
+primitives that are actually used. Do not build layers of empty
+repository/service/hook wrappers.
 
-Server Components mengambil data awal. Client Components menangani form dan pilihan item. Server Action cocok untuk mutasi UI; Route Handler untuk kontrak HTTP/job provider. Keduanya memakai helper server yang sama agar validasi dan scope tidak berbeda.
+Server Components fetch initial data. Client Components handle forms and
+item picking. Server Actions fit UI mutations; Route Handlers fit HTTP
+contracts/provider jobs. Both use the same server helpers so validation and
+scope never diverge.
 
-Browser → Server Action/Route Handler → validasi Zod → query Supabase dengan workspace tetap dari environment → response minimum. Browser tidak memiliki Supabase client atau secret. Query pribadi tidak relevan pada scope ini, tetapi cache bersama tetap harus mempunyai invalidasi setelah mutasi agar data demo tidak stale.
+Browser → Server Action/Route Handler → Zod validation → Supabase query
+with the fixed environment workspace → minimal response. The browser has no
+Supabase client or secret. Private queries are irrelevant in this scope, but
+the shared cache still needs invalidation after mutations so demo data does
+not go stale.
 
-## Batas database
+## Database boundaries
 
-Tabel awal: wardrobe items, preferences, looks beserta itemnya, capsules beserta itemnya, serta AI jobs. Semua aggregate dan row relasi dibatasi workspace. Foreign key/constraint mencegah relasi lintas workspace; predicate pada row anak saja tidak cukup.
+Initial tables: wardrobe items, preferences, looks with their items,
+capsules with their items, and AI jobs. Every aggregate and relation row is
+workspace-scoped. Foreign keys/constraints prevent cross-workspace links; a
+predicate on the child row alone is not enough.
 
-RLS aktif dan akses langsung `anon`/`authenticated` ditolak. Server memakai `SUPABASE_SECRET_KEY` yang melewati RLS, sehingga setiap query harus menyertakan `STYLORA_WORKSPACE_ID` dari environment. Jangan mempercayai workspace dari form/URL/body. Tes database dan tes scope server memeriksa batas yang berbeda.
+RLS is on and direct `anon`/`authenticated` access is denied. The server
+uses `SUPABASE_SECRET_KEY`, which bypasses RLS, so every query must include
+`STYLORA_WORKSPACE_ID` from the environment. Never trust a workspace from
+forms/URLs/bodies. Database tests and server scope tests check different
+boundaries.
 
-Simpan look/capsule beserta relasinya secara atomik bila membutuhkan beberapa writes. Rangkaian HTTP insert terpisah bukan transaksi; gunakan fungsi SQL yang ditinjau atau mekanisme transaksi nyata, dengan scope tetap. Hindari `SECURITY DEFINER` tanpa kebutuhan dan review khusus.
+Save looks/capsules with their relations atomically when multiple writes
+are needed. Separate HTTP inserts are not a transaction; use a reviewed SQL
+function or a real transaction mechanism, still scoped. Avoid
+`SECURITY DEFINER` without a specific need and review.
 
-Generated types mengikuti migrations. Generation yang terhalang Docker/lingkungan harus dilaporkan, bukan ditutup dengan klaim tipe telah dihasilkan.
+Generated types follow migrations. Generation blocked by Docker/environment
+must be reported, not papered over with claims that types were generated.
 
-## File dan AI
+## Files and AI
 
-Bucket tetap privat. Upload sensitif belum masuk scope. Upload demo nanti melalui server, dengan size/MIME limit, path acak dalam workspace tetap, serta cleanup file yatim. Database menyimpan storage path; signed URL dibuat saat diperlukan dan tidak disimpan permanen. Jangan membuat endpoint fetch URL arbitrer karena membuka SSRF.
+Buckets stay private. Sensitive uploads are out of scope. Demo uploads go
+through the server later, with size/MIME limits, random paths inside the
+fixed workspace, and orphan cleanup. The database stores the storage path;
+signed URLs are minted on demand and never stored permanently. Do not build
+arbitrary-URL fetch endpoints; they open SSRF.
 
-AI hanya di server dengan secret environment. Validasi output, batas biaya/rate, timeout, dan error yang jelas diperlukan sebelum provider diaktifkan pada demo publik tanpa login. Provider belum terpasang: unavailable adalah perilaku yang benar.
+AI runs server-side only, with secret environment config. Output validation,
+cost/rate limits, timeouts, and clear errors are required before a provider
+goes live on a login-free public demo. No provider is installed yet:
+unavailable is the correct behavior.
 
-Job panjang membutuhkan executor nyata. Record PostgreSQL menyimpan status; record tersebut bukan queue yang otomatis diproses. Utamakan async API provider dengan polling bila cocok. Tambahkan queue/worker setelah durasi dan reliability diuji; jangan menjalankan background promise sesudah response Vercel.
+Long jobs need a real executor. A PostgreSQL record stores status; that
+record is not a queue that processes itself. Prefer the provider's async
+API with polling where it fits. Add a queue/worker after duration and
+reliability are proven; do not run background promises after a Vercel
+response.
 
-Sharing ditunda sampai kontrak snapshot publik, token acak, expiry, revoke, dan field aman disepakati. Jangan memberi anon select pada data internal hanya demi halaman shared.
+Sharing waits until a public snapshot contract, random token, expiry,
+revoke, and safe fields are agreed. Do not grant anon select on internal
+data just for a shared page.
 
-## Tradeoff sprint
+## Sprint tradeoffs
 
-- Tanpa auth mengurangi setup dan alur demo; konsekuensinya semua pengunjung dapat mengubah dataset bersama.
-- Server-only Supabase menjaga secret di server; konsekuensinya validasi scope harus benar di setiap endpoint karena RLS tidak membatasi secret client.
-- Satu pemilik migrations/lockfile mengurangi konflik integrasi. Fitur tidak boleh membuat tabel alternatif untuk menghindari koordinasi.
-- Server-first mengurangi state sinkronisasi; komponen client tetap dipakai untuk interaksi yang memerlukannya.
-- Tes berfokus pada validasi, workspace scope, constraint, dan kegagalan penting; snapshot setiap placeholder tidak membantu target sprint.
+- No auth reduces setup and demo flow; every visitor can change the shared
+  dataset as a consequence.
+- Server-only Supabase keeps secrets on the server; every endpoint must get
+  scope validation right, since RLS does not constrain the secret client.
+- One owner for migrations/lockfile reduces integration conflicts. Features
+  must not create alternate tables to dodge coordination.
+- Server-first reduces state syncing; client components still cover
+  interactions that need them.
+- Tests focus on validation, workspace scope, constraints, and key failures;
+  snapshotting every placeholder does not serve the sprint goal.
 
-Referensi resmi: [Next.js App Router](https://nextjs.org/docs/app), [Supabase RLS](https://supabase.com/docs/guides/database/postgres/row-level-security), [Supabase API keys](https://supabase.com/docs/guides/api/api-keys), [Storage access control](https://supabase.com/docs/guides/storage/security/access-control).
+Official references: [Next.js App Router](https://nextjs.org/docs/app),
+[Supabase RLS](https://supabase.com/docs/guides/database/postgres/row-level-security),
+[Supabase API keys](https://supabase.com/docs/guides/api/api-keys),
+[Storage access control](https://supabase.com/docs/guides/storage/security/access-control).

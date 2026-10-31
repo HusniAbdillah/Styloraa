@@ -1,30 +1,74 @@
-# Instruksi kerja Stylora
+# Stylora working instructions
+
+## Language
+
+English is the project language. Write docs, code comments, UI copy,
+commit messages, and review notes in English. Translate leftover
+non-English text when you touch a file instead of leaving mixed languages.
 
 ## Scope
 
-Baca `PRD.md`, `docs/architecture.md`, dan `docs/sprint-plan.md`. Target adalah demo 7 jam dengan 4 developer. Aplikasi tidak menggunakan auth: satu workspace demo dipakai bersama, semua pengunjung dapat mengubah data. Jangan menambahkan login, user ownership, atau janji data privat tanpa perubahan scope yang eksplisit.
+Read `PRD.md`, `docs/architecture.md`, and `docs/sprint-plan.md`. The target
+is a 7-hour demo with 4 developers. The app has no auth: one shared demo
+workspace is used by everyone, and all visitors can change the data. Do not
+add login, user ownership, or private-data promises without an explicit
+scope change.
 
-## Implementasi
+## Implementation
 
-- TypeScript strict, Server Components sebagai default, `use client` hanya untuk interaksi browser.
-- Jaga route di `src/app` tipis. Kode bisnis berada di `features/<fitur>`; buat subfolder schema/components/actions/queries hanya saat dibutuhkan.
-- Semua akses Supabase berada pada modul server-only. Jangan membuat browser Supabase client atau mengirim secret key ke browser.
-- `SUPABASE_SECRET_KEY` memiliki hak tinggi dan melewati RLS. Setiap query/mutasi harus dibatasi `STYLORA_WORKSPACE_ID` dari environment server, termasuk relasi anak. Jangan menerima workspace ID dari form/client.
-- Aktifkan RLS pada tabel publik dan jangan beri akses data langsung kepada `anon`/`authenticated`. RLS tidak melindungi bug query server yang memakai secret key; audit predicate workspace secara terpisah.
-- Validasi input di server memakai Zod. Jangan menganggap data dari Server Action atau Route Handler otomatis aman.
-- Jangan menambahkan upload sensitif pada demo tanpa identitas. Bucket tetap privat; upload/download nanti melalui server dengan scope workspace, MIME/size limit, dan nama acak. Jangan simpan signed URL sebagai identitas file permanen.
-- Jangan mencatat secrets, payload pribadi, atau signed URL. Jangan fetch URL arbitrer dari client/provider tanpa pembatasan sumber.
-- Database migrations adalah source of truth. Buat migration lewat Supabase CLI; jangan mengedit migration yang telah digunakan tim. Koordinasikan perubahan dengan pemilik database.
-- Generated database types tidak diedit manual. Perbaiki schema, regenerasi dengan `npm run db:types`, dan review diff. Jika generation terhalang, laporkan batas tersebut.
-- AI yang belum dikonfigurasi harus memberi unavailable yang jelas. Jangan menampilkan mock sebagai hasil provider nyata.
-- Vercel request bukan worker permanen. Jangan memakai timer atau promise tidak di-await untuk job panjang. Record `queued` saja tidak menjalankan job.
-- Gunakan token palet proyek, label form, focus state, keyboard, loading/empty/error state. Tambahkan shadcn/ui hanya bila membantu kebutuhan nyata.
-- Jangan menambah ORM, state manager, queue, atau SDK AI tanpa kebutuhan teruji. Jangan membuat lapisan kosong sekadar melengkapi struktur.
+- Strict TypeScript, Server Components by default, `use client` only for
+  browser interaction.
+- Keep routes in `src/app` thin. Business code lives in
+  `features/<feature>`; create schema/components/actions/queries subfolders
+  only when needed.
+- All Supabase access lives in server-only modules. Do not create a browser
+  Supabase client or send secret keys to the browser.
+- `SUPABASE_SECRET_KEY` is highly privileged and bypasses RLS. Every
+  query/mutation must be scoped by the server-side `STYLORA_WORKSPACE_ID`
+  from the environment, including child relations. Never accept a workspace
+  ID from forms/clients.
+- Enable RLS on public tables and grant no direct data access to
+  `anon`/`authenticated`. RLS does not protect against server query bugs
+  that use the secret key; audit the workspace predicate separately.
+- Validate input on the server with Zod. Never assume data from a Server
+  Action or Route Handler is safe.
+- Do not add sensitive uploads to the identity-less demo. Buckets stay
+  private; uploads/downloads go through the server later with workspace
+  scope, MIME/size limits, and random names. Do not store signed URLs as
+  permanent file identities.
+- Do not log secrets, personal payloads, or signed URLs. Do not fetch
+  arbitrary URLs from clients/providers without source restrictions.
+- Database migrations are the source of truth. Create migrations via the
+  Supabase CLI; never edit a migration the team already uses. Coordinate
+  changes with the database owner.
+- Generated database types are not edited by hand. Fix the schema,
+  regenerate with `pnpm db:types`, and review the diff. If generation is
+  blocked, report that limitation.
+- Unconfigured AI must return a clear unavailable response. Never present
+  mocks as real provider output.
+- A Vercel request is not a durable worker. Do not use timers or un-awaited
+  promises for long jobs. Recording `queued` alone does not run a job.
+- Use project palette tokens, form labels, focus states, keyboard support,
+  and loading/empty/error states. Add shadcn/ui only when it serves a real
+  need.
+- Do not add an ORM, state manager, queue, or AI SDK without a proven need.
+  Do not create empty layers just to complete the structure.
 
-## Kerja paralel dan pemeriksaan
+## Parallel work and verification
 
-Patuhi pemilik file pada `docs/sprint-plan.md`. Satu pemilik untuk lockfile/root CSS/layout/env, satu untuk migrations/generated types. Sampaikan kontrak sebelum mengubah file tim lain. Agent hanya mengerjakan scope yang ditugaskan; jangan memperluas task atau menambah agent tanpa kebutuhan dan otorisasi.
+Follow the file owners in `docs/sprint-plan.md`. One owner for the
+lockfile/root CSS/layout/env, one for migrations/generated types. Share the
+contract before editing another team's files. Agents only work on the
+assigned scope; do not expand the task or add agents without need and
+authorization.
 
-Jalankan `npm run check` dan `npm run build`. Untuk database jalankan reset lokal, `npm run db:types`, dan `npm run db:test`. Uji scope workspace lain ditolak oleh layer server dan akses langsung anon/authenticated ditolak database. Catat hasil aktual dan checks yang belum berjalan. Jangan menyatakan route placeholder, build, atau unit test sebagai bukti fitur end-to-end.
+Run `pnpm check` (`make check`) and `pnpm build` (`make build`). For the
+database, run a local reset, `pnpm db:types`, and `pnpm db:test`. Verify
+that other workspace scopes are rejected by the server layer and that
+direct anon/authenticated access is rejected by the database. Record actual
+results and checks that did not run. Do not present placeholder routes,
+builds, or unit tests as end-to-end feature proof.
 
-Jangan commit/push/deploy atau mengubah database remote hanya karena pemeriksaan lokal selesai. Jangan mengubah memory atau menyalin skill/cache pribadi ke repo. Lihat `docs/skills.md` untuk pemilihan panduan agent.
+Do not commit/push/deploy or change the remote database just because local
+verification passed. Do not modify memory or copy personal skills/caches
+into the repo. See `docs/skills.md` for agent guide selection.
