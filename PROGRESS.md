@@ -4,6 +4,26 @@
 **Baseline:** merged `origin/main` at `34c3ca8`
 **Verification in this documentation task:** repository and source inspection only; no app checks or runtime flows were run.
 
+## Responsive design handoff, 31 October 2026
+
+The latest design revision is recorded in
+[`docs/design/v2-handoff.md`](docs/design/v2-handoff.md). It supersedes the
+earlier manual matching flow and repeated workspace/sample banners. This
+is a Figma prototype and documentation delivery, not implementation of the
+feature routes reported below.
+
+Prepared on the merged `origin/main` baseline `adf0029`. Local verification:
+`pnpm check` passed ESLint, TypeScript and eight tests across two test files;
+`pnpm build` passed; `git diff --check` passed. Figma inspection covered
+1440/1280px desktop and 390/360px mobile, with no horizontal text overflow
+or invalid prototype destinations recorded. Browser, screen-reader,
+real-device and provider flows were not verified. Database reset, type
+generation and database tests were not rerun for this documentation-only
+change; schema and server queries are unchanged.
+
+The implementation inventory below remains a historical source inspection
+at its stated baseline, rather than a current end-to-end completion claim.
+
 ## Delivery status
 
 The repository is an implementation scaffold. The full product scope in `PRD.md` remains required in the seven-hour hackathon; the checklist below reports what source inspection found at this baseline, not what the team has completed since.
@@ -64,3 +84,16 @@ The backend implementation is pushed on `feat/owner-2-backend-flow` at `ed0e2ba`
 | Provider/transport negative matrix | **Not run** | 401/429/timeout and database/storage failure injection still need dedicated coverage |
 
 The shared hosted wardrobe was empty during testing, and no synthetic wardrobe records were inserted. The E2E used the actual supplied image and real Muse requests; it did not mock AI output. The initial review attempt exposed an ambiguous `look_id` in the hosted RPC; an additive follow-up migration fixed it. A later E2E check found match reloads were not scoped to the current look piece list; the repository now filters by those piece IDs. The full hosted flow passed after both fixes.
+
+
+## Merge regression check — 2026-10-31
+
+Merged fetched `origin/main` (`a10e849`, responsive design and updated product flow) into `feat/owner-2-backend-flow`. The `PROGRESS.md` conflict was resolved by retaining the updated main handoff and carrying forward the Owner 2 backend delivery section. No backend API, schema, or migration files were dropped; main's PRD, rules, task, design documentation, and layout changes were retained.
+
+| Verification after merge | Result |
+| --- | --- |
+| `corepack pnpm@10.26.2 check` | PASS — ESLint, route type generation, TypeScript, 4 files / 15 tests |
+| `corepack pnpm@10.26.2 build` | PASS — optimized Next.js production build |
+| `node scripts/owner2-e2e.mjs` against local Next.js + hosted Supabase | PASS — real Muse inference, review, matching, three options, reload, and cleanup |
+| E2E negative cases | PASS — unsupported upload, missing asset, stale review revision, stale matching revision |
+| Hosted cleanup | PASS — temporary Storage object, asset, and look removed; shared wardrobe remained empty |

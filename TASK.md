@@ -2,6 +2,11 @@
 
 All four workstreams are required for the same seven-hour hackathon delivery. Each owner ships a usable feature surface, integrates against shared contracts early, and reports actual verification. The product scope is defined in `PRD.md`; this file is the source of truth for task ownership.
 
+**Current flow:** Item -> editable detection -> AI recommendations -> selected
+look. Matching in the assignments below means automatic wardrobe context
+inside AI recommendations, not a manual matching page or alternative picker.
+Use `docs/design/streamlined-v2.md` for the current navigation contract.
+
 ## Owners
 
 | Owner | Accountable scope | Primary areas |

@@ -6,6 +6,15 @@
 **Hackathon timebox:** 7 hours for the complete feature set in this document  
 **Primary stack:** Next.js App Router, TypeScript, Supabase, Muse vision API, Gemini text/image models, and a SERP-powered shopping search provider
 
+**Flow revision, 31 October 2026:** The owner simplified the main journey to
+item/inspiration upload, editable image detection, AI outfit recommendations,
+and the selected look. Wardrobe context is considered automatically by AI;
+there is no separate manual matching or wardrobe-alternative selection page.
+Shopping, item editing, preview and sharing are contextual panels/sheets.
+Desktop supports an icon sidebar and compact rail; mobile uses a drawer.
+The UI no longer displays a persistent Shared demo / Sample content banner.
+The no-auth data scope remains unchanged. See `docs/design/streamlined-v2.md`.
+
 ## 1. Product summary
 
 Stylora helps people turn an outfit image they saved from TikTok, Instagram, or another social source into a practical outfit they can recreate. The user uploads an inspiration image, reviews the clothing pieces Stylora detects, compares them with their wardrobe, explores three explained outfit options, and finds purchase links for pieces they are missing.
@@ -23,7 +32,7 @@ Stylora connects inspiration, wardrobe inventory, personal style context, outfit
 1. **Explain every recommendation.** Each suggested match or outfit includes a concise “Why this?” explanation grounded in visible garment attributes, wardrobe availability, and the user's saved style context.
 2. **Be honest about evidence.** Separate detected facts, inferred attributes, user preferences, and catalog data. Mark low-confidence detections and unavailable provider results; never present placeholder content as a real AI or search result.
 3. **Prefer reuse before purchase.** Show owned items and viable wardrobe alternatives before shopping suggestions. Capsule recommendations should maximize useful outfit combinations and cost-per-wear potential.
-4. **Keep user agency.** Let users correct detections, choose which pieces to match, replace pieces in a try-on, and dismiss recommendations.
+4. **Keep user agency.** Let users correct detections, ask AI to change a suggested combination, choose single-item or full-outfit preview, and dismiss recommendations. Do not require manual wardrobe matching.
 5. **Design for responsive use.** The full workflow works on desktop and mobile web, including touch input, keyboard access, clear progress, and recoverable errors.
 6. **Treat body and skin attributes carefully.** They are optional, user-provided personalization inputs, not judgments or constraints. Use neutral language, explain when they affect a recommendation, and allow editing or clearing them.
 
@@ -66,8 +75,8 @@ Every feature below is in the hackathon deliverable. The team should implement i
 1. **Responsive landing page and onboarding:** a catchy hero, visual example/demo, primary upload CTA, secondary sample path, and optional prompts to complete Style DNA and body profile.
 2. **Inspiration intake:** upload a supported image with server-side type/size validation, preview, progress, retry, replace, and remove controls.
 3. **AI garment analysis:** Muse reads the inspiration image and returns structured, editable pieces with category, color, pattern, apparent material/texture, silhouette/fit, cut/length, layering role, style tags, likely occasion, confidence, and source/provenance.
-4. **Wardrobe matching:** classify every detected piece as **Owned match**, **Wardrobe alternative**, or **Missing**; explain shared attributes and differences; allow user correction and manual matching.
-5. **Three AI outfit combinations:** (a) **Closest to the inspiration**, (b) **From your wardrobe**, and (c) **A fresh alternative** combining owned items, alternatives, and selected missing recommendations. Each has its own title, description, item list, fashion rationale, profile inputs used, uncertainty, and item replacement controls.
+4. **Automatic wardrobe context:** AI considers relevant owned pieces, suitable substitutes and missing pieces while generating outfits. Explain useful similarities and differences within recommendations. Users may correct detection or ask AI for another suggestion; no manual matching page or wardrobe-alternative picker is required.
+5. **Three AI outfit combinations:** (a) **Closest to the inspiration**, (b) **From your wardrobe**, and (c) **A fresh alternative** combining owned items, alternatives, and selected missing recommendations. Each has its own title, description, item list, fashion rationale, profile inputs used, uncertainty, and an action asking AI for another suggestion. Do not introduce a manual wardrobe-alternative picker.
 6. **Shopping search and Value Score:** search only for missing items through the configured SERP provider; display source links and available title/price/rating/review data; compare best value with visible adjustable price, rating, and relevance factors.
 7. **Style DNA and body profile:** selectable, skippable visual options for style preferences, undertone, optional skin-depth preference, fit/coverage, and inclusive body-shape illustrations. Every option is labeled, editable, and clearable; users can skip without blocking analysis.
 8. **Wardrobe CRUD:** add, view, edit, and delete items with metadata and optional images; support metadata-only entry and preserve useful empty states.
@@ -83,8 +92,8 @@ This is a complete product scope, not a reduced MVP. The seven-hour constraint i
 1. **Discover:** The user lands on a concise explanation of “inspiration to outfit.” They can upload a screenshot or open a clearly labeled sample demo. Optional profile completion is encouraged but never blocks the core task.
 2. **Upload:** The user chooses or drops an outfit image. Stylora validates format/size, previews it, and explains that the image will be analyzed. The user can replace it before analysis.
 3. **Analyze and review:** Stylora identifies garments and likely attributes. It groups results by garment and shows confidence/source. The user edits or removes errors before continuing.
-4. **Match wardrobe:** Stylora compares each reviewed garment with the user's wardrobe and shows owned matches, alternatives, and missing pieces. Users can change a match or mark a suggested piece as irrelevant.
-5. **Explore outfits:** Stylora presents three clearly differentiated combinations. Each card explains silhouette, color relationship, material/texture balance, occasion/use, wardrobe reuse, and profile relevance where applicable. Users can replace individual items and regenerate a rationale.
+4. **Use wardrobe context automatically:** Stylora considers the wardrobe in the background and moves directly from reviewed detection to explained outfit suggestions. Users can request a different suggestion without manually selecting an alternative garment.
+5. **Explore outfits:** Stylora presents three clearly differentiated combinations. Each card explains silhouette, color relationship, material/texture balance, occasion/use, wardrobe reuse, and profile relevance where applicable. Users can ask AI to change an item or regenerate a combination and its rationale.
 6. **Find missing pieces:** The user selects an outfit and searches only for its missing items. SERP results link to the original seller/product result and display the data available, its source, and an “as of” timestamp when provided. Best value is a transparent score, not an unexplained winner.
 7. **Save and reuse:** The user saves the selected look to their looks collection or adds a found item to the wardrobe manually. The saved look links to the wardrobe items and any product references.
 8. **Build a capsule:** The user selects a purpose or timeframe; Stylora creates multiple looks from existing wardrobe IDs, explains outfit logic, and suggests versatile additions with clear reasons.
@@ -173,17 +182,17 @@ Avoid unsupported claims such as “perfect for your body,” exact material com
 - Return structured, schema-validated output; handle malformed or partial provider responses.
 - Make attributes editable before matching. Maintain provenance/confidence per attribute where feasible.
 
-### 10.3 Wardrobe matching
+### 10.3 Automatic wardrobe context
 
 - Use structured attribute similarity and user corrections, not image caption text alone.
 - Display match type, shared attributes, differences, and a concise reason.
-- Let the user override a proposed match. Preserve the distinction between the exact reference item and a wardrobe substitute.
+- Present relevant wardrobe suggestions within the AI outfit recommendations, with reasons and differences. Preserve the distinction between the reference and an owned substitute. Use detection correction and AI regeneration rather than a separate manual matching/alternative-selection surface.
 
 ### 10.4 Outfit generation
 
 - Produce three distinct options with clear labels: **Closest to the inspiration**, **From your wardrobe**, and **A fresh alternative**.
 - Use only known wardrobe item IDs and explicit missing-item descriptions; never invent wardrobe IDs.
-- Include “Why this?”, profile inputs applied, fashion rationale, uncertainty, and a replace-item affordance.
+- Include “Why this?”, profile inputs applied, fashion rationale, uncertainty, and an action requesting a different AI suggestion.
 - If the AI response fails validation, offer manual construction or a clear retry instead of rendering malformed content.
 
 ### 10.5 Shopping and Value Score
@@ -211,7 +220,7 @@ Avoid unsupported claims such as “perfect for your body,” exact material com
 
 - Allow a user to create a shareable snapshot of a selected look with a custom catchphrase and link.
 - Sharing is opt-in, revocable, and limited to fields included in the snapshot. Never expose private wardrobe records, profile, or upload paths through broad database access.
-- For the shared demo workspace, clearly state that data is shared and editable by visitors; public sharing must use a separate safe snapshot contract.
+- Keep the no-auth workspace contract in deployment documentation and relevant data-handling context. Do not repeat Shared demo or Sample content banners in the shell. Public sharing must use a separate safe snapshot contract.
 
 ### 10.9 Try-on
 
@@ -225,7 +234,7 @@ Avoid unsupported claims such as “perfect for your body,” exact material com
 
 - Desktop: readable centered content, persistent step context, side-by-side image and garment review where space allows, and comparison layouts for outfit/product options.
 - Mobile: single-column steps, large touch targets, sticky but non-obstructive next action, compact progress indicator, and stacked comparison cards.
-- Keep progress and current step clear: Upload → Review pieces → Match wardrobe → Choose outfit → Shop/save.
+- Keep progress clear: Item upload, Detection, AI outfit recommendations, Selected look. Shopping and sharing remain optional actions on the selected look.
 - Meet WCAG 2.2 AA intent: semantic headings/forms, keyboard operation, visible focus, meaningful image alternatives, non-color status cues, adequate contrast, reduced-motion support, and accessible validation/error announcements.
 - Every flow includes loading, empty, error, success, and retry states. Preserve edits on recoverable provider failures.
 - Use concise copy that distinguishes facts (“you own this”) from suggestions (“similar option”) and inference (“likely cotton texture”).
@@ -242,7 +251,7 @@ Avoid unsupported claims such as “perfect for your body,” exact material com
 
 ### Repository-specific demo constraints
 
-- Current repository instructions define a **no-auth, single shared demo workspace**. All visitors can change the same synthetic demo dataset; it is not a private wardrobe. Make this visible in the interface and do not promise user ownership or privacy.
+- Current repository instructions define a **no-auth, single shared demo workspace**. All visitors can change the same synthetic demo dataset; it is not a private wardrobe. Do not promise user ownership or privacy. The owner's current design omits persistent workspace/sample notices from the shell; preserve this constraint in deployment documentation and relevant upload/data-handling context.
 - Obtain `STYLORA_WORKSPACE_ID` only from server environment; never accept it from request data. Apply it to every parent and child query.
 - Supabase access remains server-only. RLS is enabled and direct `anon`/`authenticated` access to internal tables is denied. The server secret bypasses RLS, so server query scope must be tested independently.
 - Do not accept sensitive personal uploads into this shared demo. Implement the try-on flow with a non-identifying model/illustration input; personal-photo try-on requires authenticated ownership, consent, private storage, retention/deletion, and provider handling.
@@ -294,7 +303,7 @@ All feature areas are in scope for the same seven-hour delivery. Follow the repo
 - Analysis output is schema-valid and editable, with uncertainty/source displayed where applicable.
 - Each detected piece maps to an owned match, wardrobe alternative, or missing state, with an understandable reason.
 - Three distinguishable outfit options are available; each has a title, item list, “Why this?” rationale, and profile-input disclosure.
-- User can replace a piece, save a selected look, and reopen it after reload.
+- User can request an AI-suggested change, save a selected look, and reopen it after reload without a manual wardrobe-alternative picker.
 - Shopping links are provider-sourced and sanitized; value factors are visible. If unavailable, the UI says so and does not create fake listings.
 - Style DNA and body/fit preferences are selectable, skippable, editable, and visibly influence relevant recommendations.
 - Wardrobe CRUD, capsule generation, safe/revocable Social Fit sharing, and single-item plus combo try-on are available from connected navigation.
@@ -319,7 +328,7 @@ All feature areas are in scope for the same seven-hour delivery. Follow the repo
 | --- | --- |
 | AI invents visual details or garment attributes | Structured schemas, confidence/provenance, human review, editable fields, conservative language. |
 | Demo scope exceeds seven hours | Four parallel feature owners, shared schemas and checkpoints, feature freeze in the final hour, manual/sample fallbacks clearly labeled. |
-| Shared no-auth demo exposes or overwrites visitor data | Synthetic data only, clear shared-workspace notice, no sensitive uploads, server workspace scoping, separate snapshot sharing contract. |
+| Shared no-auth demo exposes or overwrites visitor data | Synthetic data only, contextual data-handling guidance, no sensitive uploads, server workspace scoping, separate snapshot sharing contract. |
 | Recommendations encode body/skin bias | Optional self-selected context, preference-first matching, inclusive illustrations, neutral copy, user controls, no inferred body/skin attributes from inspiration images. |
 | Product listing is stale, incomplete, or misleading | Provider attribution, retrieval timestamp, only display returned fields, explain score, no invented stock/price. |
 | Try-on image is sensitive or misleading | Defer personal photos in demo; require consent, private handling, deletion, and limitations before release. |
