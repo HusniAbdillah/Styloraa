@@ -6,6 +6,7 @@ import { AnimatePresence, animate, motion, useIsPresent, useMotionValue, useRedu
 import type { TargetAndTransition, Variants } from "motion/react";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./button.module.css";
+import { useClientReady } from "@/lib/use-client-ready";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 export type ButtonSize = "sm" | "md" | "lg";
@@ -82,6 +83,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   ref,
 ) {
   const reduceMotion = useReducedMotion() ?? false;
+  const ready = useClientReady();
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const contentRef = useRef<HTMLSpanElement>(null);
   const key = labelKey(children);
@@ -102,7 +104,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       ref={setRefs}
       tabIndex={props.tabIndex ?? 0}
       className={classes}
-      disabled={disabled}
+      disabled={disabled || !ready}
       aria-busy={loading || undefined}
       custom={buttonRef}
       variants={pressVariants}
