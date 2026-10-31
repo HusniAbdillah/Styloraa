@@ -1,21 +1,23 @@
 # Owner 4 verification, 31 October 2026
 
+This records the initial delivery. The later [Muse integration record](owner4-muse-integration.md) supersedes its unconfigured-provider limitations.
+
 Baseline: merged main `3097c45`, including Owner 2 frontend PR #10,
 Owner 3 selected/product/saved-look flows and the PWA shell.
 Work was isolated from the shared checkout
 after the user confirmed another dependency installation was active there.
 
-| Check | Actual result |
-| --- | --- |
-| `pnpm check` | PASS: ESLint, TypeScript, 76 tests in 18 files |
-| `pnpm build` | PASS: all eight requested UI routes and their APIs compile |
-| Local database reset | PASS: all migrations, including atomic capsule save, applied |
-| `pnpm db:types` | PASS: generated from the migrated local database; no hand-edited types |
-| `pnpm db:test` | PASS: 98 assertions across seven SQL test files |
-| `node --env-file=.env.local scripts/verify-owner4.mjs` | PASS: actual browser-facing HTTP APIs and local PostgreSQL |
-| Browser | PASS: eight routes, real selected-item save/reload, desktop rail, mobile drawer/Escape/focus, 390/360px geometry |
-| Mobile refinement | PASS: native composition disclosure, no horizontal overflow at both widths |
-| `git diff origin/main --check` | PASS: Owner 4 changes; existing main migrations were retained byte-for-byte |
+| Check                                                  | Actual result                                                                                                    |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| `pnpm check`                                           | PASS: ESLint, TypeScript, 76 tests in 18 files                                                                   |
+| `pnpm build`                                           | PASS: all eight requested UI routes and their APIs compile                                                       |
+| Local database reset                                   | PASS: all migrations, including atomic capsule save, applied                                                     |
+| `pnpm db:types`                                        | PASS: generated from the migrated local database; no hand-edited types                                           |
+| `pnpm db:test`                                         | PASS: 98 assertions across seven SQL test files                                                                  |
+| `node --env-file=.env.local scripts/verify-owner4.mjs` | PASS: actual browser-facing HTTP APIs and local PostgreSQL                                                       |
+| Browser                                                | PASS: eight routes, real selected-item save/reload, desktop rail, mobile drawer/Escape/focus, 390/360px geometry |
+| Mobile refinement                                      | PASS: native composition disclosure, no horizontal overflow at both widths                                       |
+| `git diff origin/main --check`                         | PASS: Owner 4 changes; existing main migrations were retained byte-for-byte                                      |
 
 The API walkthrough persisted a complete brief, timeframe/season/occasion,
 and exact owned-item IDs. It verified updates, atomic rollback on referenced

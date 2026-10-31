@@ -7,6 +7,11 @@ export type Json =
   | Json[];
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.18";
+  };
   public: {
     Tables: {
       ai_jobs: {
@@ -17,7 +22,7 @@ export type Database = {
           created_at: string;
           error_code: string | null;
           id: string;
-          input: NonNullable<Json>;
+          input: Json;
           input_asset_id: string | null;
           kind: string;
           limitations_acknowledged_at: string | null;
@@ -38,7 +43,6 @@ export type Database = {
           wardrobe_item_id: string | null;
           workspace_id: string;
         };
-        ComputedFields: never;
         Insert: {
           capsule_outfit_id?: string | null;
           completed_at?: string | null;
@@ -46,7 +50,7 @@ export type Database = {
           created_at?: string;
           error_code?: string | null;
           id?: string;
-          input?: NonNullable<Json>;
+          input?: Json;
           input_asset_id?: string | null;
           kind: string;
           limitations_acknowledged_at?: string | null;
@@ -74,7 +78,7 @@ export type Database = {
           created_at?: string;
           error_code?: string | null;
           id?: string;
-          input?: NonNullable<Json>;
+          input?: Json;
           input_asset_id?: string | null;
           kind?: string;
           limitations_acknowledged_at?: string | null;
@@ -173,7 +177,6 @@ export type Database = {
           storage_path: string;
           workspace_id: string;
         };
-        ComputedFields: never;
         Insert: {
           bucket: string;
           byte_size: number;
@@ -212,7 +215,6 @@ export type Database = {
           wardrobe_item_id: string;
           workspace_id: string;
         };
-        ComputedFields: never;
         Insert: {
           capsule_id: string;
           wardrobe_item_id: string;
@@ -248,7 +250,6 @@ export type Database = {
           wardrobe_item_id: string;
           workspace_id: string;
         };
-        ComputedFields: never;
         Insert: {
           capsule_id: string;
           outfit_id: string;
@@ -289,7 +290,7 @@ export type Database = {
           capsule_id: string;
           created_at: string;
           id: string;
-          inputs_used: NonNullable<Json>;
+          inputs_used: Json;
           rationale: string;
           source_revision: number;
           source_type: string;
@@ -297,12 +298,11 @@ export type Database = {
           uncertainty: string;
           workspace_id: string;
         };
-        ComputedFields: never;
         Insert: {
           capsule_id: string;
           created_at?: string;
           id?: string;
-          inputs_used?: NonNullable<Json>;
+          inputs_used?: Json;
           rationale: string;
           source_revision: number;
           source_type: string;
@@ -314,7 +314,7 @@ export type Database = {
           capsule_id?: string;
           created_at?: string;
           id?: string;
-          inputs_used?: NonNullable<Json>;
+          inputs_used?: Json;
           rationale?: string;
           source_revision?: number;
           source_type?: string;
@@ -334,11 +334,11 @@ export type Database = {
       };
       capsules: {
         Row: {
-          brief: NonNullable<Json>;
+          brief: Json;
           created_at: string;
           description: string;
           id: string;
-          missing_additions: NonNullable<Json>;
+          missing_additions: Json;
           occasion: string | null;
           revision: number;
           season: string | null;
@@ -347,13 +347,12 @@ export type Database = {
           updated_at: string;
           workspace_id: string;
         };
-        ComputedFields: never;
         Insert: {
-          brief?: NonNullable<Json>;
+          brief?: Json;
           created_at?: string;
           description?: string;
           id?: string;
-          missing_additions?: NonNullable<Json>;
+          missing_additions?: Json;
           occasion?: string | null;
           revision?: number;
           season?: string | null;
@@ -363,11 +362,11 @@ export type Database = {
           workspace_id: string;
         };
         Update: {
-          brief?: NonNullable<Json>;
+          brief?: Json;
           created_at?: string;
           description?: string;
           id?: string;
-          missing_additions?: NonNullable<Json>;
+          missing_additions?: Json;
           occasion?: string | null;
           revision?: number;
           season?: string | null;
@@ -388,47 +387,46 @@ export type Database = {
       };
       inspiration_pieces: {
         Row: {
-          attributes: NonNullable<Json>;
+          attributes: Json;
           category: string;
           confidence: number | null;
-          corrections: NonNullable<Json>;
+          corrections: Json;
           created_at: string;
           id: string;
           look_id: string;
           name: string;
           position: number;
-          provenance: NonNullable<Json>;
+          provenance: Json;
           removed_at: string | null;
           source_type: string;
           workspace_id: string;
         };
-        ComputedFields: never;
         Insert: {
-          attributes?: NonNullable<Json>;
+          attributes?: Json;
           category: string;
           confidence?: number | null;
-          corrections?: NonNullable<Json>;
+          corrections?: Json;
           created_at?: string;
           id?: string;
           look_id: string;
           name: string;
           position?: number;
-          provenance?: NonNullable<Json>;
+          provenance?: Json;
           removed_at?: string | null;
           source_type: string;
           workspace_id: string;
         };
         Update: {
-          attributes?: NonNullable<Json>;
+          attributes?: Json;
           category?: string;
           confidence?: number | null;
-          corrections?: NonNullable<Json>;
+          corrections?: Json;
           created_at?: string;
           id?: string;
           look_id?: string;
           name?: string;
           position?: number;
-          provenance?: NonNullable<Json>;
+          provenance?: Json;
           removed_at?: string | null;
           source_type?: string;
           workspace_id?: string;
@@ -450,7 +448,6 @@ export type Database = {
           wardrobe_item_id: string;
           workspace_id: string;
         };
-        ComputedFields: never;
         Insert: {
           look_id: string;
           position?: number;
@@ -487,7 +484,7 @@ export type Database = {
           inspiration_asset_id: string | null;
           is_saved: boolean;
           notes: string;
-          provider_metadata: NonNullable<Json>;
+          provider_metadata: Json;
           revision: number;
           selected_option_id: string | null;
           source_type: string;
@@ -496,14 +493,13 @@ export type Database = {
           updated_at: string;
           workspace_id: string;
         };
-        ComputedFields: never;
         Insert: {
           created_at?: string;
           id?: string;
           inspiration_asset_id?: string | null;
           is_saved?: boolean;
           notes?: string;
-          provider_metadata?: NonNullable<Json>;
+          provider_metadata?: Json;
           revision?: number;
           selected_option_id?: string | null;
           source_type?: string;
@@ -518,7 +514,7 @@ export type Database = {
           inspiration_asset_id?: string | null;
           is_saved?: boolean;
           notes?: string;
-          provider_metadata?: NonNullable<Json>;
+          provider_metadata?: Json;
           revision?: number;
           selected_option_id?: string | null;
           source_type?: string;
@@ -568,7 +564,6 @@ export type Database = {
           wardrobe_item_id: string | null;
           workspace_id: string;
         };
-        ComputedFields: never;
         Insert: {
           id?: string;
           item_kind: string;
@@ -636,10 +631,10 @@ export type Database = {
         Row: {
           created_at: string;
           id: string;
-          inputs_used: NonNullable<Json>;
+          inputs_used: Json;
           look_id: string;
           option_type: string;
-          provider_metadata: NonNullable<Json>;
+          provider_metadata: Json;
           rationale: string;
           source_revision: number;
           source_type: string;
@@ -647,14 +642,13 @@ export type Database = {
           uncertainty: string;
           workspace_id: string;
         };
-        ComputedFields: never;
         Insert: {
           created_at?: string;
           id?: string;
-          inputs_used?: NonNullable<Json>;
+          inputs_used?: Json;
           look_id: string;
           option_type: string;
-          provider_metadata?: NonNullable<Json>;
+          provider_metadata?: Json;
           rationale: string;
           source_revision: number;
           source_type: string;
@@ -665,10 +659,10 @@ export type Database = {
         Update: {
           created_at?: string;
           id?: string;
-          inputs_used?: NonNullable<Json>;
+          inputs_used?: Json;
           look_id?: string;
           option_type?: string;
-          provider_metadata?: NonNullable<Json>;
+          provider_metadata?: Json;
           rationale?: string;
           source_revision?: number;
           source_type?: string;
@@ -706,7 +700,6 @@ export type Database = {
           title: string;
           workspace_id: string;
         };
-        ComputedFields: never;
         Insert: {
           category: string;
           commercial_disclosure?: string | null;
@@ -759,11 +752,11 @@ export type Database = {
         Row: {
           created_at: string;
           id: string;
-          inputs_used: NonNullable<Json>;
-          items: NonNullable<Json>;
+          inputs_used: Json;
+          items: Json;
           look_id: string;
           option_id: string | null;
-          provider_metadata: NonNullable<Json>;
+          provider_metadata: Json;
           rationale: string;
           source_revision: number;
           source_type: string;
@@ -771,15 +764,14 @@ export type Database = {
           uncertainty: string;
           workspace_id: string;
         };
-        ComputedFields: never;
         Insert: {
           created_at?: string;
           id?: string;
-          inputs_used?: NonNullable<Json>;
-          items: NonNullable<Json>;
+          inputs_used?: Json;
+          items: Json;
           look_id: string;
           option_id?: string | null;
-          provider_metadata?: NonNullable<Json>;
+          provider_metadata?: Json;
           rationale?: string;
           source_revision: number;
           source_type: string;
@@ -790,11 +782,11 @@ export type Database = {
         Update: {
           created_at?: string;
           id?: string;
-          inputs_used?: NonNullable<Json>;
-          items?: NonNullable<Json>;
+          inputs_used?: Json;
+          items?: Json;
           look_id?: string;
           option_id?: string | null;
-          provider_metadata?: NonNullable<Json>;
+          provider_metadata?: Json;
           rationale?: string;
           source_revision?: number;
           source_type?: string;
@@ -825,19 +817,18 @@ export type Database = {
           created_at: string;
           expires_at: string;
           id: string;
-          public_snapshot: NonNullable<Json>;
+          public_snapshot: Json;
           revoked_at: string | null;
           saved_look_id: string;
           token_hash: string;
           workspace_id: string;
         };
-        ComputedFields: never;
         Insert: {
           catchphrase?: string;
           created_at?: string;
           expires_at: string;
           id?: string;
-          public_snapshot: NonNullable<Json>;
+          public_snapshot: Json;
           revoked_at?: string | null;
           saved_look_id: string;
           token_hash: string;
@@ -848,7 +839,7 @@ export type Database = {
           created_at?: string;
           expires_at?: string;
           id?: string;
-          public_snapshot?: NonNullable<Json>;
+          public_snapshot?: Json;
           revoked_at?: string | null;
           saved_look_id?: string;
           token_hash?: string;
@@ -867,17 +858,16 @@ export type Database = {
       shopping_results: {
         Row: {
           explanation: string;
-          factors: NonNullable<Json>;
+          factors: Json;
           position: number;
           product_id: string;
           search_id: string;
           value_score: number | null;
           workspace_id: string;
         };
-        ComputedFields: never;
         Insert: {
           explanation?: string;
-          factors?: NonNullable<Json>;
+          factors?: Json;
           position: number;
           product_id: string;
           search_id: string;
@@ -886,7 +876,7 @@ export type Database = {
         };
         Update: {
           explanation?: string;
-          factors?: NonNullable<Json>;
+          factors?: Json;
           position?: number;
           product_id?: string;
           search_id?: string;
@@ -920,11 +910,10 @@ export type Database = {
           provider: string;
           query: string;
           score_version: string;
-          score_weights: NonNullable<Json>;
+          score_weights: Json;
           status: string;
           workspace_id: string;
         };
-        ComputedFields: never;
         Insert: {
           country?: string;
           created_at?: string;
@@ -934,7 +923,7 @@ export type Database = {
           provider: string;
           query: string;
           score_version?: string;
-          score_weights?: NonNullable<Json>;
+          score_weights?: Json;
           status: string;
           workspace_id: string;
         };
@@ -947,7 +936,7 @@ export type Database = {
           provider?: string;
           query?: string;
           score_version?: string;
-          score_weights?: NonNullable<Json>;
+          score_weights?: Json;
           status?: string;
           workspace_id?: string;
         };
@@ -963,29 +952,28 @@ export type Database = {
       };
       user_preferences: {
         Row: {
-          body_profile: NonNullable<Json>;
+          body_profile: Json;
           display_name: string | null;
-          fit_preferences: NonNullable<Json>;
-          style_dna: NonNullable<Json>;
+          fit_preferences: Json;
+          style_dna: Json;
           style_notes: string;
           updated_at: string;
           workspace_id: string;
         };
-        ComputedFields: never;
         Insert: {
-          body_profile?: NonNullable<Json>;
+          body_profile?: Json;
           display_name?: string | null;
-          fit_preferences?: NonNullable<Json>;
-          style_dna?: NonNullable<Json>;
+          fit_preferences?: Json;
+          style_dna?: Json;
           style_notes?: string;
           updated_at?: string;
           workspace_id: string;
         };
         Update: {
-          body_profile?: NonNullable<Json>;
+          body_profile?: Json;
           display_name?: string | null;
-          fit_preferences?: NonNullable<Json>;
-          style_dna?: NonNullable<Json>;
+          fit_preferences?: Json;
+          style_dna?: Json;
           style_notes?: string;
           updated_at?: string;
           workspace_id?: string;
@@ -1004,32 +992,31 @@ export type Database = {
         Row: {
           archived_at: string | null;
           asset_id: string | null;
-          attribute_provenance: NonNullable<Json>;
-          attributes: NonNullable<Json>;
+          attribute_provenance: Json;
+          attributes: Json;
           category: string;
           color: string;
           created_at: string;
           id: string;
           image_path: string | null;
-          inferred_attributes: NonNullable<Json>;
+          inferred_attributes: Json;
           name: string;
           notes: string;
           subcategory: string | null;
           updated_at: string;
           workspace_id: string;
         };
-        ComputedFields: never;
         Insert: {
           archived_at?: string | null;
           asset_id?: string | null;
-          attribute_provenance?: NonNullable<Json>;
-          attributes?: NonNullable<Json>;
+          attribute_provenance?: Json;
+          attributes?: Json;
           category: string;
           color?: string;
           created_at?: string;
           id?: string;
           image_path?: string | null;
-          inferred_attributes?: NonNullable<Json>;
+          inferred_attributes?: Json;
           name: string;
           notes?: string;
           subcategory?: string | null;
@@ -1039,14 +1026,14 @@ export type Database = {
         Update: {
           archived_at?: string | null;
           asset_id?: string | null;
-          attribute_provenance?: NonNullable<Json>;
-          attributes?: NonNullable<Json>;
+          attribute_provenance?: Json;
+          attributes?: Json;
           category?: string;
           color?: string;
           created_at?: string;
           id?: string;
           image_path?: string | null;
-          inferred_attributes?: NonNullable<Json>;
+          inferred_attributes?: Json;
           name?: string;
           notes?: string;
           subcategory?: string | null;
@@ -1073,28 +1060,27 @@ export type Database = {
       wardrobe_matches: {
         Row: {
           confidence: number | null;
-          differences: NonNullable<Json>;
+          differences: Json;
           id: string;
           is_manual_override: boolean;
           match_type: string;
           piece_id: string;
           rationale: string;
-          shared_attributes: NonNullable<Json>;
+          shared_attributes: Json;
           source_revision: number;
           source_type: string;
           wardrobe_item_id: string | null;
           workspace_id: string;
         };
-        ComputedFields: never;
         Insert: {
           confidence?: number | null;
-          differences?: NonNullable<Json>;
+          differences?: Json;
           id?: string;
           is_manual_override?: boolean;
           match_type: string;
           piece_id: string;
           rationale: string;
-          shared_attributes?: NonNullable<Json>;
+          shared_attributes?: Json;
           source_revision: number;
           source_type: string;
           wardrobe_item_id?: string | null;
@@ -1102,13 +1088,13 @@ export type Database = {
         };
         Update: {
           confidence?: number | null;
-          differences?: NonNullable<Json>;
+          differences?: Json;
           id?: string;
           is_manual_override?: boolean;
           match_type?: string;
           piece_id?: string;
           rationale?: string;
-          shared_attributes?: NonNullable<Json>;
+          shared_attributes?: Json;
           source_revision?: number;
           source_type?: string;
           wardrobe_item_id?: string | null;
@@ -1137,7 +1123,6 @@ export type Database = {
           id: string;
           name: string;
         };
-        ComputedFields: never;
         Insert: {
           created_at?: string;
           id?: string;
