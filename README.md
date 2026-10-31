@@ -127,6 +127,9 @@ implies no account identity; sharing and real AI are later work.
 
 ## Team docs
 
+- [Product requirements and scope](PRD.md)
+- [Arsitektur](docs/architecture.md)
+- [Pembagian 4 developer dan jadwal 7 jam](docs/sprint-plan.md)
 - [PRD and scope](PRD.md)
 - [Architecture](docs/architecture.md)
 - [4-developer split and 7-hour schedule](docs/sprint-plan.md)
